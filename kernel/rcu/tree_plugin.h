@@ -122,7 +122,7 @@ static void __init rcu_bootup_announce(void)
  * Return the number of RCU-preempt batches processed thus far
  * for debug and statistics.
  */
-static long rcu_batches_completed_preempt(void)
+static unsigned long rcu_batches_completed_preempt(void)
 {
 	return rcu_preempt_state.completed;
 }
@@ -131,7 +131,7 @@ EXPORT_SYMBOL_GPL(rcu_batches_completed_preempt);
 /*
  * Return the number of RCU batches processed thus far for debug & stats.
  */
-long rcu_batches_completed(void)
+unsigned long rcu_batches_completed(void)
 {
 	return rcu_batches_completed_preempt();
 }
@@ -881,7 +881,7 @@ static void __init rcu_bootup_announce(void)
 /*
  * Return the number of RCU batches processed thus far for debug & stats.
  */
-long rcu_batches_completed(void)
+unsigned long rcu_batches_completed(void)
 {
 	return rcu_batches_completed_sched();
 }
