@@ -329,3 +329,8 @@ config SUSPEND_TIME
 config DEDUCE_WAKEUP_REASONS
 	bool
 	default n
+
+config PM_SYNC_BEFORE_SUSPEND
+	bool
+	depends on PM
+	default n
