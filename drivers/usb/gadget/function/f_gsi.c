@@ -14,7 +14,7 @@
 #include <linux/usb/usb_ctrl_qti.h>
 #include <linux/etherdevice.h>
 #include <linux/debugfs.h>
-#include <linux/usb/f_gsi.h>
+#include "f_gsi.h"
 #include "rndis.h"
 
 static unsigned int gsi_in_aggr_size;
