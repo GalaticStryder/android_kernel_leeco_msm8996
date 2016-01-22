@@ -166,7 +166,7 @@ static int quota_getquota(struct super_block *sb, int type, qid_t id,
 
 /*
  * Return quota for next active quota >= this id, if any exists,
- * otherwise return -ESRCH via ->get_nextdqblk
+ * otherwise return -ENOENT via ->get_nextdqblk
  */
 static int quota_getnextquota(struct super_block *sb, int type, qid_t id,
 			  void __user *addr)
@@ -423,7 +423,7 @@ static int quota_getxquota(struct super_block *sb, int type, qid_t id,
 
 /*
  * Return quota for next active quota >= this id, if any exists,
- * otherwise return -ESRCH via ->get_nextdqblk.
+ * otherwise return -ENOENT via ->get_nextdqblk.
  */
 static int quota_getnextxquota(struct super_block *sb, int type, qid_t id,
 			    void __user *addr)
