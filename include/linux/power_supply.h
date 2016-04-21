@@ -219,6 +219,7 @@ enum power_supply_property {
 	POWER_SUPPLY_PROP_LE_QUICK_CHARGE_MODE,
 #endif
 	POWER_SUPPLY_PROP_ALLOW_HVDCP3,
+	POWER_SUPPLY_PROP_SOC_REPORTING_READY,
 	/* Local extensions of type int64_t */
 	POWER_SUPPLY_PROP_CHARGE_COUNTER_EXT,
 	/* Properties of type `const char *' */
