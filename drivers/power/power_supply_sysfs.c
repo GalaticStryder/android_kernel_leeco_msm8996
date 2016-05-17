@@ -259,6 +259,8 @@ static struct device_attribute power_supply_attrs[] = {
 	POWER_SUPPLY_ATTR(soc_reporting_ready),
 	POWER_SUPPLY_ATTR(ignore_false_negative_isense),
 	POWER_SUPPLY_ATTR(enable_jeita_detection),
+	POWER_SUPPLY_ATTR(battery_info),
+	POWER_SUPPLY_ATTR(battery_info_id),
 #ifdef CONFIG_MACH_LEECO
 	POWER_SUPPLY_ATTR(le_usbin_temp),
 	POWER_SUPPLY_ATTR(le_vph_voltage),
