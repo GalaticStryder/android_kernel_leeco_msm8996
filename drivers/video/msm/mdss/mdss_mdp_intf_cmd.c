@@ -1208,11 +1208,12 @@ static void mdss_mdp_cmd_pingpong_done(void *arg)
 			       atomic_read(&ctx->koff_cnt));
 		if (sync_ppdone) {
 			atomic_inc(&ctx->pp_done_cnt);
+			if (!ctl->commit_in_progress)
 #ifdef CONFIG_MACH_LEECO
-			/* Use custom pingpong workqueue */
-			queue_work(letv_pp_wq, &ctx->pp_done_work);
+				/* Use custom pingpong workqueue */
+				queue_work(letv_pp_wq, &ctx->pp_done_work);
 #else
-			schedule_work(&ctx->pp_done_work);
+				schedule_work(&ctx->pp_done_work);
 #endif
 
 			mdss_mdp_resource_control(ctl,
