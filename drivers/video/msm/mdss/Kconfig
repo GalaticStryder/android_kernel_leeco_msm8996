@@ -77,3 +77,9 @@ config FB_MSM_MDSS_STATIC_MBL
 	---help---
 	This configuration will bypass device tree defined max brightness level
 	setting. Instead, this will set 255 as value regardless of panel's nature.
+
+config FB_MSM_MDSS_RGB_CTRL
+	depends on FB_MSM_MDSS
+	bool "Enable MDSS RGB control"
+	---help---
+	  Enable native MDSS RGB adjustment support. Not KCAL.
