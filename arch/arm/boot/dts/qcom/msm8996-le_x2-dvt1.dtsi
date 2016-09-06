@@ -92,7 +92,7 @@
 	qcom,cont-splash-enabled;
 	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
 
-	qcom,mdss-dsi-panel-timings-8996 = [22 1e 07 08 04 03 04 a0
+	qcom,mdss-dsi-panel-timings-phy-v2 = [22 1e 07 08 04 03 04 a0
 		22 1e 07 08 04 03 04 a0
 		22 1e 07 08 04 03 04 a0
 		22 1e 07 08 04 03 04 a0
