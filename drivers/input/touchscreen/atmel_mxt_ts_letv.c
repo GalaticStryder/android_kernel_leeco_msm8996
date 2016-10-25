@@ -4921,7 +4921,7 @@ static int fb_notifier_callback(struct notifier_block *self,
 	if (evdata && evdata->data && event == FB_EVENT_BLANK &&
 				mxt && mxt->client) {
 		blank = evdata->data;
-		if (*blank == FB_BLANK_UNBLANK) {
+		if (*blank == FB_BLANK_UNBLANK || *blank == FB_BLANK_NORMAL) {
 			dev_dbg(&mxt->client->dev,
 					"TP: %s(), FB_BLANK_UNBLANK\n",
 					__func__);
