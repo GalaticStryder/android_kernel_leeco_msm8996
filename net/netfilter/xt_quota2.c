@@ -19,6 +19,12 @@
 #include <asm/atomic.h>
 #include <net/netlink.h>
 
+//xiaoke.weng 20160809 CONNECT-2409 force enable NFLOG ++
+#ifndef CONFIG_NETFILTER_XT_MATCH_QUOTA2_LOG
+#define CONFIG_NETFILTER_XT_MATCH_QUOTA2_LOG
+#endif
+//xiaoke.weng 20160809 CONNECT-2409 force enable NFLOG --
+
 #include <linux/netfilter/x_tables.h>
 #include <linux/netfilter/xt_quota2.h>
 #ifdef CONFIG_NETFILTER_XT_MATCH_QUOTA2_LOG

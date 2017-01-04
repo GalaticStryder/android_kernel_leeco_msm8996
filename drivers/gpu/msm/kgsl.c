@@ -1,4 +1,4 @@
-/* Copyright (c) 2008-2015, The Linux Foundation. All rights reserved.
+/* Copyright (c) 2008-2016, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -388,6 +388,17 @@ kgsl_mem_entry_untrack_gpuaddr(struct kgsl_process_private *process,
 		kgsl_mmu_put_gpuaddr(pagetable, &entry->memdesc);
 }
 
+/* Commit the entry to the process so it can be accessed by other operations */
+static void kgsl_mem_entry_commit_process(struct kgsl_mem_entry *entry)
+{
+	if (!entry)
+		return;
+
+	spin_lock(&entry->priv->mem_lock);
+	idr_replace(&entry->priv->mem_idr, entry, entry->id);
+	spin_unlock(&entry->priv->mem_lock);
+}
+
 /**
  * kgsl_mem_entry_attach_process - Attach a mem_entry to its owner process
  * @entry: the memory entry
@@ -413,7 +424,8 @@ kgsl_mem_entry_attach_process(struct kgsl_mem_entry *entry,
 		return -EBADF;
 	idr_preload(GFP_KERNEL);
 	spin_lock(&process->mem_lock);
-	id = idr_alloc(&process->mem_idr, entry, 1, 0, GFP_NOWAIT);
+	/* Allocate the ID but don't attach the pointer just yet */
+	id = idr_alloc(&process->mem_idr, NULL, 1, 0, GFP_NOWAIT);
 	spin_unlock(&process->mem_lock);
 	idr_preload_end();
 
@@ -2244,7 +2256,7 @@ static long _gpuobj_map_dma_buf(struct kgsl_device *device,
 	if (ret)
 		return ret;
 
-	if (buf.fd == 0)
+	if (buf.fd < 0)
 		return -EINVAL;
 
 	*fd = buf.fd;
@@ -2325,6 +2337,7 @@ long kgsl_ioctl_gpuobj_import(struct kgsl_device_private *dev_priv,
 
 	trace_kgsl_mem_map(entry, fd);
 
+	kgsl_mem_entry_commit_process(entry);
 	return 0;
 
 unmap:
@@ -2596,6 +2609,7 @@ long kgsl_ioctl_map_user_mem(struct kgsl_device_private *dev_priv,
 
 	trace_kgsl_mem_map(entry, param->fd);
 
+	kgsl_mem_entry_commit_process(entry);
 	return result;
 
 error_attach:
@@ -3002,6 +3016,7 @@ static struct kgsl_mem_entry *gpumem_alloc_entry(
 			entry->memdesc.size);
 	trace_kgsl_mem_alloc(entry);
 
+	kgsl_mem_entry_commit_process(entry);
 	return entry;
 err:
 	kfree(entry);
@@ -3677,19 +3692,14 @@ static int kgsl_mmap(struct file *file, struct vm_area_struct *vma)
 
 	if (cache == KGSL_CACHEMODE_WRITEBACK
 		|| cache == KGSL_CACHEMODE_WRITETHROUGH) {
-		struct scatterlist *s;
 		int i;
 		unsigned long addr = vma->vm_start;
+		struct kgsl_memdesc *m = &entry->memdesc;
 
-		for_each_sg(entry->memdesc.sgt->sgl, s,
-				entry->memdesc.sgt->nents, i) {
-			int j;
-			for (j = 0; j < (s->length >> PAGE_SHIFT); j++) {
-				struct page *page = sg_page(s);
-				page = nth_page(page, j);
+		for (i = 0; i < m->page_count; i++) {
+				struct page *page = m->pages[i];
 				vm_insert_page(vma, addr, page);
 				addr += PAGE_SIZE;
-			}
 		}
 	}
 

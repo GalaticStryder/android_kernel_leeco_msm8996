@@ -1271,7 +1271,7 @@ static int ngd_slim_power_up(struct msm_slim_ctrl *dev, bool mdm_restart)
 	/* reconnect BAM pipes if needed and enable NGD */
 	ngd_slim_setup(dev);
 
-	timeout = wait_for_completion_timeout(&dev->reconf, HZ);
+	timeout = wait_for_completion_timeout(&dev->reconf, 3 * HZ);
 	if (!timeout) {
 		SLIM_WARN(dev, "capability exchange timed-out\n");
 		return -ETIMEDOUT;

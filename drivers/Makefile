@@ -173,3 +173,9 @@ obj-$(CONFIG_SENSORS_SSC)	+= sensors/
 
 # <t-base drivers
 obj-$(CONFIG_MOBICORE_DRIVER)	+= gud/
+
+# Letv drivers
+obj-y				+= letv/
+
+# zeusis power debug feature
+obj-$(CONFIG_ZES_POWER_DEBUG)  += zes_util/

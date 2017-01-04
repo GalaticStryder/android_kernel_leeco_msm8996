@@ -271,6 +271,9 @@ void __weak arch_suspend_enable_irqs(void)
  *
  * This function should be called after devices have been suspended.
  */
+#ifdef CONFIG_ZES_POWER_DEBUG
+extern int zs_rpm_master_stats_dump(bool fromSuspend);
+#endif
 static int suspend_enter(suspend_state_t state, bool *wakeup)
 {
 	char suspend_abort[MAX_SUSPEND_ABORT_LEN];
@@ -337,6 +340,9 @@ static int suspend_enter(suspend_state_t state, bool *wakeup)
 		if (!(suspend_test(TEST_CORE) || *wakeup)) {
 			trace_suspend_resume(TPS("machine_suspend"),
 				state, true);
+#ifdef CONFIG_ZES_POWER_DEBUG
+			zs_rpm_master_stats_dump(1);
+#endif
 			error = suspend_ops->enter(state);
 			trace_suspend_resume(TPS("machine_suspend"),
 				state, false);
@@ -491,6 +497,7 @@ static int enter_state(suspend_state_t state)
 	return error;
 }
 
+int utc_pm_mark_enabled = 0;
 static void pm_suspend_marker(char *annotation)
 {
 	struct timespec ts;
@@ -501,6 +508,16 @@ static void pm_suspend_marker(char *annotation)
 	pr_info("PM: suspend %s %d-%02d-%02d %02d:%02d:%02d.%09lu UTC\n",
 		annotation, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
 		tm.tm_hour, tm.tm_min, tm.tm_sec, ts.tv_nsec);
+
+	if (!utc_pm_mark_enabled)
+		utc_pm_mark_enabled = 1;
+
+	if (0 == (strncmp("entry", annotation ,strlen(annotation)))) {
+		/* dont calibrate time, only use local time. */
+		do_prk_utc_cali(0);
+	} else {
+		do_prk_utc_cali(ts.tv_sec);
+	}
 }
 
 /**

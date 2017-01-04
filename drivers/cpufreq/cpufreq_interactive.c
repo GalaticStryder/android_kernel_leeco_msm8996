@@ -154,6 +154,13 @@ struct cpufreq_interactive_tunables {
 
 	/* Ignore min_sample_time for notification */
 	bool fast_ramp_down;
+
+
+	/* Ignore jump to max speed logic*/
+	bool is_skip_max_logic;
+
+	/* Stay at high pseed at least hispeed_freq_hysteresis*/
+	unsigned int hispeed_freq_hysteresis;
 };
 
 /* For cases where we have single governor instance for system */
@@ -508,7 +515,7 @@ static void cpufreq_interactive_timer(unsigned long data)
 		trace_cpufreq_interactive_cpuload(i, cpu_load, new_load_pct);
 
 		if (cpu_load >= tunables->go_hispeed_load &&
-		    new_load_pct >= NEW_TASK_RATIO) {
+		    new_load_pct >= NEW_TASK_RATIO && (!tunables->is_skip_max_logic)) {
 			skip_hispeed_logic = true;
 			jump_to_max = true;
 		}
@@ -521,7 +528,7 @@ static void cpufreq_interactive_timer(unsigned long data)
 	if (now - ppol->max_freq_hyst_start_time <
 	    tunables->max_freq_hysteresis &&
 	    cpu_load >= tunables->go_hispeed_load &&
-	    ppol->target_freq < ppol->policy->max) {
+	    ppol->target_freq < ppol->policy->max && (!tunables->is_skip_max_logic)) {
 		skip_hispeed_logic = true;
 		skip_min_sample_time = true;
 		policy_max_fast_restore = true;
@@ -551,6 +558,13 @@ static void cpufreq_interactive_timer(unsigned long data)
 	    tunables->max_freq_hysteresis)
 		new_freq = max(tunables->hispeed_freq, new_freq);
 
+	if((now - ppol->hispeed_validate_time < tunables->hispeed_freq_hysteresis) 
+		&& (ppol->target_freq >= tunables->hispeed_freq) && (new_freq > ppol->target_freq))
+	{
+		spin_unlock_irqrestore(&ppol->target_freq_lock, flags);
+		goto rearm;
+	}
+	
 	if (!skip_hispeed_logic &&
 	    ppol->target_freq >= tunables->hispeed_freq &&
 	    new_freq > ppol->target_freq &&
@@ -994,6 +1008,8 @@ show_store_one(max_freq_hysteresis);
 show_store_one(align_windows);
 show_store_one(ignore_hispeed_on_notif);
 show_store_one(fast_ramp_down);
+show_store_one(hispeed_freq_hysteresis);
+show_store_one(is_skip_max_logic);
 
 static ssize_t show_go_hispeed_load(struct cpufreq_interactive_tunables
 		*tunables, char *buf)
@@ -1388,6 +1404,10 @@ show_store_gov_pol_sys(max_freq_hysteresis);
 show_store_gov_pol_sys(align_windows);
 show_store_gov_pol_sys(ignore_hispeed_on_notif);
 show_store_gov_pol_sys(fast_ramp_down);
+show_store_gov_pol_sys(hispeed_freq_hysteresis);
+show_store_gov_pol_sys(is_skip_max_logic);
+
+
 
 #define gov_sys_attr_rw(_name)						\
 static struct global_attr _name##_gov_sys =				\
@@ -1417,6 +1437,9 @@ gov_sys_pol_attr_rw(max_freq_hysteresis);
 gov_sys_pol_attr_rw(align_windows);
 gov_sys_pol_attr_rw(ignore_hispeed_on_notif);
 gov_sys_pol_attr_rw(fast_ramp_down);
+gov_sys_pol_attr_rw(hispeed_freq_hysteresis);
+gov_sys_pol_attr_rw(is_skip_max_logic);
+
 
 static struct global_attr boostpulse_gov_sys =
 	__ATTR(boostpulse, 0200, NULL, store_boostpulse_gov_sys);
@@ -1443,6 +1466,8 @@ static struct attribute *interactive_attributes_gov_sys[] = {
 	&align_windows_gov_sys.attr,
 	&ignore_hispeed_on_notif_gov_sys.attr,
 	&fast_ramp_down_gov_sys.attr,
+	&hispeed_freq_hysteresis_gov_sys.attr,
+	&is_skip_max_logic_gov_sys.attr,
 	NULL,
 };
 
@@ -1469,7 +1494,9 @@ static struct attribute *interactive_attributes_gov_pol[] = {
 	&max_freq_hysteresis_gov_pol.attr,
 	&align_windows_gov_pol.attr,
 	&ignore_hispeed_on_notif_gov_pol.attr,
-	&fast_ramp_down_gov_pol.attr,
+	&fast_ramp_down_gov_pol.attr,	
+	&hispeed_freq_hysteresis_gov_pol.attr,
+	&is_skip_max_logic_gov_pol.attr,
 	NULL,
 };
 

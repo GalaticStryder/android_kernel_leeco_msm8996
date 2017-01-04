@@ -1155,7 +1155,7 @@ int diag_md_session_create(int mode, int peripheral_mask, int proc)
 	 * then return invalid param
 	 */
 	if (driver->md_session_mode == DIAG_MD_NORMAL)
-		return -EINVAL;
+		return 0;//-EINVAL;
 	if (driver->md_session_mode == DIAG_MD_PERIPHERAL
 	    && mode == DIAG_MD_NORMAL)
 		return -EINVAL;
@@ -1545,7 +1545,6 @@ static int diag_switch_logging(struct diag_logging_mode_param_t *param)
 		queue_work(driver->diag_real_time_wq,
 			   &driver->diag_real_time_work);
 	}
-
 	return 0;
 fail:
 	return err;
@@ -2144,6 +2143,7 @@ long diagchar_ioctl(struct file *filp,
 		result = diag_ioctl_hdlc_toggle(ioarg);
 		break;
 	}
+
 	return result;
 }
 
@@ -3145,6 +3145,8 @@ static void diag_debug_init(void)
 	 */
 	diag_debug_mask = DIAG_DEBUG_PERIPHERALS | DIAG_DEBUG_DCI |
 				DIAG_DEBUG_BRIDGE;
+	//enable all diag logs
+	diag_debug_mask = 0xff;
 }
 #else
 static void diag_debug_init(void)

@@ -961,12 +961,16 @@ static int cpufreq_add_dev_interface(struct cpufreq_policy *policy,
 	return ret;
 }
 
+extern char g_boot_mode[];
 static void cpufreq_init_policy(struct cpufreq_policy *policy)
 {
 	struct cpufreq_governor *gov = NULL;
 	struct cpufreq_policy new_policy;
 	int ret = 0;
-
+#ifdef CONFIG_PRODUCT_LE_ZL1
+	unsigned int POWER_CLUSTER_LIMIT = 0;
+	unsigned int PERF_CLUSTER_LIMIT = 0;
+#endif
 	/* Restore policy->min/max for hotplug */
 	if (per_cpu(cpufreq_policy_save, policy->cpu).min) {
 		policy->min = per_cpu(cpufreq_policy_save, policy->cpu).min;
@@ -976,6 +980,7 @@ static void cpufreq_init_policy(struct cpufreq_policy *policy)
 		policy->max = per_cpu(cpufreq_policy_save, policy->cpu).max;
 		policy->user_policy.max = policy->max;
 	}
+
 	pr_debug("Restoring CPU%d user policy min %d and max %d\n",
 		 policy->cpu, policy->min, policy->max);
 
@@ -995,6 +1000,30 @@ static void cpufreq_init_policy(struct cpufreq_policy *policy)
 	if (cpufreq_driver->setpolicy)
 		cpufreq_parse_governor(gov->name, &new_policy.policy, NULL);
 
+#ifdef CONFIG_PRODUCT_LE_ZL1
+	POWER_CLUSTER_LIMIT = 1593600;
+	PERF_CLUSTER_LIMIT = 1824000;
+	pr_debug("Power limit %s\n", g_boot_mode);
+	if(!strncmp(g_boot_mode, "ffbm", 4))
+	{
+	        POWER_CLUSTER_LIMIT = 844800;
+	        PERF_CLUSTER_LIMIT = 902400;
+	}
+	if((0 == strcmp(gov->name, "performance")) && ((0 == policy->cpu)||(1 == policy->cpu)))
+	{
+	        policy->user_policy.max = POWER_CLUSTER_LIMIT;
+	        policy->max = POWER_CLUSTER_LIMIT;
+	        new_policy.max = POWER_CLUSTER_LIMIT;
+	        pr_debug("Power: Power cluster performance frequency limit %d\n", POWER_CLUSTER_LIMIT);
+	}
+	else if((0 == strcmp(gov->name, "performance")) && ((2 == policy->cpu)||(3 == policy->cpu)))
+	{
+	        policy->user_policy.max = PERF_CLUSTER_LIMIT;
+	        policy->max = PERF_CLUSTER_LIMIT;
+	        new_policy.max = PERF_CLUSTER_LIMIT;
+	        pr_debug("Power: Perf cluster performance frequency limit %d\n", PERF_CLUSTER_LIMIT);
+	}
+#endif
 	/* set default policy */
 	ret = cpufreq_set_policy(policy, &new_policy);
 	if (ret) {

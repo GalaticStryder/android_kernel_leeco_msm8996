@@ -200,4 +200,10 @@ source "drivers/bif/Kconfig"
 
 source "drivers/gud/Kconfig"
 
+# Letv driver config
+source "drivers/letv/Kconfig"
+
+# Zeusis debug feature
+source "drivers/zes_util/Kconfig"
+
 endmenu

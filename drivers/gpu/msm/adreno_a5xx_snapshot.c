@@ -587,6 +587,7 @@ static struct kgsl_memdesc capturescript;
 static struct kgsl_memdesc registers;
 static bool crash_dump_valid;
 
+#if 0
 static size_t a5xx_snapshot_shader_memory(struct kgsl_device *device,
 	u8 *buf, size_t remain, void *priv)
 {
@@ -635,6 +636,62 @@ static void a5xx_snapshot_shader(struct kgsl_device *device,
 		}
 	}
 }
+#endif
+
+#if 0
+static int get_hlsq_registers(struct kgsl_device *device,
+		const struct a5xx_hlsq_sp_tp_regs *regs, unsigned int *data)
+{
+	int j;
+	unsigned int val;
+
+	kgsl_regwrite(device, A5XX_HLSQ_DBG_READ_SEL,
+			(regs->statetype << A5XX_SHADER_STATETYPE_SHIFT));
+
+	for (j = 0; j < regs->size; j++) {
+		kgsl_regread(device, A5XX_HLSQ_DBG_AHB_READ_APERTURE + j, &val);
+		*data++ = regs->ahbaddr + j;
+		*data++ = val;
+	}
+
+	return (regs->size * 2);
+}
+
+static size_t a5xx_snapshot_dump_hlsq_sp_tp_regs(struct kgsl_device *device,
+		u8 *buf, size_t remain, void *priv)
+{
+	struct adreno_device *adreno_dev = ADRENO_DEVICE(device);
+	struct kgsl_snapshot_regs *header = (struct kgsl_snapshot_regs *)buf;
+	unsigned int *data = (unsigned int *)(buf + sizeof(*header));
+	int count = 0, i;
+
+	/* Figure out how many registers we are going to dump */
+	for (i = 0; i < ARRAY_SIZE(a5xx_hlsq_sp_tp_registers); i++)
+			count += a5xx_hlsq_sp_tp_registers[i].size;
+
+	/* the HLSQ non context registers cannot be dumped on A530v1 */
+	if (!adreno_is_a530v1(adreno_dev))
+		count += a5xx_hlsq_non_ctx_registers.size;
+
+	if (remain < (count * 8) + sizeof(*header)) {
+		SNAPSHOT_ERR_NOMEM(device, "REGISTERS");
+		return 0;
+	}
+
+	for (i = 0; i < ARRAY_SIZE(a5xx_hlsq_sp_tp_registers); i++)
+		data += get_hlsq_registers(device,
+			&a5xx_hlsq_sp_tp_registers[i], data);
+
+	if (!adreno_is_a530v1(adreno_dev))
+		data += get_hlsq_registers(device,
+			&a5xx_hlsq_non_ctx_registers, data);
+
+	header->count = count;
+
+	/* Return the size of the section */
+	return (count * 8) + sizeof(*header);
+}
+#endif
 
 static size_t a5xx_legacy_snapshot_registers(struct kgsl_device *device,
 		u8 *buf, size_t remain)
@@ -777,6 +834,12 @@ void a5xx_snapshot(struct adreno_device *adreno_dev,
 		a5xx_vbif_snapshot_registers,
 		ARRAY_SIZE(a5xx_vbif_snapshot_registers));
 
+#if 0
+	/* Dump SP TP HLSQ registers */
+	kgsl_snapshot_add_section(device, KGSL_SNAPSHOT_SECTION_REGS, snapshot,
+		a5xx_snapshot_dump_hlsq_sp_tp_regs, NULL);
+#endif
+
 	/* CP_PFP indexed registers */
 	kgsl_snapshot_indexed_registers(device, snapshot,
 		A5XX_CP_PFP_STAT_ADDR, A5XX_CP_PFP_STAT_DATA,
@@ -833,8 +896,10 @@ void a5xx_snapshot(struct adreno_device *adreno_dev,
 	kgsl_snapshot_add_section(device, KGSL_SNAPSHOT_SECTION_DEBUG,
 		snapshot, a5xx_snapshot_cp_pm4, NULL);
 
+#if 0
 	/* Shader memory */
 	a5xx_snapshot_shader(device, snapshot);
+#endif
 
 	/* Debug bus */
 	a5xx_snapshot_debugbus(device, snapshot);

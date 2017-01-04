@@ -29,6 +29,10 @@
 
 #define RPM_MASTERS_BUF_LEN 400
 
+#ifdef CONFIG_ZES_POWER_DEBUG 
+struct msm_rpm_master_stats_private_data *prvdataSuspend;
+#endif
+
 #define SNPRINTF(buf, size, format, ...) \
 	do { \
 		if (size > 0) { \
@@ -260,6 +264,199 @@ static int msm_rpm_master_copy_stats(
 	return RPM_MASTERS_BUF_LEN - count;
 }
 
+#ifdef CONFIG_ZES_POWER_DEBUG
+/*************************************
+ * Add for dump status when system enter suspend sequence
+ ************************************/
+static int zs_msm_rpm_master(
+		struct msm_rpm_master_stats_private_data *prvdata)
+{
+	struct msm_rpm_master_stats record;
+	struct msm_rpm_master_stats_platform_data *pdata;
+	static int master_cnt;
+	int count, j = 0;
+	char *buf;
+
+
+	/* Iterate possible number of masters */
+	if (master_cnt > prvdata->num_masters - 1) {
+		master_cnt = 0;
+		return 0;
+	}
+
+	pdata = prvdata->platform_data;
+	count = RPM_MASTERS_BUF_LEN;
+	buf = prvdata->buf;
+
+	if (prvdata->platform_data->version == 2) {
+		SNPRINTF(buf, count, "%s\n",
+				GET_MASTER_NAME(master_cnt, prvdata));
+
+		record.shutdown_req = readq_relaxed(prvdata->reg_base +
+			(master_cnt * pdata->master_offset +
+			offsetof(struct msm_rpm_master_stats, shutdown_req)));
+
+		SNPRINTF(buf, count, "\t%s:0x%llX\n",
+			GET_FIELD(record.shutdown_req),
+			record.shutdown_req);
+
+		record.wakeup_ind = readq_relaxed(prvdata->reg_base +
+			(master_cnt * pdata->master_offset +
+			offsetof(struct msm_rpm_master_stats, wakeup_ind)));
+
+		SNPRINTF(buf, count, "\t%s:0x%llX\n",
+			GET_FIELD(record.wakeup_ind),
+			record.wakeup_ind);
+
+		record.bringup_req = readq_relaxed(prvdata->reg_base +
+			(master_cnt * pdata->master_offset +
+			offsetof(struct msm_rpm_master_stats, bringup_req)));
+
+		SNPRINTF(buf, count, "\t%s:0x%llX\n",
+			GET_FIELD(record.bringup_req),
+			record.bringup_req);
+
+		record.bringup_ack = readq_relaxed(prvdata->reg_base +
+			(master_cnt * pdata->master_offset +
+			offsetof(struct msm_rpm_master_stats, bringup_ack)));
+
+		SNPRINTF(buf, count, "\t%s:0x%llX\n",
+			GET_FIELD(record.bringup_ack),
+			record.bringup_ack);
+
+		record.xo_last_entered_at = readq_relaxed(prvdata->reg_base +
+			(master_cnt * pdata->master_offset +
+			offsetof(struct msm_rpm_master_stats,
+			xo_last_entered_at)));
+
+		SNPRINTF(buf, count, "\t%s:0x%llX\n",
+			GET_FIELD(record.xo_last_entered_at),
+			record.xo_last_entered_at);
+
+		record.xo_last_exited_at = readq_relaxed(prvdata->reg_base +
+			(master_cnt * pdata->master_offset +
+			offsetof(struct msm_rpm_master_stats,
+			xo_last_exited_at)));
+
+		SNPRINTF(buf, count, "\t%s:0x%llX\n",
+			GET_FIELD(record.xo_last_exited_at),
+			record.xo_last_exited_at);
+
+		record.xo_accumulated_duration =
+				readq_relaxed(prvdata->reg_base +
+				(master_cnt * pdata->master_offset +
+				offsetof(struct msm_rpm_master_stats,
+				xo_accumulated_duration)));
+
+		SNPRINTF(buf, count, "\t%s:0x%llX\n",
+			GET_FIELD(record.xo_accumulated_duration),
+			record.xo_accumulated_duration);
+
+		record.last_sleep_transition_duration =
+				readl_relaxed(prvdata->reg_base +
+				(master_cnt * pdata->master_offset +
+				offsetof(struct msm_rpm_master_stats,
+				last_sleep_transition_duration)));
+
+		SNPRINTF(buf, count, "\t%s:0x%x\n",
+			GET_FIELD(record.last_sleep_transition_duration),
+			record.last_sleep_transition_duration);
+
+		record.last_wake_transition_duration =
+				readl_relaxed(prvdata->reg_base +
+				(master_cnt * pdata->master_offset +
+				offsetof(struct msm_rpm_master_stats,
+				last_wake_transition_duration)));
+
+		SNPRINTF(buf, count, "\t%s:0x%x\n",
+			GET_FIELD(record.last_wake_transition_duration),
+			record.last_wake_transition_duration);
+
+		record.xo_count =
+				readl_relaxed(prvdata->reg_base +
+				(master_cnt * pdata->master_offset +
+				offsetof(struct msm_rpm_master_stats,
+				xo_count)));
+
+		SNPRINTF(buf, count, "\t%s:0x%x\n",
+			GET_FIELD(record.xo_count),
+			record.xo_count);
+
+		record.wakeup_reason = readl_relaxed(prvdata->reg_base +
+					(master_cnt * pdata->master_offset +
+					offsetof(struct msm_rpm_master_stats,
+					wakeup_reason)));
+
+		SNPRINTF(buf, count, "\t%s:0x%x\n",
+			GET_FIELD(record.wakeup_reason),
+			record.wakeup_reason);
+
+		record.numshutdowns = readl_relaxed(prvdata->reg_base +
+			(master_cnt * pdata->master_offset +
+			 offsetof(struct msm_rpm_master_stats, numshutdowns)));
+
+		SNPRINTF(buf, count, "\t%s:0x%x\n",
+			GET_FIELD(record.numshutdowns),
+			record.numshutdowns);
+
+		record.active_cores = readl_relaxed(prvdata->reg_base +
+			(master_cnt * pdata->master_offset) +
+			offsetof(struct msm_rpm_master_stats, active_cores));
+
+		SNPRINTF(buf, count, "\t%s:0x%x\n",
+			GET_FIELD(record.active_cores),
+			record.active_cores);
+	} else {
+		SNPRINTF(buf, count, "%s\n",
+				GET_MASTER_NAME(master_cnt, prvdata));
+
+		record.numshutdowns = readl_relaxed(prvdata->reg_base +
+				(master_cnt * pdata->master_offset) + 0x0);
+
+		SNPRINTF(buf, count, "\t%s:0x%0x\n",
+			GET_FIELD(record.numshutdowns),
+			record.numshutdowns);
+
+		record.active_cores = readl_relaxed(prvdata->reg_base +
+				(master_cnt * pdata->master_offset) + 0x4);
+
+		SNPRINTF(buf, count, "\t%s:0x%0x\n",
+			GET_FIELD(record.active_cores),
+			record.active_cores);
+	}
+
+	j = find_first_bit((unsigned long *)&record.active_cores,
+							BITS_PER_LONG);
+	while (j < BITS_PER_LONG) {
+		SNPRINTF(buf, count, "\t\tcore%d\n", j);
+		j = find_next_bit((unsigned long *)&record.active_cores,
+				BITS_PER_LONG, j + 1);
+	}
+
+	master_cnt++;
+	return RPM_MASTERS_BUF_LEN - count;
+}
+
+
+/*************************
+ ** Add for dump rpm status
+ ************************/
+int zs_rpm_master_stats_dump(bool fromSuspend)
+{
+	int i;
+	for(i = 0; i < prvdataSuspend->num_masters; i++)
+	{
+		if(fromSuspend)
+			zs_msm_rpm_master(prvdataSuspend);
+		else
+			msm_rpm_master_copy_stats(prvdataSuspend);
+		printk("%s\n", prvdataSuspend->buf);
+	}
+	return 0;
+}
+EXPORT_SYMBOL(zs_rpm_master_stats_dump);
+#endif
+
 static ssize_t msm_rpm_master_stats_file_read(struct file *file,
 				char __user *bufu, size_t count, loff_t *ppos)
 {
@@ -396,6 +593,7 @@ static  int msm_rpm_master_stats_probe(struct platform_device *pdev)
 	struct msm_rpm_master_stats_platform_data *pdata;
 	struct resource *res = NULL;
 
+
 	if (!pdev)
 		return -EINVAL;
 
@@ -429,8 +627,36 @@ static  int msm_rpm_master_stats_probe(struct platform_device *pdev)
 								__func__);
 		return -ENOMEM;
 	}
-
 	platform_set_drvdata(pdev, dent);
+
+#ifdef CONFIG_ZES_POWER_DEBUG
+	/******
+	 * ZS add debug info for rpm master status start
+	 *******/
+	prvdataSuspend = kzalloc(sizeof(struct msm_rpm_master_stats_private_data),
+			GFP_KERNEL);
+	if(!prvdataSuspend)
+		return -ENOMEM;
+
+	prvdataSuspend->reg_base = ioremap(pdata->phys_addr_base,
+						pdata->phys_size);
+	if (!prvdataSuspend->reg_base) {
+		kfree(prvdataSuspend);
+		prvdataSuspend = NULL;
+		pr_err("%s: ERROR could not ioremap start=%pa, len=%u\n",
+			__func__, &pdata->phys_addr_base,
+			pdata->phys_size);
+		return -EBUSY;
+	}
+
+	prvdataSuspend->len = 0;
+	prvdataSuspend->num_masters = pdata->num_masters;
+	prvdataSuspend->master_names = pdata->masters;
+	prvdataSuspend->platform_data = pdata;
+	/******
+	 * ZS add debug info for rpm master status end
+	 *******/
+#endif
 	return 0;
 }
 

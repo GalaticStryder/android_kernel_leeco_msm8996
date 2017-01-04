@@ -31,6 +31,7 @@
 #define INPUT_EVENT_HANDLER_DELAY_USECS (16000 * 4)
 #define AUTOREFRESH_MAX_FRAME_CNT 6
 
+static struct workqueue_struct *letv_pp_wq;
 static DEFINE_MUTEX(cmd_clk_mtx);
 
 enum mdss_mdp_cmd_autorefresh_state {
@@ -1015,7 +1016,7 @@ static void mdss_mdp_cmd_lineptr_done(void *arg)
 	spin_unlock(&ctx->clk_lock);
 }
 
-static void mdss_mdp_cmd_intf_recovery(void *data, int event)
+static int mdss_mdp_cmd_intf_recovery(void *data, int event)
 {
 	struct mdss_mdp_cmd_ctx *ctx = data;
 	unsigned long flags;
@@ -1023,11 +1024,11 @@ static void mdss_mdp_cmd_intf_recovery(void *data, int event)
 
 	if (!data) {
 		pr_err("%s: invalid ctx\n", __func__);
-		return;
+		return  -EINVAL;
 	}
 
 	if (!ctx->ctl)
-		return;
+		return  -EINVAL;
 
 	/*
 	 * Currently, only intf_fifo_underflow is
@@ -1037,7 +1038,7 @@ static void mdss_mdp_cmd_intf_recovery(void *data, int event)
 	if (event != MDP_INTF_DSI_CMD_FIFO_UNDERFLOW) {
 		pr_warn("%s: unsupported recovery event:%d\n",
 					__func__, event);
-		return;
+		return -EPERM;
 	}
 
 	if (atomic_read(&ctx->koff_cnt)) {
@@ -1060,6 +1061,7 @@ static void mdss_mdp_cmd_intf_recovery(void *data, int event)
 	if (notify_frame_timeout)
 		mdss_mdp_ctl_notify(ctx->ctl, MDP_NOTIFY_FRAME_TIMEOUT);
 
+	return 0;
 }
 
 static void mdss_mdp_cmd_pingpong_done(void *arg)
@@ -1099,8 +1101,7 @@ static void mdss_mdp_cmd_pingpong_done(void *arg)
 			       atomic_read(&ctx->koff_cnt));
 		if (mdss_mdp_cmd_do_notifier(ctx)) {
 			atomic_inc(&ctx->pp_done_cnt);
-			schedule_work(&ctx->pp_done_work);
-
+			queue_work(letv_pp_wq, &ctx->pp_done_work);
 			mdss_mdp_resource_control(ctl,
 				MDP_RSRC_CTL_EVENT_PP_DONE);
 		}
@@ -3045,6 +3046,12 @@ static int mdss_mdp_cmd_ctx_setup(struct mdss_mdp_ctl *ctl,
 	ret = mdss_mdp_cmd_tearcheck_setup(ctx, false);
 	if (ret)
 		pr_err("tearcheck setup failed\n");
+
+	letv_pp_wq = alloc_workqueue("letv_pingpong_wq", WQ_UNBOUND | WQ_HIGHPRI, 0);
+	if (!letv_pp_wq) {
+		pr_err("fail to allocate letv_pingpong_wq");
+		return -ENOMEM;
+	}
 
 	return ret;
 }

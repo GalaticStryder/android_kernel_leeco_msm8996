@@ -30,6 +30,8 @@
 #include <linux/cpumask.h>
 #include <linux/msm_thermal.h>
 
+#include <linux/zes_util.h>
+
 #define CREATE_TRACE_POINTS
 #define _BCL_SW_TRACE
 #include <trace/trace_thermal.h>
@@ -1807,6 +1809,9 @@ static struct platform_driver bcl_driver = {
 
 static int __init bcl_init(void)
 {
+#ifdef CONFIG_ZES_POWER_DEBUG
+	init_zes_power_monitor();
+#endif
 	return platform_driver_register(&bcl_driver);
 }
 

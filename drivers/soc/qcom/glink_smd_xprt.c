@@ -132,7 +132,7 @@ struct edge_info {
  * @remote_legacy:	The remote side of the channel is in legacy mode.
  * @rx_data_lock:	Used to serialize RX data processing.
  * @streaming_ch:	Indicates the underlying SMD channel is streaming type.
- * @tx_resume_needed:	Indicates whether a tx_resume call should be triggered.
+ * @tx_resume_needed:  Indicates whether a tx_resume call should be triggered.
  */
 struct channel {
 	struct list_head node;
@@ -239,6 +239,7 @@ static void smd_data_ch_close(struct channel *ch);
  *			 and enable the read interrupt if there is not.
  * @check_fn:	The function to use to check if there is space to write
  * @ch:		The channel to check
+
  *
  * Return: 0 on success or standard Linux error codes.
  */
@@ -781,6 +782,7 @@ static void process_data_event(struct work_struct *work)
 		read_avail = smd_read_avail(ch->smd_ch);
 		if (ch->streaming_ch && read_avail > pkt_remaining)
 			read_avail = pkt_remaining;
+
 		intent = einfo->xprt_if.glink_core_if_ptr->rx_get_pkt_ctx(
 							&einfo->xprt_if,
 							ch->rcid,
@@ -1245,6 +1247,8 @@ static int tx_cmd_ch_open(struct glink_transport_if *if_ptr, uint32_t lcid,
 			kfree(temp_ch);
 		}
 	}
+
+
 
 	ch->tx_resume_needed = false;
 	ch->lcid = lcid;

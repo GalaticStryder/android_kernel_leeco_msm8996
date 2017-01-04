@@ -159,7 +159,7 @@ struct mdss_panel_cfg {
 #define MDP_INTF_DSI_VIDEO_FIFO_OVERFLOW	0x0002
 
 struct mdss_intf_recovery {
-	void (*fxn)(void *ctx, int event);
+	int (*fxn)(void *ctx, int event);
 	void *data;
 };
 
@@ -615,6 +615,7 @@ struct mdss_panel_info {
 	/* current fps, once is programmed in hw */
 	int current_fps;
 
+	bool rst_timing_compatible;
 	int panel_max_fps;
 	int panel_max_vtotal;
 	u32 mode_gpio_state;
