@@ -495,6 +495,12 @@ config QPNP_SMBCHARGER
 	  The driver also offers relevant information to userspace via the
 	  power supply framework.
 
+config QPNP_MHL
+	tristate "LeTV MHL state information"
+	depends on QPNP_SMBCHARGER
+	help
+	  Say Y here to enable LeTV's MHL state information.
+
 config QPNP_FG
 	tristate "QPNP fuel gauge driver"
 	depends on SPMI || MSM_SPMI

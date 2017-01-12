@@ -714,6 +714,14 @@ config MSM_SERVICE_LOCATOR
 	  to what process domain exports the service, and which subsystem
 	  that process domain will execute in.
 
+config MSM_SSR_MONITOR
+	bool "SSR Monitor"
+	depends on MSM_SUBSYSTEM_RESTART
+	help
+	  The SSR Monitor provides a library for a kernel client to
+	  to be monitored and notified of subsystem events happening
+	  in the modem core.
+
 config MSM_SERVICE_NOTIFIER
 	bool "Service Notifier"
 	depends on MSM_SERVICE_LOCATOR && MSM_SUBSYSTEM_RESTART
@@ -758,6 +766,13 @@ config MSM_KERNEL_PROTECT_TEST
           Attempts to write to the kernel text after making the kernel text
           read-only.  This test is FATAL whether it passes or fails!
           Success is signaled by a stage-2 fault.
+
+config DEEP_SLEEP_LED_SWITCH
+	bool "Enable deep sleep LED light support for LeTV devices"
+	depends on MACH_LEECO
+	help
+	  Add support for LeTV's hardware based deep sleep LED switcher
+	  (on/off) present on some of their devices, check your device tree.
 
 source "drivers/soc/qcom/memshare/Kconfig"
 

@@ -1120,6 +1120,9 @@ static ssize_t subsys_debugfs_write(struct file *filp,
 	struct subsys_device *subsys = filp->private_data;
 	char buf[10];
 	char *cmp;
+#ifdef CONFIG_MACH_LEECO
+	int restart_level_tmp;
+#endif
 
 	cnt = min(cnt, sizeof(buf) - 1);
 	if (copy_from_user(&buf, ubuf, cnt))
@@ -1127,7 +1130,19 @@ static ssize_t subsys_debugfs_write(struct file *filp,
 	buf[cnt] = '\0';
 	cmp = strstrip(buf);
 
+#ifdef CONFIG_MACH_LEECO
+	if (!strcmp(cmp, "rstmpss")) {
+		restart_level_tmp = subsys->restart_level;
+		subsys->restart_level=RESET_SUBSYS_COUPLED;
+		if (subsystem_restart_dev(subsys)){
+			subsys->restart_level = restart_level_tmp;
+			return -EIO;}
+		else
+			subsys->restart_level = restart_level_tmp;
+	} else if (!strcmp(cmp, "restart")) {
+#else
 	if (!strcmp(cmp, "restart")) {
+#endif
 		if (subsystem_restart_dev(subsys))
 			return -EIO;
 	} else if (!strcmp(cmp, "get")) {

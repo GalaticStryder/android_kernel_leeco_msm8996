@@ -1085,18 +1085,24 @@ config SERIAL_MSM_HS
 	  called msm_serial_hs.
 
 config SERIAL_MSM_HSL
-	tristate "MSM UART High Speed : Legacy mode Serial Driver"
+	tristate "MSM UART High Speed: Legacy mode Serial Driver"
 	depends on (ARM || ARM64) && ARCH_MSM
 	select SERIAL_CORE
 	default n
 	help
-	  Select this module to enable MSM high speed UART driver.
+	  Select this module to enable MSM high speed UART driver in
+	  legacy mode.
 
 config SERIAL_MSM_HSL_CONSOLE
 	bool "MSM High speed serial legacy mode console support"
 	depends on SERIAL_MSM_HSL=y
 	select SERIAL_CORE_CONSOLE
 	select SERIAL_EARLYCON
+	default n
+
+config SERIAL_MSM_HSL_DYNAMIC_CONSOLE
+	bool "Dynamic command line support for the HSL console"
+	depends on SERIAL_MSM_HSL_CONSOLE
 	default n
 
 config SERIAL_VT8500

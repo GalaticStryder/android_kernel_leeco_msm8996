@@ -1683,6 +1683,7 @@ struct xhci_segment *trb_in_td(struct xhci_hcd *xhci,
 		/* If the end TRB isn't in this segment, this is set to 0 */
 		end_trb_dma = xhci_trb_virt_to_dma(cur_seg, end_trb);
 
+#ifdef CONFIG_MACH_LEECO_DEBUG
 		if (debug)
 			xhci_warn(xhci,
 				"Looking for event-dma %016llx trb-start %016llx trb-end %016llx seg-start %016llx seg-end %016llx\n",
@@ -1691,6 +1692,7 @@ struct xhci_segment *trb_in_td(struct xhci_hcd *xhci,
 				(unsigned long long)end_trb_dma,
 				(unsigned long long)cur_seg->dma,
 				(unsigned long long)end_seg_dma);
+#endif
 
 		if (end_trb_dma > 0) {
 			/* The end TRB is in this segment, so suspect should be here */
@@ -2454,12 +2456,14 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 					ret = 0;
 					goto cleanup;
 				}
+#ifdef CONFIG_MACH_LEECO_DEBUG
 				/* HC is busted, give up! */
 				xhci_err(xhci,
 					"ERROR Transfer event TRB DMA ptr not "
 					"part of current TD ep_index %d "
 					"comp_code %u\n", ep_index,
 					trb_comp_code);
+#endif
 				trb_in_td(xhci, ep_ring->deq_seg,
 					  ep_ring->dequeue, td->last_trb,
 					  event_dma, true);

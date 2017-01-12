@@ -26,6 +26,9 @@
 #include <linux/wait.h>
 #include <soc/qcom/ramdump.h>
 #include <linux/dma-mapping.h>
+#ifdef CONFIG_MSM_SSR_MONITOR
+#include "ssr_monitor.h"
+#endif
 
 #define RAMDUMP_WAIT_MSECS	120000
 
@@ -221,6 +224,9 @@ ramdump_done:
 	rd_dev->data_ready = 0;
 	*pos = 0;
 	complete(&rd_dev->ramdump_complete);
+#ifdef CONFIG_MSM_SSR_MONITOR
+	ssr_monitor_notify(rd_dev->name);
+#endif
 	return ret;
 }
 
