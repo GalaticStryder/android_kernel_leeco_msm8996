@@ -68,6 +68,8 @@ struct msm_ois_ctrl_t {
 	struct msm_pinctrl_info pinctrl_info;
 	uint8_t cam_pinctrl_status;
 	struct msm_ois_board_info *oboard_info;
+	/* TODO: #ifdef, please. */
+	const char *project_name;
 };
 
 #endif

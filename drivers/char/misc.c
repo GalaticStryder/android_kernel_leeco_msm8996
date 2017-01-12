@@ -201,6 +201,8 @@ int misc_register(struct miscdevice * misc)
 				goto out;
 			}
 		}
+		if(misc->minor < DYNAMIC_MINORS)
+			set_bit(DYNAMIC_MINORS -misc->minor -1, misc_minors);
 	}
 
 	dev = MKDEV(MISC_MAJOR, misc->minor);

@@ -428,6 +428,10 @@ static int mdss_mdp_writeback_prepare_rot(struct mdss_mdp_ctl *ctl, void *arg)
 	ctx->frame_rate = perf->config.frame_rate;
 	ctx->dnsc_factor_w = entry->dnsc_factor_w;
 	ctx->dnsc_factor_h = entry->dnsc_factor_h;
+#ifdef CONFIG_MACH_LEECO
+	/* Refreash frame rate on rotation */
+	ctx->frame_rate = ctl->frame_rate;
+#endif
 
 	ctx->rot90 = !!(item->flags & MDP_ROTATION_90);
 
