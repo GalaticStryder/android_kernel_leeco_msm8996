@@ -70,12 +70,21 @@ struct attribute_group {
  * for examples..
  */
 
+#ifdef CONFIG_MACH_LEECO
+/* Avoid VERIFY_OCTAL_PERMISSIONS check. */
+#define __ATTR(_name, _mode, _show, _store) {				\
+	.attr = {.name = __stringify(_name), .mode = _mode },		\
+	.show	= _show,						\
+	.store	= _store,						\
+}
+#else
 #define __ATTR(_name, _mode, _show, _store) {				\
 	.attr = {.name = __stringify(_name),				\
 		 .mode = VERIFY_OCTAL_PERMISSIONS(_mode) },		\
 	.show	= _show,						\
 	.store	= _store,						\
 }
+#endif
 
 #define __ATTR_RO(_name) {						\
 	.attr	= { .name = __stringify(_name), .mode = S_IRUGO },	\

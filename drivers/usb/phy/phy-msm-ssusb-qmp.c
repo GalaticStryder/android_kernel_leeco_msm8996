@@ -50,6 +50,12 @@ enum core_ldo_levels {
 #define ALFPS_DTCT_EN		BIT(1)
 #define ARCVR_DTCT_EVENT_SEL	BIT(4)
 
+#ifdef CONFIG_MACH_LEECO
+static int phy_tune[64],phy_tune_n;
+module_param_array(phy_tune, int, &phy_tune_n,  S_IRUGO|S_IWUSR);
+MODULE_PARM_DESC(phy_tune, "SSUSB PHY TUNE SEQ");
+#endif
+
 enum qmp_phy_rev_reg {
 	USB3_REVISION_ID0,
 	USB3_REVISION_ID1,
@@ -619,6 +625,18 @@ static int msm_ssphy_qmp_init(struct usb_phy *uphy)
 			return ret;
 		}
 	}
+
+#ifdef CONFIG_MACH_LEECO
+	/* PHY register override */
+	if (phy_tune_n > 0 && (0 == phy_tune_n%2)) {
+		int i;
+
+		for (i = 0; i < phy_tune_n; i = i+2) {
+			dev_dbg(uphy->dev, "write 0x%02x to 0x%02x\n", phy_tune[i], phy_tune[i+1]);
+			writel_relaxed(phy_tune[i], phy->base + phy_tune[i+1]);
+		}
+	}
+#endif
 
 	writel_relaxed(0x03, phy->base + phy->phy_reg[USB3_PHY_START]);
 	writel_relaxed(0x00, phy->base + phy->phy_reg[USB3_PHY_SW_RESET]);

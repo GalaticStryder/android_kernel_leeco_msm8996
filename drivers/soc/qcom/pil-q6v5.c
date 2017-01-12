@@ -212,6 +212,7 @@ void pil_q6v5_halt_axi_port(struct pil_desc *pil, void __iomem *halt_base)
 }
 EXPORT_SYMBOL(pil_q6v5_halt_axi_port);
 
+#ifndef CONFIG_MACH_LEECO
 void assert_clamps(struct pil_desc *pil)
 {
 	u32 val;
@@ -229,6 +230,7 @@ void assert_clamps(struct pil_desc *pil)
 	/* To make sure asserting clamps is done before MSS restart*/
 	mb();
 }
+#endif
 
 static void __pil_q6v5_shutdown(struct pil_desc *pil)
 {
@@ -690,8 +692,10 @@ struct q6v5_data *pil_q6v5_init(struct platform_device *pdev)
 
 	drv->ahb_clk_vote = of_property_read_bool(pdev->dev.of_node,
 						"qcom,ahb-clk-vote");
+#ifndef CONFIG_MACH_LEECO
 	drv->mx_spike_wa = of_property_read_bool(pdev->dev.of_node,
 						"qcom,mx-spike-wa");
+#endif
 
 	drv->xo = devm_clk_get(&pdev->dev, "xo");
 	if (IS_ERR(drv->xo))

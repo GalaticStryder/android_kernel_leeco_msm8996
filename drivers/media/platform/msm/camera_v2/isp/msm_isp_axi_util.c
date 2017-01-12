@@ -1482,8 +1482,8 @@ void msm_isp_axi_stream_update(struct vfe_device *vfe_dev,
 			axi_data->stream_info[i].state == STOP_PENDING) {
 			msm_isp_axi_stream_enable_cfg(
 				vfe_dev, &axi_data->stream_info[i],
-				axi_data->stream_info[i].state ==
-				START_PENDING ? 1 : 0);
+				axi_data->stream_info[i].state ==START_PENDING ? 1 : 0);
+	//			vfe_dev, &axi_data->stream_info[i], 1);
 			axi_data->stream_info[i].state =
 				axi_data->stream_info[i].state ==
 				START_PENDING ? STARTING : STOPPING;
@@ -1653,6 +1653,16 @@ void msm_isp_halt_send_error(struct vfe_device *vfe_dev, uint32_t event)
 
 		msm_isp_process_overflow_irq(vfe_dev,
 			&irq_status0, &irq_status1, 1);
+		return;
+	}
+
+	if (ISP_EVENT_PING_PONG_MISMATCH == event &&
+		vfe_dev->axi_data.recovery_count < MAX_RECOVERY_THRESHOLD) {
+		pr_err("%s:pingpong mismatch from vfe%d, core%d,recovery_count %d\n",
+			__func__, vfe_dev->pdev->id, smp_processor_id(),
+			vfe_dev->axi_data.recovery_count);
+		vfe_dev->axi_data.recovery_count++;
+		msm_isp_start_error_recovery(vfe_dev);
 		return;
 	}
 

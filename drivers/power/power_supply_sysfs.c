@@ -46,6 +46,10 @@ static ssize_t power_supply_show_property(struct device *dev,
 	static const char * const type_text[] = {
 		"Unknown", "Battery", "UPS", "Mains", "USB", "USB_DCP",
 		"USB_CDP", "USB_ACA", "USB_HVDCP", "USB_HVDCP_3", "USB_PD",
+#ifdef CONFIG_MACH_LEECO
+		/* Introduce LE_PD USB power supply type. */
+		"USB_LE_PD",
+#endif
 		"Wireless", "USB_FLOAT", "BMS", "Parallel", "Main", "Wipower",
 		"TYPEC", "TYPEC_UFP", "TYPEC_DFP"
 	};
@@ -252,6 +256,9 @@ static struct device_attribute power_supply_attrs[] = {
 	POWER_SUPPLY_ATTR(temp_cool),
 	POWER_SUPPLY_ATTR(temp_warm),
 	POWER_SUPPLY_ATTR(system_temp_level),
+#ifdef CONFIG_MACH_LEECO_ZL1
+	POWER_SUPPLY_ATTR(system_scn),
+#endif
 	POWER_SUPPLY_ATTR(resistance),
 	POWER_SUPPLY_ATTR(resistance_capacitive),
 	POWER_SUPPLY_ATTR(resistance_id),
@@ -307,6 +314,17 @@ static struct device_attribute power_supply_attrs[] = {
 	POWER_SUPPLY_ATTR(connector_health),
 	POWER_SUPPLY_ATTR(hw_current_max),
 	POWER_SUPPLY_ATTR(real_type),
+#ifdef CONFIG_MACH_LEECO
+	/* TODO: This will be a tough one,
+	 * the charger code has changed again!
+	 * Probably gonna purge all that...
+	 */
+	POWER_SUPPLY_ATTR(le_usbin_temp),
+	POWER_SUPPLY_ATTR(le_vph_voltage),
+	POWER_SUPPLY_ATTR(le_usb_temp_level),
+	POWER_SUPPLY_ATTR(le_black_call_mode),
+	POWER_SUPPLY_ATTR(le_quick_charge_mode),
+#endif
 	/* Local extensions of type int64_t */
 	POWER_SUPPLY_ATTR(charge_counter_ext),
 	/* Properties of type `const char *' */
