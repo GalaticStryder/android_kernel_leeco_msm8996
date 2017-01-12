@@ -12,6 +12,7 @@ menuconfig INPUT_TOUCHSCREEN
 if INPUT_TOUCHSCREEN
 
 source "drivers/input/touchscreen/synaptics_dsx/Kconfig"
+source "drivers/input/touchscreen/synaptics_dsx_letv/Kconfig"
 
 config OF_TOUCHSCREEN
 	def_tristate INPUT
@@ -106,7 +107,7 @@ config TOUCHSCREEN_AR1021_I2C
 
 config TOUCHSCREEN_ATMEL_MXT
 	tristate "Atmel mXT I2C Touchscreen"
-	depends on I2C
+	depends on I2C && !MACH_LEECO
 	select FW_LOADER
 	help
 	  Say Y here if you have Atmel mXT series I2C touchscreen,
@@ -119,7 +120,7 @@ config TOUCHSCREEN_ATMEL_MXT
 
 config TOUCHSCREEN_ATMEL_MAXTOUCH_TS
 	tristate "Atmel Maxtouch Touchscreen Family"
-	depends on I2C
+	depends on I2C && !MACH_LEECO
 	help
 	  Say Y here if you have Atmel MaXTouch Touchscreen
 	  using i2c connected to your system.
@@ -997,8 +998,8 @@ config TOUCHSCREEN_FT5X06_GESTURE
 config SECURE_TOUCH
 	bool "Secure Touch"
 	depends on (TOUCHSCREEN_SYNAPTICS_I2C_RMI4 || \
-	  TOUCHSCREEN_SYNAPTICS_DSX_I2C_v21 || TOUCHSCREEN_ATMEL_MXT || \
-	  TOUCHSCREEN_ATMEL_MAXTOUCH_TS)
+	  TOUCHSCREEN_SYNAPTICS_DSX_I2C_v21 || TOUCHSCREEN_SYNAPTICS_DSX_I2C_LETV || \
+	  TOUCHSCREEN_ATMEL_MXT || TOUCHSCREEN_ATMEL_MAXTOUCH_TS)
 	help
 	  Say Y here to enable Secure Touch in supported drivers.
 
@@ -1028,17 +1029,26 @@ config TOUCHSCREEN_GEN_VKEYS
          module will be called gen_vkeys.
 
 config TOUCHSCREEN_FT5X06
-       tristate "FocalTech touchscreens"
-       depends on I2C
-       help
-         Say Y here if you have a ft5X06 touchscreen.
-	 Ft5x06 controllers are multi touch controllers which can
-	 report 5 touches at a time.
+	tristate "FocalTech I2C Touchscreen"
+	depends on I2C
+	help
+	  Say Y here if you have a ft5X06 touchscreen.
+	  Ft5x06 controllers are multi touch controllers which can
+	  report 5 touches at a time.
 
-         If unsure, say N.
+	  If unsure, say N.
 
-         To compile this driver as a module, choose M here: the
-         module will be called ft5x06_ts.
+	  To compile this driver as a module, choose M here: the
+	  module will be called ft5x06_ts.
+
+config TOUCHSCREEN_FTS
+	bool "FocalTech I2C Touchscreen (LeTV)"
+	depends on I2C
+	help
+	  Say Y here if you have a Focaltech I2C touchscreen
+	  connected to your LeEco/LeTV device.
+
+	  If unsure, say N.
 
 config TOUCHSCREEN_SYNAPTICS_I2C_RMI4
 	tristate "Synaptics DSX I2C touchscreen"
@@ -1103,6 +1113,14 @@ config TOUCHSCREEN_MAXIM_STI
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called maxim_sti.
+
+config LETVS_CLASS
+	bool "LeTV device register"
+	help
+	  Say Y here if you have a LeTV device to register for a
+	  certain driver.
+
+	  If unsure, say N.
 
 source "drivers/input/touchscreen/gt9xx/Kconfig"
 endif

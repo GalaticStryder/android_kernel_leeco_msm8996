@@ -3847,9 +3847,16 @@ static void apply_dynamic_ot_limit(u32 *ot_lim,
 
 	res = params->width * params->height;
 
+#ifdef CONFIG_MACH_LEECO
+	/* Add frame rate to debugging usecase */
+	pr_debug("w:%d h:%d rot:%d yuv:%d wb:%d res:%d fps:%d\n",
+		params->width, params->height, params->is_rot,
+		params->is_yuv, params->is_wb, res, params->frame_rate);
+#else
 	pr_debug("w:%d h:%d rot:%d yuv:%d wb:%d res:%d\n",
 		params->width, params->height, params->is_rot,
 		params->is_yuv, params->is_wb, res);
+#endif
 
 	switch (mdata->mdp_rev) {
 	case MDSS_MDP_HW_REV_114:

@@ -2142,6 +2142,10 @@ static void mdss_mdp_set_ot_limit_pipe(struct mdss_mdp_pipe *pipe)
 	ot_params.is_rot = pipe->mixer_left->rotator_mode;
 	ot_params.is_wb = ctl->intf_num == MDSS_MDP_NO_INTF;
 	ot_params.is_yuv = pipe->src_fmt->is_yuv;
+#ifdef CONFIG_MACH_LEECO
+	/* Refreash frame rate on pipe limit */
+	ot_params.frame_rate = pipe->frame_rate;
+#endif
 
 	/* rotator read uses nrt vbif */
 	if (mdss_mdp_is_nrt_vbif_base_defined(ctl->mdata) &&

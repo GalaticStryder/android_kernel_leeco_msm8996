@@ -159,6 +159,11 @@ enum tasha_sido_voltage {
 	SIDO_VOLTAGE_NOMINAL_MV = 1100,
 };
 
+#ifdef CONFIG_MACH_LEECO
+extern bool letv_typec_plug_state;
+extern bool letv_typec_4_pole;
+#endif
+
 static enum codec_variant codec_ver;
 
 static int dig_core_collapse_enable = 1;
@@ -648,6 +653,12 @@ static struct wcd_mbhc_register
 			  0, 0, 0, 0),
 	WCD_MBHC_REGISTER("WCD_MBHC_MUX_CTL",
 			  WCD9335_MBHC_CTL_2, 0x70, 4, 0),
+#ifdef CONFIG_MACH_LEECO
+	WCD_MBHC_REGISTER("WCD_MBHC_HS_VREF_INP",
+			  WCD9335_MBHC_CTL_2, 0x70, 4, 0),
+	WCD_MBHC_REGISTER("WCD_MBHC_AMIC2_HOLD_EN",
+			  WCD9335_ANA_AMIC2, 0x20, 5, 0),
+#endif
 };
 
 static const struct wcd_mbhc_intr intr_ids = {
@@ -1413,6 +1424,32 @@ static int tasha_micbias_control(struct snd_soc_codec *codec,
 		break;
 	case MICB_DISABLE:
 		tasha->micb_ref[micb_index]--;
+#ifdef CONFIG_MACH_LEECO
+		/* TODO: Get rid of debugging */
+		if ((tasha->micb_ref[micb_index] == 0) &&
+		    (tasha->pullup_ref[micb_index] > 0)) {
+			if (letv_typec_4_pole && letv_typec_plug_state &&
+				(micb_num == MIC_BIAS_2)) {
+				snd_soc_update_bits(codec, micb_reg, 0xC0, 0xC0);
+				pr_info("1: letv_headset still pluged!!\n");
+			} else {
+				pr_info("1: micb disable, micb_num(%d)!!\n", micb_num);
+				snd_soc_update_bits(codec, micb_reg, 0xC0, 0x80);
+			}
+		} else if ((tasha->micb_ref[micb_index] == 0) &&
+			 (tasha->pullup_ref[micb_index] == 0)) {
+			if (pre_off_event)
+				blocking_notifier_call_chain(&tasha->notifier,
+						pre_off_event, &tasha->mbhc);
+			if (letv_typec_4_pole && letv_typec_plug_state &&
+				(micb_num == MIC_BIAS_2)) {
+				snd_soc_update_bits(codec, micb_reg, 0xC0, 0x40);
+				pr_info("2: letv_headset still pluged!!\n");
+			} else {
+				pr_info("2: micb disable, micb_num(%d)!!\n", micb_num);
+				snd_soc_update_bits(codec, micb_reg, 0xC0, 0x00);
+			}
+#else
 		if ((tasha->micb_ref[micb_index] == 0) &&
 		    (tasha->pullup_ref[micb_index] > 0))
 			snd_soc_update_bits(codec, micb_reg, 0xC0, 0x80);
@@ -1422,6 +1459,7 @@ static int tasha_micbias_control(struct snd_soc_codec *codec,
 				blocking_notifier_call_chain(&tasha->notifier,
 						pre_off_event, &tasha->mbhc);
 			snd_soc_update_bits(codec, micb_reg, 0xC0, 0x00);
+#endif
 			if (post_off_event)
 				blocking_notifier_call_chain(&tasha->notifier,
 						post_off_event, &tasha->mbhc);
@@ -4713,7 +4751,9 @@ static int tasha_codec_enable_swr(struct snd_soc_dapm_widget *w,
 {
 	struct snd_soc_codec *codec = w->codec;
 	struct tasha_priv *tasha;
+#ifdef WSA881X_PA
 	int i, ch_cnt;
+#endif
 
 	tasha = snd_soc_codec_get_drvdata(codec);
 
@@ -4728,6 +4768,7 @@ static int tasha_codec_enable_swr(struct snd_soc_dapm_widget *w,
 		if ((strnstr(w->name, "INT8_", sizeof("RX INT8_"))) &&
 		    !tasha->rx_8_count)
 			tasha->rx_8_count++;
+#ifdef WSA881X_PA
 		ch_cnt = tasha->rx_7_count + tasha->rx_8_count;
 
 		for (i = 0; i < tasha->nr; i++) {
@@ -4736,6 +4777,7 @@ static int tasha_codec_enable_swr(struct snd_soc_dapm_widget *w,
 			swrm_wcd_notify(tasha->swr_ctrl_data[i].swr_pdev,
 					SWR_SET_NUM_RX_CH, &ch_cnt);
 		}
+#endif
 		break;
 	case SND_SOC_DAPM_POST_PMD:
 		if ((strnstr(w->name, "INT7_", sizeof("RX INT7_"))) &&
@@ -4744,12 +4786,13 @@ static int tasha_codec_enable_swr(struct snd_soc_dapm_widget *w,
 		if ((strnstr(w->name, "INT8_", sizeof("RX INT8_"))) &&
 		    tasha->rx_8_count)
 			tasha->rx_8_count--;
+#ifdef WSA881X_PA
 		ch_cnt = tasha->rx_7_count + tasha->rx_8_count;
 
 		for (i = 0; i < tasha->nr; i++)
 			swrm_wcd_notify(tasha->swr_ctrl_data[i].swr_pdev,
 					SWR_SET_NUM_RX_CH, &ch_cnt);
-
+#endif
 		break;
 	}
 	dev_dbg(tasha->dev, "%s: current swr ch cnt: %d\n",
@@ -7583,6 +7626,47 @@ static int tasha_pinctl_mode_put(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 
+#ifdef CONFIG_MACH_LEECO
+static int wcd_swr_low_power_get(struct snd_kcontrol *kcontrol,
+	struct snd_ctl_elem_value *ucontrol)
+{
+	return 0;
+}
+
+static int wcd_swr_low_power_put(struct snd_kcontrol *kcontrol,
+	struct snd_ctl_elem_value *ucontrol)
+{
+	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
+	struct tasha_priv *tasha = snd_soc_codec_get_drvdata(codec);
+
+	if (1 == ucontrol->value.integer.value[0]) {
+		pr_info("%s, enable!\n", __func__);
+		wcd9xxx_reg_update_bits(
+			&tasha->wcd9xxx->core_res,
+			WCD9335_TEST_DEBUG_NPL_DLY_TEST_1,
+			0x90, 0x10);
+		msleep(10);
+		wcd9xxx_reg_update_bits(
+			&tasha->wcd9xxx->core_res,
+			WCD9335_TEST_DEBUG_NPL_DLY_TEST_1,
+			0x90, 0x90);
+	} else {
+		pr_info("%s, disable!\n", __func__);
+		wcd9xxx_reg_update_bits(
+			&tasha->wcd9xxx->core_res,
+			WCD9335_TEST_DEBUG_NPL_DLY_TEST_1,
+			0x90, 0x10);
+		msleep(10);
+		wcd9xxx_reg_update_bits(
+			&tasha->wcd9xxx->core_res,
+			WCD9335_TEST_DEBUG_NPL_DLY_TEST_1,
+			0x90, 0x90);
+	}
+
+	return 0;
+}
+#endif
+
 static void wcd_vbat_adc_out_config_2_0(struct wcd_vbat *vbat,
 					struct snd_soc_codec *codec)
 {
@@ -8148,6 +8232,11 @@ static const struct snd_kcontrol_new tasha_snd_controls[] = {
 	SOC_ENUM_EXT("GSM mode Enable", tasha_vbat_gsm_mode_enum,
 			tasha_vbat_gsm_mode_func_get,
 			tasha_vbat_gsm_mode_func_put),
+
+#ifdef CONFIG_MACH_LEECO
+	SOC_SINGLE_EXT("WCD9335_SWR_LOW_POWER", SND_SOC_NOPM, 23, 1, 0,
+		       wcd_swr_low_power_get, wcd_swr_low_power_put),
+#endif
 };
 
 static int tasha_put_dec_enum(struct snd_kcontrol *kcontrol,
@@ -12593,14 +12682,18 @@ static int tasha_device_down(struct wcd9xxx *wcd9xxx)
 	struct snd_soc_codec *codec;
 	struct tasha_priv *priv;
 	int count;
+#ifdef WSA881X_PA
 	int i = 0;
+#endif
 
 	codec = (struct snd_soc_codec *)(wcd9xxx->ssr_priv);
 	priv = snd_soc_codec_get_drvdata(codec);
 	wcd_cpe_ssr_event(priv->cpe_core, WCD_CPE_BUS_DOWN_EVENT);
+#ifdef WSA881X_PA
 	for (i = 0; i < priv->nr; i++)
 		swrm_wcd_notify(priv->swr_ctrl_data[i].swr_pdev,
 				SWR_DEVICE_DOWN, NULL);
+#endif
 	snd_soc_card_change_online_state(codec->component.card, 0);
 	for (count = 0; count < NUM_CODEC_DAIS; count++)
 		priv->dai[count].bus_down_in_recovery = true;
@@ -12733,6 +12826,9 @@ static int tasha_codec_probe(struct snd_soc_codec *codec)
 	int i, ret;
 	void *ptr = NULL;
 	struct regulator *supply;
+
+	/* TODO: Remove once working... */
+	pr_info("%s:enter\n", __func__);
 
 	control = dev_get_drvdata(codec->dev->parent);
 

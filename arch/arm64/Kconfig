@@ -287,6 +287,15 @@ config ARCH_MSM8994_V1_TLBI_WA
 
 endmenu
 
+menu "Device configuration"
+
+#
+# This is sorted alphabetically by mach-$OEM.
+#
+source "arch/arm64/mach-leeco/Kconfig"
+
+endmenu
+
 menu "Bus support"
 
 config ARM_AMBA

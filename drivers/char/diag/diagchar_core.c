@@ -1155,7 +1155,11 @@ int diag_md_session_create(int mode, int peripheral_mask, int proc)
 	 * then return invalid param
 	 */
 	if (driver->md_session_mode == DIAG_MD_NORMAL)
+#ifdef CONFIG_MACH_LEECO
+		return 0;
+#else
 		return -EINVAL;
+#endif
 	if (driver->md_session_mode == DIAG_MD_PERIPHERAL
 	    && mode == DIAG_MD_NORMAL)
 		return -EINVAL;
