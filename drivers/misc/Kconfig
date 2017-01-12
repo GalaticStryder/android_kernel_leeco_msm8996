@@ -591,6 +591,21 @@ config TI_DRV2667
 	  To compile this driver as a module, choose M here: the
 	  module will be called ti_drv2667.
 
+config IR_MAXQ616
+	tristate "MAXQ616 Infrared Remote Control driver"
+	depends on OF_GPIO
+	default n
+	help
+	  The MAXQ616 is a low-power microcontroller designed for low-power
+	  applications including universal remote controls and consumer
+	  electronics.
+
+	  The device combines a powerful 16-bit RISC microcontroller and
+	  integrated peripherals including a universal synchronous/asynchronous
+	  receiver-transmitter (USART).
+
+	  If unsure, say N.
+
 config QPNP_MISC
 	tristate "QPNP Misc Peripheral"
 	depends on SPMI || MSM_SPMI

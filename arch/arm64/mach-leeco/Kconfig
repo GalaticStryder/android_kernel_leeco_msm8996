@@ -1,0 +1,107 @@
+# LeTV/LeEco devices
+config MACH_LEECO
+	bool "Kernel support for LeEco (LeTV) devices"
+	depends on ARCH_MSM8996
+	select USB_CCLOGIC
+	select USB_CYCCG
+	select ANALOGIX_OHIO
+	select LETVS_CLASS
+	select TOUCHKEY_ATMEGA48A_LETV
+	select TOUCHSCREEN_SYNAPTICS_DSX_LETV
+	select MSM_I2C_FLASH
+	select QPNP_MHL
+	default n
+	help
+	  Once selected, this will apply common Kernel changes
+	  from LeEco at all levels. Device specific changes aren't
+	  covered, you need to select them manually.
+
+	  The following drivers will be selected in Kernel:
+
+	  * USB CC Logic -> USB Type-C
+	  * USB Cypress -> USB Type-C
+	  * Analogix -> USB Type-C
+	  * ATmega48A -> Capacitive Keys
+	  * QPNP MHL -> MHL State
+	  * MSM I2C Flash -> Camera's Flash
+
+	  This can be used to apply patches from LeEco without touching
+	  other devices or the general purpose of the Linux Kernel.
+
+	  If unsure, say N.
+
+config MACH_LEECO_OEM
+	depends on MACH_LEECO
+	bool "OEM extensions for LeEco (LeTV) devices"
+	help
+	  Once selected, this option will bring-in OEM changes in Kernel source code, they
+	  aren't usually needed.
+
+	  If unsure, say Y here to avoid issues when running stock Android firmware. Otherwise,
+	  say N.
+
+config MACH_LEECO_DEBUG
+	depends on MACH_LEECO
+	bool "Debugging conditionals for LeEco (LeTV) devices"
+	help
+	  Once selected, this option will enable most OEM debugging code in Kernel, this is
+	  not needed unless you're debugging changes on those OEM drivers.
+
+	  If unsure, say N.
+
+config MACH_LEECO_ZL1
+	bool "Kernel support for the Le Pro 3 (ZL1)"
+	depends on MACH_LEECO
+	select BACKLIGHT_LM3697
+	select INPUT_DRV2604L_HAPTICS
+	select INPUT_GP5XX8
+	select IR_MAXQ616
+	select NFC_LETV
+	select SND_SOC_MAX98927
+	select SND_SOC_WCD_MBHC_ZL1
+	select TOUCHSCREEN_FTS
+	select TOUCHSCREEN_SYNAPTICS_DSX_CORE_LETV
+	select TOUCHSCREEN_SYNAPTICS_DSX_RMI_DEV_LETV
+	select TOUCHSCREEN_SYNAPTICS_DSX_FW_UPDATE_LETV
+	select TOUCHSCREEN_SYNAPTICS_DSX_TEST_REPORTING_LETV
+	select FB_MSM_MDSS_HDMI_DP_ANX7816
+	help
+	  Once selected, barebones Le Pro 3 tuning and drivers will take effect.
+
+	  The following drivers will be selected in Kernel:
+
+	  * LM3697 -> Backlight
+	  * Goodix 5208 -> Fingerprint Sensor
+	  * Focaltech FTS -> Touchsreen
+	  * ANX7816 -> Slimport (Colorado 3)
+	  * TI DRV2604L -> Vibrator
+	  * MAXQ616 -> Infrared Remote Control
+	  * Maxim MAX98927 -> Smart PA
+	  * Custom ZL1 MBHC -> Audio Socket
+	  * PN544 -> NFC
+
+	  OEM changes such as custom init, cpufreq modifications, VR support and proprietary
+	  sound controllers aren't covered in this option.
+	  Thus, if you want those OEM changes you'll need to select the next
+	  option right down below.
+
+	  If unsure, you're the expert. Otherwise, always say N.
+
+config MACH_LEECO_ZL1_OEM
+	depends on MACH_LEECO_ZL1
+	bool "OEM extensions for the Le Pro 3 (ZL1)"
+	help
+	  Once selected, this option will bring-in OEM changes in Kernel source code, they
+	  aren't usually needed.
+
+	  If unsure, say Y here to avoid issues when running stock Android firmware. Otherwise,
+	  say N.
+
+config SND_SOC_WCD_MBHC_ZL1
+	depends on MACH_LEECO_ZL1
+	tristate "Custom MBHC codec for the Le Pro 3 (ZL1)"
+	help
+	  Once selected, this will compile an alternative version of the
+	  MBHC sound codec, specific for the Le Pro 3.
+
+	  This option is automatically enabled when MACH_LEECO_ZL1 is selected.

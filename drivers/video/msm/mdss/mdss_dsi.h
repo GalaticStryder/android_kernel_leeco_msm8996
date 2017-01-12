@@ -65,6 +65,12 @@
 #define MDSS_STATUS_TE_WAIT_MAX		3
 #define NONE_PANEL "none"
 
+/* LeTV panel features */
+#ifdef CONFIG_MACH_LEECO
+#define LCD_BIST_TEST
+#define MAX_STATUS_ERROR_COUNT 5
+#endif
+
 enum {		/* mipi dsi panel */
 	DSI_VIDEO_MODE,
 	DSI_CMD_MODE,
@@ -480,6 +486,18 @@ struct mdss_dsi_ctrl_pdata {
 	u32 *status_value;
 	unsigned char *return_buf;
 	u32 groups; /* several alternative values to compare */
+#ifdef CONFIG_MACH_LEECO
+	struct dsi_panel_cmds status_cmds1;
+	u32 status_cmds_rlen1;
+	u32 *status_value1;
+	struct dsi_panel_cmds status_on_cmds1;
+	bool enable_reg_check1;
+	struct dsi_panel_cmds status_cmds2;
+	u32 status_cmds_rlen2;
+	u32 *status_value2;
+	struct dsi_panel_cmds status_on_cmds2;
+	bool enable_reg_check2;
+#endif
 	u32 status_error_count;
 	u32 max_status_error_count;
 
@@ -512,10 +530,17 @@ struct mdss_dsi_ctrl_pdata {
 	char dlane_swap;	/* data lane swap */
 	bool is_phyreg_enabled;
 	bool burst_mode_enabled;
+#ifdef CONFIG_MACH_LEECO_ZL1_OEM
+	bool add_lcd_reset_time;
+#endif
 
 	struct dsi_buf tx_buf;
 	struct dsi_buf rx_buf;
 	struct dsi_buf status_buf;
+#ifdef CONFIG_MACH_LEECO
+	struct dsi_buf status_buf1;
+	struct dsi_buf status_buf2;
+#endif
 	int status_mode;
 	int rx_len;
 	int cur_max_pkt_size;
@@ -675,6 +700,10 @@ void mdss_dsi_set_reg(struct mdss_dsi_ctrl_pdata *ctrl, int off,
 	u32 mask, u32 val);
 int mdss_dsi_phy_pll_reset_status(struct mdss_dsi_ctrl_pdata *ctrl);
 int mdss_dsi_panel_power_ctrl(struct mdss_panel_data *pdata, int power_state);
+
+#ifdef CONFIG_MACH_LEECO
+int mdss_dsi_panel_esd_check_power_off(struct mdss_panel_data *pdata);
+#endif
 
 static inline const char *__mdss_dsi_pm_name(enum dsi_pm_type module)
 {

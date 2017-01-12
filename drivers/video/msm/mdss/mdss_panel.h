@@ -174,7 +174,11 @@ enum {
 };
 
 struct mdss_intf_recovery {
+#ifdef CONFIG_MACH_LEECO
 	int (*fxn)(void *ctx, int event);
+#else
+	void (*fxn)(void *ctx, int event);
+#endif
 	void *data;
 };
 
@@ -659,6 +663,9 @@ struct mdss_panel_info {
 	/* current fps, once is programmed in hw */
 	int current_fps;
 
+#ifdef CONFIG_MACH_LEECO
+	bool rst_timing_compatible;
+#endif
 	int panel_max_fps;
 	int panel_max_vtotal;
 	u32 mode_gpio_state;

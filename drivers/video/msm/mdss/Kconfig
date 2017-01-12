@@ -21,6 +21,13 @@ config FB_MSM_MDSS_HDMI_MHL_SII8334
 	  MHL (Mobile High-Definition Link) technology
 	  uses USB connector to output HDMI content
 
+config FB_MSM_MDSS_HDMI_DP_ANX7816
+	tristate "Analogix Slimport transmitter COLORADO3 support"
+	default n
+	---help---
+	  Slimport Transmitter is a HD video transmitter chip
+	  over micro-USB connector for smartphone device.
+
 config FB_MSM_MDSS_MHL3
 	depends on FB_MSM_MDSS_HDMI_PANEL
 	bool "MHL3 SII8620 Support"

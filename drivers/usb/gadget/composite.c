@@ -752,6 +752,18 @@ static void reset_config(struct usb_composite_dev *cdev)
 	cdev->delayed_status = 0;
 }
 
+#ifdef CONFIG_MACH_LEECO
+#define BOOT_MODE_CMDLINE_MAX 30
+char g_boot_mode[BOOT_MODE_CMDLINE_MAX];
+
+static int __init get_boot_mode(char *str)
+{
+	strlcpy(g_boot_mode, str, BOOT_MODE_CMDLINE_MAX);
+	return 1;
+}
+__setup("androidboot.mode=", get_boot_mode);
+#endif
+
 static int set_config(struct usb_composite_dev *cdev,
 		const struct usb_ctrlrequest *ctrl, unsigned number)
 {

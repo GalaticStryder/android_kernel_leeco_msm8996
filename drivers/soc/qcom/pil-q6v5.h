@@ -70,7 +70,9 @@ struct q6v5_data {
 	bool override_acc;
 	int override_acc_1;
 	bool ahb_clk_vote;
+#ifndef CONFIG_MACH_LEECO
 	bool mx_spike_wa;
+#endif
 };
 
 int pil_q6v5_make_proxy_votes(struct pil_desc *pil);
@@ -78,7 +80,9 @@ void pil_q6v5_remove_proxy_votes(struct pil_desc *pil);
 void pil_q6v5_halt_axi_port(struct pil_desc *pil, void __iomem *halt_base);
 void pil_q6v5_shutdown(struct pil_desc *pil);
 int pil_q6v5_reset(struct pil_desc *pil);
+#ifndef CONFIG_MACH_LEECO
 void assert_clamps(struct pil_desc *pil);
+#endif
 struct q6v5_data *pil_q6v5_init(struct platform_device *pdev);
 
 #endif
