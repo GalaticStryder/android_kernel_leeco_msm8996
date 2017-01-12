@@ -64,7 +64,7 @@
 #define MAX_BUFFERS_IN_HW 2
 
 #define MAX_VFE 2
-#define MAX_RECOVERY_THRESHOLD  5
+#define MAX_RECOVERY_THRESHOLD  20
 
 struct vfe_device;
 struct msm_vfe_axi_stream;
@@ -524,6 +524,7 @@ struct msm_vfe_axi_shared_data {
 	uint32_t event_mask;
 	uint8_t enable_frameid_recovery;
 	enum msm_vfe_camif_state camif_state;
+	/* Used for ping pong... */
 	uint32_t recovery_count;
 };
 

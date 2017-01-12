@@ -1873,7 +1873,11 @@ static const struct file_operations gpiolib_operations = {
 static int __init gpiolib_debugfs_init(void)
 {
 	/* /sys/kernel/debug/gpio */
+#ifdef CONFIG_MACH_LEECO_ZL1_OEM
+	(void) debugfs_create_file("gpio", S_IFREG | S_IRUGO | S_IWUGO,
+#else
 	(void) debugfs_create_file("gpio", S_IFREG | S_IRUGO,
+#endif
 				NULL, NULL, &gpiolib_operations);
 	return 0;
 }

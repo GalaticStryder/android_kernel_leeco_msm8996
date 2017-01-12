@@ -108,6 +108,13 @@ struct msm_actuator_ctrl_t {
 	struct msm_camera_gpio_conf *gconf;
 	struct msm_pinctrl_info pinctrl_info;
 	uint8_t cam_pinctrl_status;
+	/* LeTV camera code, TODO: condition to #ifdefined. */
+	struct msm_camera_sensor_board_info *actuatordata;
+	const char *project_name;
+	/* NOTE: The sa3103 actuator is different from all qcom
+	 * standard actuator types. Maybe not needed for Pro3? LeTV turbo only. */
+	uint16_t maxdac;
+	uint16_t mindac;
 };
 
 #endif
