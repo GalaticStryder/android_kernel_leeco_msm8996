@@ -688,3 +688,5 @@ config PROCESS_RECLAIM
 	 (addr, addr + size-bytes) of the process.
 
 	 Any other vaule is ignored.
+
+source "arch/arm64/mm/Kconfig"
