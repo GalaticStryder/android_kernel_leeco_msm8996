@@ -19,6 +19,7 @@
 #include "letv-tp-synaptics-dsx-i2c.dtsi"
 #include "msm8996-camera-sensor-le_x2.dtsi"
 #include "letv-ft-hideep-i2c.dtsi"
+#include "msm8996-synchronized-leds.dtsi"
 
 &sdhc_2 {
 	status = "disabled";

@@ -21,6 +21,7 @@
 #include "focaltech-touchscreen-le_zl1.dtsi"
 #include "synaptics-dsx-i2c-le_zl1.dtsi"
 #include "msm8996-audio-le_zl1.dtsi"
+#include "msm8996-synchronized-leds.dtsi"
 
 /*
  * Add FT8716 touchscreen device
