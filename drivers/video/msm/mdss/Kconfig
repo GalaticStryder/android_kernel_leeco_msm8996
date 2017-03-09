@@ -86,3 +86,12 @@ config FB_MSM_MDSS_FRC_DEBUG
 	frame rate control (FRC) debugging features to: Collect video frame
 	statistics and check whether its output pattern matches expected
 	cadence.
+
+config FB_MSM_MDSS_STATIC_MBL
+	depends on FB_MSM_MDSS
+	bool "Set max brightness level to 255 unconditionally"
+	default y
+	---help---
+	This configuration will bypass device tree defined max brightness level
+	setting. Instead, this will set 255 as value regardless the original value.
+

@@ -782,10 +782,14 @@ static int mdss_edp_device_register(struct mdss_edp_drv_pdata *edp_drv)
 	mdss_edp_edid2pinfo(edp_drv);
 	edp_drv->panel_data.panel_info.bl_min = 1;
 	edp_drv->panel_data.panel_info.bl_max = 255;
+#ifdef CONFIG_FB_MSM_MDSS_STATIC_MBL
+	edp_drv->panel_data.panel_info.brightness_max = MDSS_MAX_BL_BRIGHTNESS;
+#else
 	ret = of_property_read_u32(edp_drv->pdev->dev.of_node,
 		"qcom,mdss-brightness-max-level", &tmp);
 	edp_drv->panel_data.panel_info.brightness_max =
 		(!ret ? tmp : MDSS_MAX_BL_BRIGHTNESS);
+#endif
 
 	edp_drv->panel_data.panel_info.edp.frame_rate =
 				DEFAULT_FRAME_RATE;/* 60 fps */
