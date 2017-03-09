@@ -69,3 +69,11 @@ config FB_MSM_MDSS_XLOG_DEBUG
 	features to: Dump MDSS registers during driver errors, panic
 	driver during fatal errors and enable some display-driver logging
 	into an internal buffer (this avoids logging overhead).
+
+config FB_MSM_MDSS_STATIC_MBL
+	depends on FB_MSM_MDSS
+	bool "Set max brightness level to 255 unconditionally"
+	default y
+	---help---
+	This configuration will bypass device tree defined max brightness level
+	setting. Instead, this will set 255 as value regardless of panel's nature.
