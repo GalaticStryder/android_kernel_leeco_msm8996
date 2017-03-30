@@ -240,7 +240,6 @@ enum power_supply_type {
 	POWER_SUPPLY_TYPE_USB_HVDCP,	/* High Voltage DCP */
 	POWER_SUPPLY_TYPE_USB_HVDCP_3,	/* Efficient High Voltage DCP */
 #ifdef CONFIG_MACH_LEECO
-	POWER_SUPPLY_TYPE_USB_FLOAT,	/* Float Charger */
 	POWER_SUPPLY_TYPE_USB_PD,		/* General PD Charger */
 	POWER_SUPPLY_TYPE_USB_LE_PD,	/* LeTV PD Charger */
 #endif
