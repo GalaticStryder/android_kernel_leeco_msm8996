@@ -430,7 +430,7 @@
 	status = "disabled";
 };
 
-&spi_12 {
+&spi_11 {
 	status = "disabled";
 	sii6400@0 {
 		status = "disabled";
