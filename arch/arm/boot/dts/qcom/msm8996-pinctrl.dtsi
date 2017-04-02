@@ -1263,6 +1263,38 @@
 			};
 		};
 
+		spi_11 {
+			spi_11_active: spi_11_active {
+				mux {
+					pins = "gpio85", "gpio86", "gpio87",
+								"gpio88";
+					function = "blsp_spi12";
+				};
+
+				config {
+					pins = "gpio85", "gpio86", "gpio87",
+								"gpio88";
+					drive-strength = <6>;
+					bias-disable;
+				};
+			};
+
+			spi_11_sleep: spi_11_sleep {
+				mux {
+					pins = "gpio85", "gpio86", "gpio87",
+								"gpio88";
+					function = "blsp_spi12";
+				};
+
+				config {
+					pins = "gpio85", "gpio86", "gpio87",
+								"gpio88";
+					drive-strength = <6>;
+					bias-disable;
+				};
+			};
+		};
+
 		spi_12 {
 			spi_12_active: spi_12_active {
 				mux {
