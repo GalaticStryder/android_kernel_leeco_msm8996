@@ -766,10 +766,12 @@ static int32_t msm_flash_get_gpio_dt_data(struct device_node *of_node,
 			goto free_cam_gpio_req_tbl;
 		}
 
+/*
 		if (fctrl->flash_driver_type == FLASH_DRIVER_DEFAULT)
 			fctrl->flash_driver_type = FLASH_DRIVER_GPIO;
 		CDBG("%s:%d fctrl->flash_driver_type = %d", __func__, __LINE__,
 			fctrl->flash_driver_type);
+*/
 	}
 
 	return 0;
@@ -1334,14 +1336,6 @@ static int32_t msm_flash_get_dt_data(struct device_node *of_node,
 			fctrl->flash_driver_type = FLASH_DRIVER_LM3643;
 	}
 
-	/* Read the flash and torch source info from device tree node */
-	rc = msm_flash_get_pmic_source_info(of_node, fctrl);
-	if (rc < 0) {
-		pr_err("%s:%d msm_flash_get_pmic_source_info failed rc %d\n",
-			__func__, __LINE__, rc);
-		return rc;
-	}
-
 	/* Read the gpio information from device tree */
 	rc = msm_flash_get_gpio_dt_data(of_node, fctrl);
 	if (rc < 0) {
@@ -1350,6 +1344,13 @@ static int32_t msm_flash_get_dt_data(struct device_node *of_node,
 		return rc;
 	}
 
+	/* Read the flash and torch source info from device tree node */
+	rc = msm_flash_get_pmic_source_info(of_node, fctrl);
+	if (rc < 0) {
+		pr_err("%s:%d msm_flash_get_pmic_source_info failed rc %d\n",
+			__func__, __LINE__, rc);
+		return rc;
+	}
 	return rc;
 }
 
