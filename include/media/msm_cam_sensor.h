@@ -109,10 +109,6 @@ struct msm_ir_led_cfg_data_t32 {
 	int32_t pwm_period_ns;
 };
 
-struct msm_ir_cut_cfg_data_t32 {
-	enum msm_ir_cut_cfg_type_t cfg_type;
-};
-
 struct eeprom_read_t32 {
 	compat_uptr_t dbuffer;
 	uint32_t num_bytes;
@@ -303,9 +299,6 @@ struct msm_flash_cfg_data_t32 {
 
 #define VIDIOC_MSM_IR_LED_CFG32 \
 	_IOWR('V', BASE_VIDIOC_PRIVATE + 14, struct msm_ir_led_cfg_data_t32)
-
-#define VIDIOC_MSM_IR_CUT_CFG32 \
-	_IOWR('V', BASE_VIDIOC_PRIVATE + 15, struct msm_ir_cut_cfg_data_t32)
 #endif
 
 #endif
