@@ -106,6 +106,8 @@ static DEFINE_MUTEX(device_list_lock);
 static struct gf_dev gf;
 struct wake_lock FP_wakelock;
 
+static struct gf_dev *gf_global = NULL;
+
 static void gf_enable_irq(struct gf_dev *gf_dev)
 {
 	if (gf_dev->irq_enabled) {
@@ -708,6 +710,7 @@ static int gf_probe(struct platform_device *pdev)
 		}
 	}
 	device_init_wakeup(&gf_dev->input->dev,1);
+	gf_global = gf_dev;
 	//wake_lock_init(&FP_wakelock,WAKE_LOCK_SUSPEND,"Fp_wakelock");
 	printk("goodix : gf_probe ***4*****\n");
 	return status;
@@ -801,6 +804,23 @@ static int gf_resume(struct platform_device *pdev)
 #endif
 	pr_info(KERN_ERR "gf_resume_test.\n");
 	return 0;
+}
+
+void gf_enable_global(bool enabled)
+{
+	struct gf_dev *gf_dev = &gf;
+
+	if (gf_global == NULL)
+		return;
+
+	spin_lock(&gf_global->spinlock);
+
+	if (enabled)
+		gf_enable_irq(gf_dev);
+	else
+		gf_disable_irq(gf_dev);
+
+	spin_unlock(&gf_global->spinlock);
 }
 
 /*
