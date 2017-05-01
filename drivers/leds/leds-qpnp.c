@@ -249,6 +249,7 @@
 #define KPDBL_MODULE_EN_MASK		0x80
 #define NUM_KPDBL_LEDS			4
 #define KPDBL_MASTER_BIT_INDEX		0
+#define LED_DEV_BUFF_SIZE			50
 
 /**
  * enum qpnp_leds - QPNP supported led ids
@@ -2243,6 +2244,20 @@ static ssize_t pwm_us_store(struct device *dev,
 	return count;
 }
 
+static ssize_t pause_lo_show(struct device *dev,
+	struct device_attribute *attr,
+	char *buf)
+{
+	struct qpnp_led_data *led;
+	struct led_classdev *led_cdev = dev_get_drvdata(dev);
+
+	led = container_of(led_cdev, struct qpnp_led_data, cdev);
+
+	return snprintf(buf,
+		LED_DEV_BUFF_SIZE, "%d\n",
+		led->rgb_cfg->pwm_cfg->lut_params.lut_pause_lo);
+}
+
 static ssize_t pause_lo_store(struct device *dev,
 	struct device_attribute *attr,
 	const char *buf, size_t count)
@@ -2407,6 +2422,20 @@ static ssize_t start_idx_store(struct device *dev,
 	}
 	qpnp_led_set(&led->cdev, led->cdev.brightness);
 	return count;
+}
+
+static ssize_t ramp_step_ms_show(struct device *dev,
+	struct device_attribute *attr,
+	char *buf)
+{
+	struct qpnp_led_data *led;
+	struct led_classdev *led_cdev = dev_get_drvdata(dev);
+
+	led = container_of(led_cdev, struct qpnp_led_data, cdev);
+
+	return snprintf(buf,
+		LED_DEV_BUFF_SIZE, "%d\n",
+		led->rgb_cfg->pwm_cfg->lut_params.ramp_step_ms);
 }
 
 static ssize_t ramp_step_ms_store(struct device *dev,
@@ -2656,6 +2685,19 @@ static void led_blink(struct qpnp_led_data *led,
 	mutex_unlock(&led->lock);
 }
 
+static ssize_t blink_show(struct device *dev,
+	struct device_attribute *attr,	char *buf)
+{
+	struct qpnp_led_data *led;
+	struct led_classdev *led_cdev = dev_get_drvdata(dev);
+
+	led = container_of(led_cdev, struct qpnp_led_data, cdev);
+
+	return snprintf(buf,
+		LED_DEV_BUFF_SIZE, "%d\n",
+		led->rgb_cfg->pwm_cfg->blinking);
+}
+
 static ssize_t blink_store(struct device *dev,
 	struct device_attribute *attr,
 	const char *buf, size_t count)
@@ -2687,19 +2729,21 @@ static ssize_t blink_store(struct device *dev,
 		dev_err(&led->spmi_dev->dev, "Invalid LED id type for blink\n");
 		return -EINVAL;
 	}
+	if (blinking)
+		led->rgb_cfg->pwm_cfg->blinking = blinking;
 	return count;
 }
 
 static DEVICE_ATTR(led_mode, 0664, NULL, led_mode_store);
 static DEVICE_ATTR(strobe, 0664, NULL, led_strobe_type_store);
 static DEVICE_ATTR(pwm_us, 0664, NULL, pwm_us_store);
-static DEVICE_ATTR(pause_lo, 0664, NULL, pause_lo_store);
+static DEVICE_ATTR(pause_lo, 0664, pause_lo_show, pause_lo_store);
 static DEVICE_ATTR(pause_hi, 0664, NULL, pause_hi_store);
 static DEVICE_ATTR(start_idx, 0664, NULL, start_idx_store);
-static DEVICE_ATTR(ramp_step_ms, 0664, NULL, ramp_step_ms_store);
+static DEVICE_ATTR(ramp_step_ms, 0664, ramp_step_ms_show, ramp_step_ms_store);
 static DEVICE_ATTR(lut_flags, 0664, NULL, lut_flags_store);
 static DEVICE_ATTR(duty_pcts, 0664, NULL, duty_pcts_store);
-static DEVICE_ATTR(blink, 0664, NULL, blink_store);
+static DEVICE_ATTR(blink, 0664, blink_show, blink_store);
 
 static struct attribute *led_attrs[] = {
 	&dev_attr_led_mode.attr,
