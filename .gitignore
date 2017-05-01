@@ -96,3 +96,13 @@ x509.genkey
 
 # Kconfig presets
 all.config
+
+# Output
+/out/
+
+# Helpers
+*.diff
+*.rej
+*.list
+*.todo
+*.note
