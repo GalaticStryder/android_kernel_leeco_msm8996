@@ -1852,11 +1852,6 @@
 			compatible = "qcom,msm-imem-pil";
 			reg = <0x94c 200>;
 		};
-
-		sleep_light@b38 {
-			compatible = "qcom,msm-imem-sleep_light";
-			reg = <0xb38 8>;
-		};
 	};
 
 	jtag_fuse: jtagfuse@7602c {

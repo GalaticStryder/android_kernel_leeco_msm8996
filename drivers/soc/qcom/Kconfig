@@ -761,13 +761,6 @@ config MSM_KERNEL_PROTECT_TEST
           read-only.  This test is FATAL whether it passes or fails!
           Success is signaled by a stage-2 fault.
 
-config DEEP_SLEEP_LED_SWITCH
-	bool "Enable deep sleep LED light support for LeTV devices"
-	depends on MACH_LEECO
-	help
-	  Add support for LeTV's hardware based deep sleep LED switcher
-	  (on/off) present on some of their devices, check your device tree.
-
 source "drivers/soc/qcom/memshare/Kconfig"
 
 endif # ARCH_MSM
