@@ -66,7 +66,7 @@ KERNEL_FOLDER=`pwd`
 OUT_FOLDER="$KERNEL_FOLDER/out"
 REPACK_FOLDER="$KERNEL_FOLDER/../anykernel"
 MODULES_FOLDER="$REPACK_FOLDER/modules-img"
-RAMDISK_FOLDER="$REPACK_FOLDER/ramdisk"
+DATA_FOLDER="$REPACK_FOLDER/data"
 TEMP_FOLDER="$REPACK_FOLDER/temporary"
 TOOLCHAIN_FOLDER="$KERNEL_FOLDER/../toolchains"
 PRODUCT_FOLDER="$KERNEL_FOLDER/../products"
@@ -158,8 +158,8 @@ function prepare_bacon {
 	# Remove all modules inside temporary folder unconditionally.
 	rm -fv $TEMP_FOLDER/*
 	# Remove the previous modules image if present.
-	if [ -f $RAMDISK_FOLDER/$MODIMAGE ]; then
-		rm -fv $RAMDISK_FOLDER/$MODIMAGE
+	if [ -f $DATA_FOLDER/$MODIMAGE ]; then
+		rm -fv $DATA_FOLDER/$MODIMAGE
 	fi;
 	echo ""
 	echo -e ${green}"Everything is ready to start..."${restore}
@@ -232,7 +232,7 @@ function mka_package {
 		echo -e ${yellow}"Modules image size:"${restore}
 		du -sh $REPACK_FOLDER/$MODIMAGE
 		# Move the modules image to ramdisk.
-		mv $REPACK_FOLDER/$MODIMAGE $RAMDISK_FOLDER/$MODIMAGE
+		mv $REPACK_FOLDER/$MODIMAGE $DATA_FOLDER/$MODIMAGE
 	fi;
 	if [ -f $REPACK_FOLDER/$IMAGE ]; then
 		echo ""
