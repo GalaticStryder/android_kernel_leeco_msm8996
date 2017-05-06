@@ -7,7 +7,7 @@
 #             /  \
 #            /    \
 #
-SCRIPT_VERSION="3.5.0 (How Siegfried was Mourned and Buried)"
+SCRIPT_VERSION="3.5.1 (How Siegfried was Mourned and Buried)"
 
 # Colorize
 red='\033[01;31m'
@@ -31,20 +31,23 @@ FLAVOR=${1};
 
 # Flavor
 if [ "$FLAVOR" = mx ]; then
-	# EUI
+	# Modular
 	FLAVOR="mx"
 	FNAME="MX"
 	FMODULE="yes"
+	ANYBRANCH="master"
 elif [ "$FLAVOR" = lx ]; then
-	# LineageOS
+	# Built-in
 	FLAVOR="lx"
 	FNAME="LX"
 	FMODULE="no"
+	ANYBRANCH="alternative"
 else if [ "$FLAVOR" = perf ]; then
-	# LA.UM
+	# Development
 	FLAVOR="perf"
 	FNAME="PERF"
-	FMODULE="no"
+	FMODULE="yes"
+	ANYBRANCH="master"
 fi;
 fi;
 
@@ -115,7 +118,7 @@ function check_folders {
 function checkout {
 	# Check the proper AnyKernel2 branch.
 	cd $REPACK_FOLDER
-	git checkout $TARGET
+	git checkout $ANYBRANCH
 	cd $KERNEL_FOLDER
 	echo ""
 }
@@ -219,11 +222,12 @@ function mka_module {
 function mka_package {
 	# Copy the new Kernel to the repack folder.
 	cp -fv $OUT_FOLDER/arch/$ARCH/boot/$IMAGE $REPACK_FOLDER/$IMAGE
+	# Only modular Kernel needs modules in /system/lib/modules.
 	if [ "$FMODULE" = yes ]; then
-		# Only MX firmware needs modules in /system.
+		# Create the modules.img in this case and copy it to /data.
 		mka_module
 	fi;
-	# Show image statistics.
+	# Show images statistics.
 	if [ -f $REPACK_FOLDER/$MODIMAGE ]; then
 		echo ""
 		echo -e ${yellow}"Modules image statistics:"${restore}
@@ -231,7 +235,7 @@ function mka_package {
 		echo ""
 		echo -e ${yellow}"Modules image size:"${restore}
 		du -sh $REPACK_FOLDER/$MODIMAGE
-		# Move the modules image to ramdisk.
+		# Move the modules image to /data.
 		mv $REPACK_FOLDER/$MODIMAGE $DATA_FOLDER/$MODIMAGE
 	fi;
 	if [ -f $REPACK_FOLDER/$IMAGE ]; then
@@ -286,12 +290,13 @@ check_folders
 
 # Prompt for the flavor if not given.
 if [ -z "$FLAVOR" ]; then
-	echo -e ${blink_red}"Please, set a build flavor as argument."${restore};
+	echo -e ${blink_red}"Please, pick a Kernel configuration flavor."${restore};
 	echo -e ${blink_yellow}"Available:"${restore};
-	echo -e ${blue}"MX: EUI based firmware."${restore};
-	echo -e ${blue}"LX: LineageOS based firmware."${restore};
+	echo -e ${blue}"MX:   Modular Kernel."${restore};
+	echo -e ${blue}"LX:   Built-in Kernel."${restore};
+	echo -e ${blue}"PERF: Development Kernel."${restore};
 	echo "";
-	echo "Which is the build flavor?"
+	echo "Which is the Kernel configuration flavor?"
 	select fchoice in MX LX PERF
 	do
 	case "$fchoice" in
@@ -299,16 +304,19 @@ if [ -z "$FLAVOR" ]; then
 			FLAVOR="mx"
 			FNAME="MX"
 			FMODULE="yes"
+			ANYBRANCH="master"
 			break;;
 		"LX")
 			FLAVOR="lx"
 			FNAME="LX"
 			FMODULE="no"
+			ANYBRANCH="alternative"
 			break;;
 		"PERF")
 			FLAVOR="perf"
 			FNAME="PERF"
 			FMODULE="yes"
+			ANYBRANCH="master"
 			break;;
 	esac
 	done
@@ -318,7 +326,7 @@ if [ -z "$FLAVOR" ]; then
 fi;
 
 # Checkout the proper AnyKernel2 branch? Just uncomment.
-#checkout
+checkout
 
 echo "Which is the build tag?"
 select choice in SNAPSHOT NIGHTLY DEVEL
@@ -336,14 +344,14 @@ case "$choice" in
 esac
 done
 
-# File to be zipped.
+# The final zip file name.
 # Example: Lambda-Kernel-MX-DEVEL-03092017.zip.
 ZIPFILE="$NAME-Kernel-$FNAME-$TAG-$BUILD_DATE"
 
 # Overlay local version from shell? Just uncomment.
-#export LOCALVERSION=-$TAG
-#echo ""
-#echo -e ${blue}"Using the Linux tag: $LOCALVERSION."${restore}
+export LOCALVERSION=-$TAG
+echo ""
+echo -e ${blue}"Using the Linux tag: $LOCALVERSION."${restore}
 
 echo ""
 echo "Which toolchain you would like to use?"
