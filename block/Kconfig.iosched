@@ -73,7 +73,7 @@ config CGROUP_BFQIO
 
 config IOSCHED_FIOPS
 	tristate "IOPS based I/O scheduler"
-	default y
+	default n
 	---help---
 	  This is an IOPS based I/O scheduler. It will try to distribute
 	  IOPS equally among all processes in the system. It's mainly for
@@ -81,7 +81,7 @@ config IOSCHED_FIOPS
 
 config IOSCHED_SIO
 	tristate "Simple I/O scheduler"
-	default y
+	default n
 	---help---
 	  The Simple I/O scheduler is an extremely simple scheduler,
 	  based on noop and deadline, that relies on deadlines to
@@ -91,7 +91,7 @@ config IOSCHED_SIO
 
 config IOSCHED_ZEN
 	tristate "Zen I/O scheduler"
-	default y
+	default n
 	---help---
 	  FCFS, dispatches are back-inserted, deadlines ensure fairness.
 	  Should work best with devices without travel-delay.
@@ -99,6 +99,7 @@ config IOSCHED_ZEN
 config IOSCHED_SWITCHER
 	bool "Switch to noop while the screen is off"
 	depends on IOSCHED_NOOP
+	default n
 	---help---
 	  This enables a driver that switches the I/O scheduler for a single
 	  block device to noop when the screen turns off, and back to its
