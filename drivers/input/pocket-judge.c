@@ -34,14 +34,14 @@ static void pocket_judge_update(void)
 	gf_enable_global(!pocket_judge_inpocket);
 }
 
-static ssize_t inpocket_show(struct kobject *kobj, struct kobj_attribute *attr,
-		char *buf)
+static ssize_t inpocket_show(struct device *dev, struct device_attribute *attr,
+			     char *buf)
 {
 	return sprintf(buf, "%u\n", pocket_judge_inpocket);
 }
 
-static ssize_t inpocket_store(struct kobject *kobj, struct kobj_attribute *attr,
-		const char *buf, size_t size)
+static ssize_t inpocket_store(struct device *dev, struct device_attribute *attr,
+			      const char *buf, size_t size)
 {
 	bool state;
 	ssize_t ret;
