@@ -1536,8 +1536,7 @@ static int mdss_fb_resume_sub(struct msm_fb_data_type *mfd)
 
 	reinit_completion(&mfd->power_set_comp);
 	mfd->is_power_setting = true;
-#ifdef CONFIG_MACH_LEECO
-	/* Assign MACH_LEECO_DEBUG */
+#ifdef CONFIG_MACH_LEECO_DEBUG
 	pr_info("mdss_fb resume index=%d\n", mfd->index);
 #else
 	pr_debug("mdss_fb resume index=%d\n", mfd->index);
