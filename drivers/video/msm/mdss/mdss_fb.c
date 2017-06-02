@@ -82,8 +82,6 @@
 bool flip_chargermode_flag = false;
 char flip_chargermode[MDSS_FB_TURBO_OLED_FLIP_CHARGEMODE];
 char spec_char_seq[MDSS_FB_SPEC_CAR_SEQ_CMDLINE_MAX];
-static struct fb_info *fbi_list[MAX_FBI_LIST];
-static int fbi_list_index;
 #endif
 
 static struct fb_info *fbi_list[MAX_FBI_LIST];
@@ -1421,8 +1419,7 @@ static int mdss_fb_resume_sub(struct msm_fb_data_type *mfd)
 
 	reinit_completion(&mfd->power_set_comp);
 	mfd->is_power_setting = true;
-#ifdef CONFIG_MACH_LEECO
-	/* Assign MACH_LEECO_DEBUG */
+#ifdef CONFIG_MACH_LEECO_DEBUG
 	pr_info("mdss_fb resume index=%d\n", mfd->index);
 #else
 	pr_debug("mdss_fb resume index=%d\n", mfd->index);

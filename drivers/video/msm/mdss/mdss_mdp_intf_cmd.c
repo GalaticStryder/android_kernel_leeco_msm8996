@@ -33,6 +33,10 @@
 #define INPUT_EVENT_HANDLER_DELAY_USECS (16000 * 4)
 #define AUTOREFRESH_MAX_FRAME_CNT 6
 
+#ifdef CONFIG_MACH_LEECO
+static struct workqueue_struct *letv_pp_wq;
+#endif
+
 static DEFINE_MUTEX(cmd_clk_mtx);
 
 enum mdss_mdp_cmd_autorefresh_state {
@@ -1203,7 +1207,12 @@ static void mdss_mdp_cmd_pingpong_done(void *arg)
 			       atomic_read(&ctx->koff_cnt));
 		if (sync_ppdone) {
 			atomic_inc(&ctx->pp_done_cnt);
+#ifdef CONFIG_MACH_LEECO
+			/* Use custom pingpong workqueue */
+			queue_work(letv_pp_wq, &ctx->pp_done_work);
+#else
 			schedule_work(&ctx->pp_done_work);
+#endif
 
 			mdss_mdp_resource_control(ctl,
 				MDP_RSRC_CTL_EVENT_PP_DONE);
@@ -3216,6 +3225,15 @@ static int mdss_mdp_cmd_ctx_setup(struct mdss_mdp_ctl *ctl,
 	ret = mdss_mdp_cmd_tearcheck_setup(ctx, false);
 	if (ret)
 		pr_err("tearcheck setup failed\n");
+
+#ifdef CONFIG_MACH_LEECO
+	/* Queue on high priority */
+	letv_pp_wq = alloc_workqueue("letv_pingpong_wq", WQ_UNBOUND | WQ_HIGHPRI, 0);
+	if (!letv_pp_wq) {
+		pr_err("failed to allocate letv_pingpong_wq");
+		return -ENOMEM;
+	}
+#endif
 
 	return ret;
 }
