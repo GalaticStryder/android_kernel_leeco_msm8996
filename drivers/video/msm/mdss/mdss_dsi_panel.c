@@ -930,8 +930,7 @@ static int mdss_dsi_panel_on(struct mdss_panel_data *pdata)
 		on_cmds = &bist_cmds;
 	else
 		on_cmds = &ctrl->on_cmds;
-	/* G.S. switched this to info from debug */
-	pr_info("[panel]:%s: bist_cmds_on=%d\n", __func__,bist_cmds_on);
+	pr_debug("[panel]:%s: bist_cmds_on=%d\n", __func__,bist_cmds_on);
 #else
 	on_cmds = &ctrl->on_cmds;
 #endif
@@ -2052,6 +2051,43 @@ static void mdss_dsi_parse_esd_params(struct device_node *np,
 	if (!pinfo->esd_check_enabled)
 		return;
 
+	ctrl->status_mode = ESD_MAX;
+	/* Check first mode */
+	rc = of_property_read_string(np,
+			"qcom,mdss-dsi-panel-status-check-mode", &string);
+	if (!rc) {
+		if (!strcmp(string, "bta_check")) {
+			ctrl->status_mode = ESD_BTA;
+		} else if (!strcmp(string, "reg_read")) {
+			ctrl->status_mode = ESD_REG;
+			ctrl->check_read_status =
+				mdss_dsi_gen_read_status;
+		} else if (!strcmp(string, "reg_read_nt35596")) {
+			ctrl->status_mode = ESD_REG_NT35596;
+			ctrl->status_error_count = 0;
+			ctrl->check_read_status =
+				mdss_dsi_nt35596_read_status;
+		} else if (!strcmp(string, "te_signal_check")) {
+			if (pinfo->mipi.mode == DSI_CMD_MODE) {
+				ctrl->status_mode = ESD_TE;
+			} else {
+				pr_err("TE-ESD not valid for video mode\n");
+				goto error;
+			}
+		} else {
+			pr_err("No valid panel-status-check-mode string\n");
+			goto error;
+		}
+	}
+
+	if ((ctrl->status_mode == ESD_BTA) || (ctrl->status_mode == ESD_TE) ||
+			(ctrl->status_mode == ESD_MAX))
+		return;
+
+	mdss_dsi_parse_dcs_cmds(np, &ctrl->status_cmds,
+			"qcom,mdss-dsi-panel-status-command",
+				"qcom,mdss-dsi-panel-status-command-state");
+
 #ifdef CONFIG_MACH_LEECO
 	/* Check second mode */
 	rc = of_property_read_string(np,
@@ -2151,43 +2187,6 @@ static void mdss_dsi_parse_esd_params(struct device_node *np,
 		}
 	}
 #endif
-
-	ctrl->status_mode = ESD_MAX;
-	/* Check first mode */
-	rc = of_property_read_string(np,
-			"qcom,mdss-dsi-panel-status-check-mode", &string);
-	if (!rc) {
-		if (!strcmp(string, "bta_check")) {
-			ctrl->status_mode = ESD_BTA;
-		} else if (!strcmp(string, "reg_read")) {
-			ctrl->status_mode = ESD_REG;
-			ctrl->check_read_status =
-				mdss_dsi_gen_read_status;
-		} else if (!strcmp(string, "reg_read_nt35596")) {
-			ctrl->status_mode = ESD_REG_NT35596;
-			ctrl->status_error_count = 0;
-			ctrl->check_read_status =
-				mdss_dsi_nt35596_read_status;
-		} else if (!strcmp(string, "te_signal_check")) {
-			if (pinfo->mipi.mode == DSI_CMD_MODE) {
-				ctrl->status_mode = ESD_TE;
-			} else {
-				pr_err("TE-ESD not valid for video mode\n");
-				goto error;
-			}
-		} else {
-			pr_err("No valid panel-status-check-mode string\n");
-			goto error;
-		}
-	}
-
-	if ((ctrl->status_mode == ESD_BTA) || (ctrl->status_mode == ESD_TE) ||
-			(ctrl->status_mode == ESD_MAX))
-		return;
-
-	mdss_dsi_parse_dcs_cmds(np, &ctrl->status_cmds,
-			"qcom,mdss-dsi-panel-status-command",
-				"qcom,mdss-dsi-panel-status-command-state");
 
 	rc = of_property_read_u32(np, "qcom,mdss-dsi-panel-max-error-count",
 		&tmp);
