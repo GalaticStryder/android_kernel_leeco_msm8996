@@ -430,7 +430,7 @@
 	status = "disabled";
 };
 
-&spi_11 {
+&spi_11 { /* BLSP2 QUP5 */
 	status = "disabled";
 	sii6400@0 {
 		status = "disabled";

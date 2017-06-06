@@ -42,7 +42,6 @@
 		i2c11 = &i2c_11;
 		i2c12 = &i2c_12;
 		spi0 = &spi_0;
-		spi11 = &spi_11;
 		mhi_rmnet0 = &mhi_rmnet_0;
 		mhi_rmnet1 = &mhi_rmnet_1;
 		mhi_uci0 = &mhi_uci_0;
@@ -201,7 +200,7 @@
 		peripheral_mem: peripheral_region@8ea00000 {
 			compatible = "removed-dma-pool";
 			no-map;
-			reg = <0 0x8ea00000 0 0x2d00000>;
+			reg = <0 0x8ea00000 0 0x2b00000>;
 		};
 
 		adsp_mem: adsp_region {
@@ -241,8 +240,10 @@
 		};
 
 		dfps_data_mem: dfps_data_mem@83400000 {
-		       reg = <0 0x83400000 0 0x1000>;
-		       label = "dfps_data_mem";
+			compatible = "shared-dma-pool";
+			no-map;
+			reg = <0 0x83400000 0 0x1000>;
+			label = "dfps_data_mem";
 		};
 
 		cont_splash_mem: cont_splash_mem@83401000 {
@@ -1914,9 +1915,9 @@
 			reg = <0x10 8>;
 		};
 
-		dload_type@18 {
+		dload-type@1c {
 			compatible = "qcom,msm-imem-dload-type";
-			reg = <0x18 4>;
+			reg = <0x1c 4>;
 		};
 
 		restart_reason@65c {
@@ -2551,32 +2552,32 @@
 			 <&clock_gcc clk_gcc_blsp1_qup1_spi_apps_clk>;
 	};
 
-	spi_11: spi@75BA000 { /* BLSP2 QUP6 */
+	spi_11: spi@75B9000 { /* BLSP2 QUP5 */
 		compatible = "qcom,spi-qup-v2";
 		#address-cells = <1>;
 		#size-cells = <0>;
 		reg-names = "spi_physical", "spi_bam_physical";
-		reg = <0x075BA000 0x600>,
+		reg = <0x075B9000 0x600>,
 		      <0x07584000 0x2b000>;
 		interrupt-names = "spi_irq", "spi_bam_irq";
-		interrupts = <0 106 0>, <0 239 0>;
-		spi-max-frequency = <19200000>;
+		interrupts = <0 105 0>, <0 239 0>;
+		spi-max-frequency = <35000000>;
 
 		qcom,infinite-mode = <0>;
 		qcom,use-bam;
 		qcom,ver-reg-exists;
-		qcom,bam-consumer-pipe-index = <14>;
-		qcom,bam-producer-pipe-index = <15>;
-		qcom,master-id = <86>;
+		qcom,bam-consumer-pipe-index = <20>;
+		qcom,bam-producer-pipe-index = <21>;
+		qcom,master-id = <84>;
 		qcom,use-pinctrl;
 		pinctrl-names = "spi_default", "spi_sleep";
-		pinctrl-0 = <&spi_11_active>;
-		pinctrl-1 = <&spi_11_sleep>;
+		pinctrl-0 = <&spi_11_mosi_active &spi_11_miso_active &spi_11_cs1_clk_active>;
+		pinctrl-1 = <&spi_11_mosi_sleep &spi_11_miso_sleep &spi_11_cs1_clk_sleep>;
 
 		clock-names = "iface_clk", "core_clk";
 
 		clocks = <&clock_gcc clk_gcc_blsp2_ahb_clk>,
-			 <&clock_gcc clk_gcc_blsp2_qup6_spi_apps_clk>;
+			 <&clock_gcc clk_gcc_blsp2_qup5_spi_apps_clk>;
 	};
 
 	qcom,rmnet-ipa {
