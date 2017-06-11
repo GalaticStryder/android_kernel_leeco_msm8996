@@ -430,7 +430,7 @@
 &pmi8994_haptics {
 	status = "okay";
 	qcom,wave-play-rate-us = <4200>;
-	qcom,vmax-mv = <1600>;
+	qcom,vmax-mv = <2150>;
 	qcom,wave-shape = "sine";
 };
 

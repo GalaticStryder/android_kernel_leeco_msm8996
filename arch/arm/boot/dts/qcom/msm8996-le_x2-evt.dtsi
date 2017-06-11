@@ -417,9 +417,9 @@
 		loop-mode = <1>;
 		rtp-format = <0>;
 		actuator-type = <1>;
-		frequency = <204>;
-		vib-rated-mv = <2000>;
-		vib-overdrive-mv = <2500>;
+		frequency = <200>;
+		vib-rated-mv = <2150>;
+		vib-overdrive-mv = <2400>;
 		enable-gpio = <&tlmm 38 0>;
 	};
 };
