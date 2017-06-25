@@ -13153,9 +13153,6 @@ static int tasha_codec_probe(struct snd_soc_codec *codec)
 	void *ptr = NULL;
 	struct regulator *supply;
 
-	/* TODO: Remove once working... */
-	pr_info("%s:enter\n", __func__);
-
 	control = dev_get_drvdata(codec->dev->parent);
 
 	dev_info(codec->dev, "%s()\n", __func__);

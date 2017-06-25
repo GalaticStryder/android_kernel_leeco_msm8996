@@ -48,8 +48,7 @@
 				<&incall_music_rx>, <&incall_music2_rx>,
 				<&sb_5_rx>, <&sb_6_rx>;
 		asoc-cpu-names = "msm-dai-q6-auxpcm.1", "msm-dai-q6-auxpcm.2",
-				"msm-dai-q6-hdmi.8",
-				"msm-dai-q6-mi2s.0",
+				"msm-dai-q6-hdmi.8", "msm-dai-q6-mi2s.0",
 				"msm-dai-q6-mi2s.2", "msm-dai-q6-mi2s.3",
 				"msm-dai-q6-dev.16384", "msm-dai-q6-dev.16385",
 				"msm-dai-q6-dev.16386", "msm-dai-q6-dev.16387",
@@ -64,8 +63,6 @@
                 "msm-dai-q6-dev.16396";
 
 		qcom,hdmi-audio-rx;
-		/*letv,hifi-audio;*/
-		/*letv,smartpa-audio;*/
 		letv,smartpa-audio-max98927;
 		letv,hph_irq_detect = <0>;
 		asoc-codec = <&stub_codec>, <&hdmi_audio>;
@@ -90,10 +87,7 @@
 			pinctrl-0 = <&pri_mi2s_active &pri_mi2s_mclk_active &pri_mi2s_sd0_active &pri_mi2s_sd1_active>;
 			pinctrl-1 = <&pri_mi2s_sleep &pri_mi2s_mclk_sleep &pri_mi2s_sd0_sleep &pri_mi2s_sd1_sleep>;*/
 		};
-	};
 
-	qcom,msm-dai-mi2s {
-		compatible = "qcom,msm-dai-mi2s";
 		dai_tert_mi2s: qcom,msm-dai-q6-mi2s-tert {
 			compatible = "qcom,msm-dai-q6-mi2s";
 			qcom,msm-dai-q6-mi2s-dev-id = <2>;
@@ -103,10 +97,7 @@
 			pinctrl-0 = <&tert_mi2s_active &tert_mi2s_sd0_active &tert_mi2s_sd1_active>;
 			pinctrl-1 = <&tert_mi2s_sleep &tert_mi2s_sd0_sleep &tert_mi2s_sd1_sleep>;
 		};
-	};
 
-	qcom,msm-dai-mi2s {
-		compatible = "qcom,msm-dai-mi2s";
 		dai_quat_mi2s: qcom,msm-dai-q6-mi2s-quat {
 			compatible = "qcom,msm-dai-q6-mi2s";
 			qcom,msm-dai-q6-mi2s-dev-id = <3>;
