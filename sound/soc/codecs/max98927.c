@@ -822,6 +822,7 @@ static int max98927_dai_hw_params(struct snd_pcm_substream *substream,
 					MAX98927_PCM_Mode_Config_PCM_CHANSZ_16,
 					MAX98927_PCM_Mode_Config_PCM_CHANSZ_16);
 			max98927->ch_size = 16;
+			pr_info("%s: 16-bit width\n", __func__);
 			break;
 		case 24:
 		case 32:
@@ -830,6 +831,7 @@ static int max98927_dai_hw_params(struct snd_pcm_substream *substream,
 					MAX98927_PCM_Mode_Config_PCM_CHANSZ_32,
 					MAX98927_PCM_Mode_Config_PCM_CHANSZ_32);
 			max98927->ch_size = 32;
+			pr_info("%s: 32-bit width\n", __func__);
 			break;
 		default:
 			pr_err("%s: format unsupported %d",
@@ -880,6 +882,9 @@ static int max98927_dai_hw_params(struct snd_pcm_substream *substream,
 			pr_err("%s rate %d not supported\n", __func__, params_rate(params));
 			goto err;
 	}
+	pr_info("%s: %dHz sample rate\n",
+			__func__, params_rate(params));
+
 	/* set DAI_SR to correct LRCLK frequency */
 	max98927_wrap_update_bits(max98927, MAX98927_PCM_Sample_rate_setup_1,
 			MAX98927_PCM_Sample_rate_setup_1_DIG_IF_SR_Mask, sampling_rate);
@@ -892,10 +897,12 @@ err:
 	return -EINVAL;
 }
 
-#define MAX98927_RATES SNDRV_PCM_RATE_8000_48000
+#define MAX98927_RATES (SNDRV_PCM_RATE_48000 | \
+		SNDRV_PCM_RATE_8000 | SNDRV_PCM_RATE_16000)
 
 #define MAX98927_FORMATS (SNDRV_PCM_FMTBIT_S16_LE | \
-		SNDRV_PCM_FMTBIT_S24_LE | SNDRV_PCM_FMTBIT_S32_LE)
+		SNDRV_PCM_FMTBIT_S24_LE | SNDRV_PCM_FMTBIT_S24_3LE | \
+		SNDRV_PCM_FMTBIT_S32_LE)
 
 static int max98927_dai_set_sysclk(struct snd_soc_dai *dai,
 		int clk_id, unsigned int freq, int dir)
