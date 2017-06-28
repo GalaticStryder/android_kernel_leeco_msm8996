@@ -1211,7 +1211,8 @@ struct max98927_priv {
 	unsigned int amp1_level5;
 	unsigned int amp2_level5;
 	unsigned int amp3_level5;
-	unsigned int digital_gain;
+	unsigned int digital_gain_l;
+	unsigned int digital_gain_r;
 	unsigned int pdm_gain;
 	unsigned int level_hold;
 	unsigned int reset_gpio;
@@ -1230,7 +1231,8 @@ struct max98927_priv {
 #define MAX98927_SPK_RMP_EN_SHIFT 4
 #define MAX98927_PDM_GAIN_SHIFT 4
 #define MAX98927_pdm_Gain_Width 3
-#define MAX98927_AMP_VOL_WIDTH 7
+#define MAX98927_AMP_VOL_WIDTH_L 7
+#define MAX98927_AMP_VOL_WIDTH_R 7
 #define MAX98927_AMP_VOL_LOCATION_SHIFT 7
 #define MAX98927_PDM_Rx_Enable_PDM_CH_SHIFT 3
 #define MAX98927_PCM_to_speaker_monomix_A_SHIFT 6

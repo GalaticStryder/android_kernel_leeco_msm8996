@@ -596,6 +596,21 @@ void max98927_wrap_update_bits(struct max98927_priv *max98927,
 		regmap_update_bits(max98927->regmap_r, reg, mask, val);
 }
 
+/* Add independent bits control APIs for L&R gain. */
+void max98927_wrap_update_bits_l(struct max98927_priv *max98927,
+		unsigned int reg, unsigned int mask, unsigned int val)
+{
+	if (max98927->left_i2c)
+		regmap_update_bits(max98927->regmap_l, reg, mask, val);
+}
+
+void max98927_wrap_update_bits_r(struct max98927_priv *max98927,
+		unsigned int reg, unsigned int mask, unsigned int val)
+{
+	if (max98927->mono_stereo && max98927->right_i2c)
+		regmap_update_bits(max98927->regmap_r, reg, mask, val);
+}
+
 static int max98927_reg_get_w(struct snd_kcontrol *kcontrol,
 		struct snd_ctl_elem_value *ucontrol)
 {
@@ -977,7 +992,8 @@ static const struct snd_soc_dapm_widget max98927_dapm_widgets[] = {
 };
 
 static DECLARE_TLV_DB_SCALE(max98927_spk_tlv, 300, 300, 0);
-static DECLARE_TLV_DB_SCALE(max98927_digital_tlv, -1600, 25, 0);
+static DECLARE_TLV_DB_SCALE(max98927_digital_tlv_l, -1600, 25, 0);
+static DECLARE_TLV_DB_SCALE(max98927_digital_tlv_r, -1600, 25, 0);
 
 static int max98927_spk_gain_get(struct snd_kcontrol *kcontrol,
 		struct snd_ctl_elem_value *ucontrol)
@@ -1008,30 +1024,58 @@ static int max98927_spk_gain_put(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 
-static int max98927_digital_gain_get(struct snd_kcontrol *kcontrol,
+static int max98927_digital_gain_get_l(struct snd_kcontrol *kcontrol,
 		struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
 	struct max98927_priv *max98927 = snd_soc_codec_get_drvdata(codec);
 
-	ucontrol->value.integer.value[0] = max98927->digital_gain;
-	pr_info("%s: spk_gain setting returned %d\n", __func__,
+	ucontrol->value.integer.value[0] = max98927->digital_gain_l;
+	pr_info("%s: left digital_gain setting returned %d\n", __func__,
 			(int) ucontrol->value.integer.value[0]);
 	return 0;
 }
 
-static int max98927_digital_gain_put(struct snd_kcontrol *kcontrol,
+static int max98927_digital_gain_put_l(struct snd_kcontrol *kcontrol,
 		struct snd_ctl_elem_value *ucontrol)
 {
 	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
 	struct max98927_priv *max98927 = snd_soc_codec_get_drvdata(codec);
 	unsigned int sel = ucontrol->value.integer.value[0];
-	pr_info("max98927_digital_gain_put: %d\n",sel);
+	pr_info("max98927_digital_gain_put_l: %d\n",sel);
 
-	if (sel <= ((1 << MAX98927_AMP_VOL_WIDTH) - 1)) {
-		max98927_wrap_update_bits(max98927, MAX98927_AMP_volume_control,
+	if (sel <= ((1 << MAX98927_AMP_VOL_WIDTH_L) - 1)) {
+		max98927_wrap_update_bits_l(max98927, MAX98927_AMP_volume_control,
 				MAX98927_AMP_volume_control_AMP_VOL_Mask, sel);
-		max98927->digital_gain = sel;
+		max98927->digital_gain_l = sel;
+	}
+	return 0;
+}
+
+static int max98927_digital_gain_get_r(struct snd_kcontrol *kcontrol,
+		struct snd_ctl_elem_value *ucontrol)
+{
+	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
+	struct max98927_priv *max98927 = snd_soc_codec_get_drvdata(codec);
+
+	ucontrol->value.integer.value[0] = max98927->digital_gain_r;
+	pr_info("%s: right digital_gain setting returned %d\n", __func__,
+			(int) ucontrol->value.integer.value[0]);
+	return 0;
+}
+
+static int max98927_digital_gain_put_r(struct snd_kcontrol *kcontrol,
+		struct snd_ctl_elem_value *ucontrol)
+{
+	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
+	struct max98927_priv *max98927 = snd_soc_codec_get_drvdata(codec);
+	unsigned int sel = ucontrol->value.integer.value[0];
+	pr_info("max98927_digital_gain_put_r: %d\n",sel);
+
+	if (sel <= ((1 << MAX98927_AMP_VOL_WIDTH_R) - 1)) {
+		max98927_wrap_update_bits_r(max98927, MAX98927_AMP_volume_control,
+				MAX98927_AMP_volume_control_AMP_VOL_Mask, sel);
+		max98927->digital_gain_r = sel;
 	}
 	return 0;
 }
@@ -1374,9 +1418,12 @@ static const struct snd_kcontrol_new max98927_snd_controls[] = {
 			0, (1<<MAX98927_Speaker_Gain_Width)-1, 0,
 			max98927_spk_gain_get, max98927_spk_gain_put, max98927_spk_tlv),
 	//000:mute	001:+3db  010:+6db	011:+9db  100:+12db  101:+15db	110:+18db  111:reserved
-	SOC_SINGLE_EXT_TLV("Digital Gain", MAX98927_AMP_volume_control,
-			0, (1<<MAX98927_AMP_VOL_WIDTH)-1, 0,
-			max98927_digital_gain_get, max98927_digital_gain_put, max98927_digital_tlv),
+	SOC_SINGLE_EXT_TLV("Left Digital Gain", MAX98927_AMP_volume_control,
+			0, (1<<MAX98927_AMP_VOL_WIDTH_L)-1, 0,
+			max98927_digital_gain_get_l, max98927_digital_gain_put_l, max98927_digital_tlv_l),
+	SOC_SINGLE_EXT_TLV("Right Digital Gain", MAX98927_AMP_volume_control,
+			0, (1<<MAX98927_AMP_VOL_WIDTH_R)-1, 0,
+			max98927_digital_gain_get_r, max98927_digital_gain_put_r, max98927_digital_tlv_r),
 	//0x00~0x7f:-16db ~ 15.75db
 	/*SOC_SINGLE_EXT("BDE Enable", MAX98927_Brownout_enables,
 			0, 1, 0, max98927_reg_get_w, max98927_reg_put_w),
