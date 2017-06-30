@@ -1,4 +1,6 @@
 # LeTV/LeEco devices
+menu "LeEco device configuration"
+
 config MACH_LEECO
 	bool "Kernel support for LeEco (LeTV) devices"
 	depends on ARCH_MSM8996
@@ -146,3 +148,5 @@ config SND_SOC_WCD_MBHC_ZL1
 	  MBHC sound codec, specific for the Le Pro 3.
 
 	  This option is automatically enabled when MACH_LEECO_ZL1 is selected.
+
+endmenu
