@@ -287,14 +287,10 @@ config ARCH_MSM8994_V1_TLBI_WA
 
 endmenu
 
-menu "Device configuration"
-
 #
-# This is sorted alphabetically by mach-$OEM.
+# Inherit OEM device configuration from ARM folder.
 #
-source "arch/arm64/mach-leeco/Kconfig"
-
-endmenu
+source "arch/arm/mach-leeco/Kconfig"
 
 menu "Bus support"
 
