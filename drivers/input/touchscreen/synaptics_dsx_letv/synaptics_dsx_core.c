@@ -624,25 +624,25 @@ static struct synaptics_rmi4_exp_fn_data exp_data;
 static struct synaptics_dsx_button_map *vir_button_map;
 
 static struct device_attribute attrs[] = {
-	__ATTR(reset, S_IWUGO,
-			synaptics_rmi4_show_error,
+	__ATTR(reset, S_IWUSR | S_IWGRP,
+			NULL,
 			synaptics_rmi4_f01_reset_store),
 	__ATTR(productinfo, S_IRUGO,
 			synaptics_rmi4_f01_productinfo_show,
-			synaptics_rmi4_store_error),
+			NULL),
 	__ATTR(buildid, S_IRUGO,
 			synaptics_rmi4_f01_buildid_show,
-			synaptics_rmi4_store_error),
+			NULL),
 	__ATTR(flashprog, S_IRUGO,
 			synaptics_rmi4_f01_flashprog_show,
-			synaptics_rmi4_store_error),
-	__ATTR(0dbutton, (S_IRUGO | S_IWUGO),
+			NULL),
+	__ATTR(0dbutton, (S_IRUGO | S_IWUSR | S_IWGRP),
 			synaptics_rmi4_0dbutton_show,
 			synaptics_rmi4_0dbutton_store),
-	__ATTR(suspend, S_IWUGO,
-			synaptics_rmi4_show_error,
+	__ATTR(suspend, S_IWUSR | S_IWGRP,
+			NULL,
 			synaptics_rmi4_suspend_store),
-	__ATTR(wake_gesture, (S_IRUGO | S_IWUGO),
+	__ATTR(wake_gesture, (S_IRUGO | S_IWUSR | S_IWGRP),
 			synaptics_rmi4_wake_gesture_show,
 			synaptics_rmi4_wake_gesture_store),
 };
@@ -897,13 +897,13 @@ static ssize_t synaptics_rmi4_tp_info_show(struct device *dev,
 		return synaptics_do_afe_calibration_store(dev->parent,attr,buf,count);
 	}
 
-static DEVICE_ATTR(tp_firmware_version, 0444, classdev_rmi4_f34_configid_show, synaptics_rmi4_store_error);
-static DEVICE_ATTR(raw_cap_data, 0444, classdev_raw_cap_data_show, synaptics_rmi4_store_error);
-static DEVICE_ATTR(open_circuit_test, 0444, classdev_open_circuit_test_show, synaptics_rmi4_store_error);
-static DEVICE_ATTR(calibration, 0660, synaptics_rmi4_show_error, classdev_calibration_store);
-static DEVICE_ATTR(product_id, 0444, synaptics_rmi4_f01_product_id_show, synaptics_rmi4_store_error);
+static DEVICE_ATTR(tp_firmware_version, 0444, classdev_rmi4_f34_configid_show, NULL);
+static DEVICE_ATTR(raw_cap_data, 0444, classdev_raw_cap_data_show, NULL);
+static DEVICE_ATTR(open_circuit_test, 0444, classdev_open_circuit_test_show, NULL);
+static DEVICE_ATTR(calibration, 0660, NULL, classdev_calibration_store);
+static DEVICE_ATTR(product_id, 0444, synaptics_rmi4_f01_product_id_show, NULL);
 static DEVICE_ATTR(suspend_touch_aa, 0660, synaptics_rmi4_suspend_touchAA_show, synaptics_rmi4_suspend_touchAA_store);
-static DEVICE_ATTR(tp_info, 0444, synaptics_rmi4_tp_info_show, synaptics_rmi4_store_error);
+static DEVICE_ATTR(tp_info, 0444, synaptics_rmi4_tp_info_show, NULL);
 
 ssize_t synaptics_tp_status_show(struct device *dev,
 				struct device_attribute *attr, char *buf);
