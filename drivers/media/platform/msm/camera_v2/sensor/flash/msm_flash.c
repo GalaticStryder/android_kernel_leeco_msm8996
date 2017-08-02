@@ -1348,11 +1348,11 @@ static ssize_t irled2_store(struct device *dev,
 	return size;
 }
 
-static DEVICE_ATTR(flashled1, S_IWUSR | S_IWGRP | S_IWOTH, NULL, flashled1_store);
-static DEVICE_ATTR(flashled2, S_IWUSR | S_IWGRP | S_IWOTH, NULL, flashled2_store);
-static DEVICE_ATTR(flashled_chipid, S_IRUSR | S_IRGRP | S_IROTH, flashled_chipid_show, NULL);
-static DEVICE_ATTR(irled1, S_IWUSR | S_IWGRP | S_IWOTH, NULL, irled1_store);
-static DEVICE_ATTR(irled2, S_IWUSR | S_IWGRP | S_IWOTH, NULL, irled2_store);
+static DEVICE_ATTR(flashled1, 0660, NULL, flashled1_store);
+static DEVICE_ATTR(flashled2, 0660, NULL, flashled2_store);
+static DEVICE_ATTR(flashled_chipid, 0444, flashled_chipid_show, NULL);
+static DEVICE_ATTR(irled1, 0660, NULL, irled1_store);
+static DEVICE_ATTR(irled2, 0660, NULL, irled2_store);
 
 static int32_t msm_flash_get_dt_data(struct device_node *of_node,
 	struct msm_flash_ctrl_t *fctrl)
