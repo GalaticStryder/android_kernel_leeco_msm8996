@@ -295,11 +295,6 @@
 		status = "disabled";
 	};
 
-	sii6400_driver {
-		compatible = "qcom, mhl-wihd-sii6400";
-		status = "ok";
-	};
-
 	pstore {
 		compatible = "ramoops";
 		status = "ok";
@@ -452,27 +447,8 @@
 	status = "disabled";
 };
 
-&spi_11 { /* BLSP2 QUP5 */
+&spi_11 {
 	status = "disabled";
-	sii6400@0 {
-		status = "disabled";
-		compatible = "qcom, mhl-wihd-sii6400";
-		reg = <0>;
-		interrupt-parent = <&tlmm>;
-		interrupts = <123 0>;
-		spi-max-frequency = <35000000>;
-		intr-gpio = <&tlmm 123 0>;
-		hdmi-det = <&tlmm 79 0>;
-		rst-gpio = <&tlmm 14 0>;
-		pwr-gpio = <&tlmm 94 0>;
-		mhl-sel1-gpio = <&tlmm 30 0>;
-		/* avcc_18-supply = <&pma8084_l14>; */
-		qcom,hdmi-tx-map = <&mdss_hdmi_tx>;
-	};
-};
-
-&pmi8994_charger {
-	qcom,mhl-wihd = <1>;
 };
 
 &mdss_hdmi_pll {
