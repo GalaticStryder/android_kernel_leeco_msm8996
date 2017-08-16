@@ -39,7 +39,7 @@
 #include <linux/msm_bcl.h>
 #include <linux/ktime.h>
 #include <linux/pmic-voter.h>
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_QPNP_MHL
 #include <linux/power/mhl_uevent.h>
 #endif
 
@@ -310,8 +310,7 @@ struct smbchg_chip {
 	/* aicl deglitch workaround */
 	unsigned long			first_aicl_seconds;
 	int				aicl_irq_count;
-#ifdef CONFIG_MACH_LEECO
-	/* TODO: Allow MHL to be disabled, if possible. */
+#ifdef CONFIG_QPNP_MHL
 	int				mhl_wihd;
 #endif
 	struct mutex			usb_status_lock;
@@ -388,6 +387,10 @@ enum wake_reason {
 	PM_PARALLEL_TAPER = BIT(3),
 	PM_DETECT_HVDCP = BIT(4),
 };
+
+#ifdef CONFIG_QPNP_MHL
+static int mhl_insert_flag;
+#endif
 
 /* fcc_voters */
 #define ESR_PULSE_FCC_VOTER	"ESR_PULSE_FCC_VOTER"
@@ -884,17 +887,13 @@ static enum pwr_path_type smbchg_get_pwr_path(struct smbchg_chip *chip)
 #define FMB_STS_MASK			SMB_MASK(3, 0)
 #define USBID_GND_THRESHOLD		0x495
 
-#ifdef CONFIG_MACH_LEECO
-/* LeTV definition of USB ID register offset. */
-#define RID_STS				0xB
+#ifdef CONFIG_QPNP_MHL
 #define RID_VALID_HIGH		0xE
 #define RID_VALID_LOW		0xF
-#define RID_INT_RT_STS		0x10
 #define R_FLOAT				0x495
 #define R_MHL				0x1A
 #define R_OTG				0x0
 
-/* LeTV definition of RID state. */
 enum rid_state {
 	RID_GROUND = 0,
 	RID_FLOAT,
@@ -903,6 +902,9 @@ enum rid_state {
 };
 
 int dw3_id_state = RID_UNKNOW;
+#endif
+
+#ifdef CONFIG_MACH_LEECO
 extern void cclogic_set_smbcharge_init_done(int done);
 #endif
 
@@ -1061,8 +1063,7 @@ static bool is_usb_present(struct smbchg_chip *chip)
 	return !!(reg & (USBIN_9V | USBIN_UNREG | USBIN_LV));
 }
 
-#ifdef CONFIG_MACH_LEECO
-/* Part of MHL code. Useless? */
+#ifdef CONFIG_QPNP_MHL
 static int get_rid_state(struct smbchg_chip *chip)
 {
 	u8 reg_high;
@@ -8448,13 +8449,13 @@ static irqreturn_t usbid_change_handler(int irq, void *_chip)
 {
 	struct smbchg_chip *chip = _chip;
 	bool otg_present;
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_QPNP_MHL
 	enum rid_state rid_sts;
 #endif
 
 	pr_smb(PR_INTERRUPT, "triggered\n");
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_QPNP_MHL
 	pr_err("usbid change handler\n");
 	/*
 	 * After the falling edge of the usbid change interrupt occurs,
@@ -10356,7 +10357,7 @@ static int smbchg_probe(struct spmi_device *spmi)
 	struct qpnp_vadc_chip *vadc_dev = NULL, *vchg_vadc_dev = NULL;
 	const char *typec_psy_name;
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_QPNP_MHL
 	mhl_kobj_init();
 #endif
 
@@ -10448,7 +10449,7 @@ static int smbchg_probe(struct spmi_device *spmi)
 		goto votables_cleanup;
 	}
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_QPNP_MHL
 	rc = of_property_read_u32(spmi->dev.of_node,
 					"qcom,mhl-wihd", &(chip->mhl_wihd));
 	if (rc) {
@@ -10794,7 +10795,7 @@ static int smbchg_remove(struct spmi_device *spmi)
 	destroy_votable(chip->usb_icl_votable);
 	destroy_votable(chip->fcc_votable);
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_QPNP_MHL
 	mhl_kobj_exit();
 #endif
 
