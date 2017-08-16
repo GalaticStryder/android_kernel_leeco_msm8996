@@ -440,7 +440,7 @@
 #define DWC3_OTG_OCTL_DEVSETHNPEN	(1 << 1)
 #define DWC3_OTG_OCTL_HSTSETHNPEN	(1 << 0)
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_QPNP_MHL
 #define MHL_POWER_OUT
 #ifdef MHL_POWER_OUT
 struct dwc3_mhl {

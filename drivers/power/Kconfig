@@ -497,6 +497,7 @@ config QPNP_SMBCHARGER
 
 config QPNP_MHL
 	tristate "LeTV MHL state information"
+	default n
 	depends on QPNP_SMBCHARGER
 	help
 	  Say Y here to enable LeTV's MHL state information.
