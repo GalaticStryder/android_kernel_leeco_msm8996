@@ -11,7 +11,6 @@ config MACH_LEECO
 	select TOUCHKEY_ATMEGA48A_LETV
 	select TOUCHSCREEN_SYNAPTICS_DSX_LETV
 	select MSM_I2C_FLASH
-	select QPNP_MHL
 	default n
 	help
 	  Once selected, this will apply common Kernel changes
@@ -24,7 +23,6 @@ config MACH_LEECO
 	  * USB Cypress -> USB Type-C
 	  * Analogix -> USB Type-C
 	  * ATmega48A -> Capacitive Keys
-	  * QPNP MHL -> MHL State
 	  * MSM I2C Flash -> Camera's Flash
 
 	  This can be used to apply patches from LeEco without touching
