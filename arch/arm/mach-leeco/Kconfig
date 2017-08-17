@@ -64,7 +64,6 @@ config MACH_LEECO_ZL1
 	select TOUCHSCREEN_SYNAPTICS_DSX_RMI_DEV_LETV
 	select TOUCHSCREEN_SYNAPTICS_DSX_FW_UPDATE_LETV
 	select TOUCHSCREEN_SYNAPTICS_DSX_TEST_REPORTING_LETV
-	select FB_MSM_MDSS_HDMI_DP_ANX7816
 	help
 	  Once selected, barebones Le Pro 3 tuning and drivers will take effect.
 
@@ -73,7 +72,6 @@ config MACH_LEECO_ZL1
 	  * LM3697 -> Backlight
 	  * Goodix 5208 -> Fingerprint Sensor
 	  * Focaltech FTS -> Touchsreen
-	  * ANX7816 -> Slimport (Colorado 3)
 	  * TI DRV2604L -> Vibrator
 	  * MAXQ616 -> Infrared Remote Control
 	  * Maxim MAX98927 -> Smart PA
