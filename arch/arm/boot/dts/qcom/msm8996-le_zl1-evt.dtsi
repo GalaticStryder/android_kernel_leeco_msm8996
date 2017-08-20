@@ -49,7 +49,12 @@
 	status = "disabled";
 };
 
+&mdss_dsi {
+	hw-config = "single_dsi";
+};
+
 &mdss_dsi0 {
+	qcom,display-id = "primary";
 	qcom,dsi-pref-prim-pan = <&dsi_ft8716_1080p_video>;
 	vddio-supply = <&pm8994_l14>;
 	qcom,platform-te-gpio = <&tlmm 97 0>;
@@ -62,8 +67,15 @@
 	status = "disabled";
 };
 
-&mdss_dsi {
-	hw-config = "single_dsi";
+&mdss_hdmi_tx {
+	qcom,display-id = "secondary";
+	pinctrl-names = "hdmi_hpd_active", "hdmi_ddc_active",
+				"hdmi_active", "hdmi_sleep";
+	pinctrl-0 = <&mdss_hdmi_hpd_active &mdss_hdmi_ddc_suspend>;
+	pinctrl-1 = <&mdss_hdmi_hpd_active &mdss_hdmi_ddc_active>;
+	pinctrl-2 = <&mdss_hdmi_hpd_active &mdss_hdmi_ddc_suspend>;
+	pinctrl-3 = <&mdss_hdmi_hpd_active &mdss_hdmi_ddc_active>;
+	pinctrl-4 = <&mdss_hdmi_hpd_suspend &mdss_hdmi_ddc_suspend>;
 };
 
 &lab_regulator {

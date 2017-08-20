@@ -1,13 +1,3 @@
-&mdss_hdmi_tx {
-	pinctrl-names = "hdmi_hpd_active", "hdmi_ddc_active",
-				"hdmi_active", "hdmi_sleep";
-	pinctrl-0 = <&mdss_hdmi_hpd_active &mdss_hdmi_ddc_suspend>;
-	pinctrl-1 = <&mdss_hdmi_hpd_active &mdss_hdmi_ddc_active>;
-	pinctrl-2 = <&mdss_hdmi_hpd_active &mdss_hdmi_ddc_suspend>;
-	pinctrl-3 = <&mdss_hdmi_hpd_active &mdss_hdmi_ddc_active>;
-	pinctrl-4 = <&mdss_hdmi_hpd_suspend &mdss_hdmi_ddc_suspend>;
-};
-
 &soc {
 	spi@7579000 { /* BLSP1 QUP4 */
 		compatible = "qcom,spi-qup-v2";
