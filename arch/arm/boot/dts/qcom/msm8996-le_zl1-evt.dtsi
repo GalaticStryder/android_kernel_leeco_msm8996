@@ -407,16 +407,24 @@
 		nxp,p61-rst = <&tlmm 130 0>;
 	};
 };
+
+/* Expose battery data information for SMBCHG. */
 /{
-	mtp_batterydata: qcom,battery-data {
+	le_batterydata: qcom,battery-data {
 		qcom,batt-id-range-pct = <15>;
 		#include "batterydata-le_zl1-lishen-4000mAh.dtsi"
 		#include "batterydata-le_zl1-scud-4000mAh.dtsi"
 	};
 };
 
+&pmi8994_charger {
+	qcom,battery-data = <&le_batterydata>;
+};
+
 &pmi8994_fg {
+	qcom,battery-data = <&le_batterydata>;
 	qcom,thermal-coefficients = [C2 86 BB 50 CF 37];
+	qcom,ext-sense-type;
 };
 
 &pmi8994_haptics {
