@@ -120,6 +120,8 @@
 		qcom,mdss-dsi-panel-status-read-length2 = <1>;
 		qcom,mdss-dsi-panel-status-value2 = <0x00>;
 		qcom,esd-check-enabled;
+		qcom,mdss-fb-color-manager;
+		qcom,mdss-fb-color-manager-value = <32768 28989 27603>;
 		/*qcom,mdss-dsi-rx-eot-ignore;*/
 		/*qcom,mdss-dsi-tx-eot-append;*/
 	};

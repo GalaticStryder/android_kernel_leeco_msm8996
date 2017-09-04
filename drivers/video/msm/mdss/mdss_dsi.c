@@ -1575,6 +1575,10 @@ static int mdss_dsi_unblank(struct mdss_panel_data *pdata)
 
 	ctrl_pdata->ctrl_state |= CTRL_STATE_PANEL_INIT;
 
+	ret = mdss_fb_color_manager_calibration(ctrl_pdata);
+	if (ret)
+		goto error;
+
 error:
 	mdss_dsi_clk_ctrl(ctrl_pdata, ctrl_pdata->dsi_clk_handle,
 			  MDSS_DSI_ALL_CLKS, MDSS_DSI_CLK_OFF);
@@ -3161,6 +3165,12 @@ static int mdss_dsi_ctrl_probe(struct platform_device *pdev)
 
 	ctrl_pdata->mdss_util = util;
 	atomic_set(&ctrl_pdata->te_irq_ready, 0);
+
+	/* Allocate memory for color manager. */
+	rc = mdss_fb_color_manager_allocate(pdev, ctrl_pdata);
+	if (unlikely(rc != 0)) {
+		return rc;
+	}
 
 	ctrl_name = of_get_property(pdev->dev.of_node, "label", NULL);
 	if (!ctrl_name)

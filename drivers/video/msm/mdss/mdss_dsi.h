@@ -23,6 +23,7 @@
 #include "mdss_panel.h"
 #include "mdss_dsi_cmd.h"
 #include "mdss_dsi_clk.h"
+#include "mdss_fb_color_manager.h"
 
 #define MMSS_SERDES_BASE_PHY 0x04f01000 /* mmss (De)Serializer CFG */
 
@@ -562,6 +563,8 @@ struct mdss_dsi_ctrl_pdata {
 
 	struct kobject *kobj;
 	int fb_node;
+
+	struct mdss_fb_color_manager_data *color_mgr;
 
 	/* DBA data */
 	struct workqueue_struct *workq;

@@ -2827,6 +2827,11 @@ static int mdss_panel_parse_dt(struct device_node *np,
 	pinfo->mipi.force_clk_lane_hs = of_property_read_bool(np,
 		"qcom,mdss-dsi-force-clock-lane-hs");
 
+	rc = mdss_fb_color_manager_params(np, ctrl_pdata);
+	if (rc) {
+		pr_err("%s: failed to parse color manager configuration\n", __func__);
+	}
+
 	rc = mdss_dsi_parse_panel_features(np, ctrl_pdata);
 	if (rc) {
 		pr_err("%s: failed to parse panel features\n", __func__);

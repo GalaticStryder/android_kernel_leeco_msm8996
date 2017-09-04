@@ -671,9 +671,14 @@ static int pp_pcc_cache_params_v1_7(struct mdp_pcc_cfg_data *config,
 			(void *) v17_cache_data;
 		if (copy_from_user(&v17_usr_config, config->cfg_payload,
 				   sizeof(v17_usr_config))) {
-			pr_err("failed to copy v17 pcc\n");
-			ret = -EFAULT;
-			goto pcc_config_exit;
+			if (config->cfg_payload != NULL) {
+				memcpy(&v17_usr_config, config->cfg_payload,
+					sizeof(v17_usr_config));
+			} else {
+				pr_err("failed to copy v17 pcc\n");
+				ret = -EFAULT;
+				goto pcc_config_exit;
+			}
 		}
 		if ((config->ops & MDP_PP_OPS_DISABLE)) {
 			pr_debug("disable pcc\n");
@@ -1170,9 +1175,14 @@ static int pp_pa_cache_params_v1_7(struct mdp_pa_v2_cfg_data *config,
 
 	if (copy_from_user(&pa_usr_config, config->cfg_payload,
 			   sizeof(pa_usr_config))) {
-		pr_err("Failed to copy v1_7 PA\n");
-		ret = -EFAULT;
-		goto pa_config_exit;
+		if (config->cfg_payload != NULL) {
+			memcpy(&pa_usr_config, config->cfg_payload,
+				sizeof(pa_usr_config));
+		} else {
+			pr_err("Failed to copy v1_7 PA\n");
+			ret = -EFAULT;
+			goto pa_config_exit;
+		}
 	}
 
 	if ((config->flags & MDP_PP_OPS_DISABLE)) {
