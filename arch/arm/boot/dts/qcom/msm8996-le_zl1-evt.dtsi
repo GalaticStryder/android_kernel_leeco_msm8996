@@ -23,17 +23,11 @@
 #include "msm8996-audio-le_zl1.dtsi"
 #include "msm8996-leds-le_zl1.dtsi"
 
-/*
- * Add FT8716 touchscreen device
- */
 &soc {
 	i2c@75ba000{
 		focaltech@38{
 			status = "ok";
 		};
-		//synaptics_dsx@20{
-			//status = "ok";
-		//};
 	};
 
 	i2c_11: i2c@75b9000 {
@@ -147,13 +141,6 @@
 		};
 	};
 };
-
-/*
-&rgb_leds {
-	deepsleep_gpio = <&tlmm 133 0x00>;
-	deepsleep_gpio_label = "rpm_led_switch";
-};
-*/
 
 &msm_imem {
 	msm-imem-crash@1c {
@@ -290,21 +277,10 @@
 		compatible = "qcom,msm-lsuart-v14";
 		reg = <0x075b4000 0x1000>;
 		interrupts = <0 118 0>;
-		status = "disabled";
 
 		clock-names = "core_clk", "iface_clk";
 		clocks = <&clock_gcc clk_gcc_blsp2_uart6_apps_clk>,
 			<&clock_gcc clk_gcc_blsp2_ahb_clk>;
-	};
-
-	pi5usb_driver {
-		compatible = "letv,pi5usb_driver";
-		status = "disabled";
-	};
-
-	tusb302l_driver {
-		compatible = "letv,tusb302l_driver";
-		status = "disabled";
 	};
 
 	pstore {
@@ -322,36 +298,8 @@
 	};
 };
 
-&blsp2_uart6 {
-	status = "ok";
-};
-
 &i2c_6 {
-	/delete-node/ at24@51;
-
-	pi5usb@1d {
-		status = "disabled";
-		compatible = "pi5usb";
-		reg =<0x1d>;
-		interrupt-parent = <&tlmm>;
-		interrupts = <73 0x02>;
-		irq-gpio = <&tlmm 73 0x00>;
-		pinctrl-names = "pi5usb_active";
-		pinctrl-0 = <&pi5usb_active>;
-		qcom,id-gpio = <&tlmm 132 0>;
-	};
-
-	tusb302l@47 {
-		status = "disabled";
-		compatible = "tusb302l";
-		reg =<0x47>;
-		interrupt-parent = <&tlmm>;
-		interrupts = <73 0x02>;
-		irq-gpio = <&tlmm 73 0x00>;
-		pinctrl-names = "tusb302l_active";
-		pinctrl-0 = <&tusb302l_active>;
-		qcom,id-gpio = <&tlmm 132 0>;
-	};
+	status = "disabled";
 };
 
 &i2c_7 {
@@ -363,23 +311,6 @@
 		status = "ok";
 		compatible = "cclogic_dev";
 		reg =<0x3d>;
-		cc1_pwr_gpio = <&tlmm 60 0>;
-		cc2_pwr_gpio = <&tlmm 61 0>;
-		switch_gpio1 = <&tlmm 58 0>;
-		switch_gpio2 = <&tlmm 59 0>;
-		pinctrl-names = "m0_ccswitch_active", "m0_ccint_active", "m0_ccpwr_active";
-		pinctrl-0 = <&m0_ccswitch_active>;
-		pinctrl-1 = <&m0_ccint_active>;
-		pinctrl-2 = <&m0_ccpwr_active>;
-		interrupt-parent = <&tlmm>;
-		interrupts = <73 0x02>;
-		irq-gpio = <&tlmm 73 0x00>;
-	};
-
-	tusb320@67 {
-		status = "ok";
-		compatible = "tusb320";
-		reg =<0x67>;
 		cc1_pwr_gpio = <&tlmm 60 0>;
 		cc2_pwr_gpio = <&tlmm 61 0>;
 		switch_gpio1 = <&tlmm 58 0>;
