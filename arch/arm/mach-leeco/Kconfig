@@ -65,6 +65,7 @@ config MACH_LEECO_ZL1
 	select TOUCHSCREEN_SYNAPTICS_DSX_FW_UPDATE_LETV
 	select TOUCHSCREEN_SYNAPTICS_DSX_TEST_REPORTING_LETV
 	select USB_CCLOGIC_PER30216
+	select USB_CCLOGIC_TUSB320
 	help
 	  Once selected, barebones Le Pro 3 tuning and drivers will take effect.
 
@@ -79,6 +80,7 @@ config MACH_LEECO_ZL1
 	  * Custom ZL1 MBHC -> Audio Socket
 	  * PN544 -> NFC
 	  * Pericom 30216C -> USB Type-C
+	  * Texas Instruments TUSB320 -> USB Type-C Audio
 
 	  OEM changes such as custom init, cpufreq modifications, VR support and proprietary
 	  sound controllers aren't covered in this option.
