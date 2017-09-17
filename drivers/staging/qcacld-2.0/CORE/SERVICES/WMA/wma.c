@@ -23084,15 +23084,7 @@ static VOS_STATUS wma_suspend_req(tp_wma_handle wma, tpSirWlanSuspendParam info)
 	 * suspend indication received on last vdev before
 	 * enabling wow in fw.
 	 */
-	/*
-	 * While processing suspend indication, there is possibility of
-	 * vdev(SAP/P2P-GO) deletion due to stop_ap. This may lead, Host to
-	 * send WoW indication twice to FW, as vdev is one but HDD sends
-	 * suspend indication twice to WMA. To fix this race condition check
-	 * for wow_enable along with vdev count.
-	 */
-	if (wma->no_of_suspend_ind < wma_get_vdev_count(wma) ||
-		wma->wow.wow_enable) {
+	if (wma->no_of_suspend_ind < wma_get_vdev_count(wma)) {
 		vos_mem_free(info);
 		return VOS_STATUS_SUCCESS;
 	}
@@ -36285,7 +36277,7 @@ int wma_dfs_indicate_radar(struct ieee80211com *ic,
 	    ( pmac->sap.SapDfsInfo.disable_dfs_ch_switch == VOS_TRUE) )
 	{
 		radar_event = (struct wma_dfs_radar_indication *)
-			vos_mem_malloc(sizeof(struct wma_dfs_radar_indication));
+			vos_mem_malloc(sizeof(*radar_event));
 		if (radar_event == NULL) {
 			WMA_LOGE(FL("Failed to allocate memory for radar_event"));
 			adf_os_spin_unlock_bh(&ic->chan_lock);
