@@ -59,18 +59,8 @@
 #include "debug.h"
 #include "xhci.h"
 
-/* Those constants are not the same
- * on stock Kernel, hum... */
-#ifdef CONFIG_MACH_LEECO
-#define DWC3_ACA_CHG_MAX 900
-#define DWC3_CDP_CHG_MAX 1000
-#define DWC3_IDEV_CHG_MAX 1400
-#define DWC3_HVDCP_CHG_MAX 1200
-static struct dwc3_msm *_msm_dwc;
-#else
 #define DWC3_IDEV_CHG_MAX 1500
 #define DWC3_HVDCP_CHG_MAX 1800
-#endif
 #define DWC3_WAKEUP_SRC_TIMEOUT 5000
 #define MICRO_5V    5000000
 #define MICRO_9V    9000000
@@ -80,6 +70,10 @@ static struct dwc3_msm *_msm_dwc;
 
 /* AHB2PHY read/write waite value */
 #define ONE_READ_WRITE_WAIT 0x11
+
+#ifdef CONFIG_MACH_LEECO
+static struct dwc3_msm *_msm_dwc;
+#endif
 
 /* cpu to fix usb interrupt */
 static int cpu_to_affin;
@@ -103,18 +97,6 @@ MODULE_PARM_DESC(hvdcp_max_current, "max current drawn for HVDCP charger");
 int dcp_max_current = DWC3_IDEV_CHG_MAX;
 module_param(dcp_max_current, int, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(dcp_max_current, "max current drawn for DCP charger");
-
-#ifdef CONFIG_MACH_LEECO
-/* Max current to be drawn for CDP charger */
-int cdp_max_current = DWC3_CDP_CHG_MAX;
-module_param(cdp_max_current, int, S_IRUGO | S_IWUSR);
-MODULE_PARM_DESC(cdp_max_current, "max current drawn for CDP charger");
-
-/* Max current to be drawn for ACA charger */
-int aca_max_current = DWC3_ACA_CHG_MAX;
-module_param(aca_max_current, int, S_IRUGO | S_IWUSR);
-MODULE_PARM_DESC(aca_max_current, "max current drawn for ACA charger");
-#endif
 
 /* XHCI registers */
 #define USB3_HCSPARAMS1		(0x4)
@@ -2502,7 +2484,7 @@ static irqreturn_t msm_dwc3_pwr_irq_thread(int irq, void *_mdwc)
 }
 
 #ifdef CONFIG_MACH_LEECO
-int pi5usb_set_msm_usb_host_mode(bool mode)
+int dwc3_set_msm_usb_host_mode(bool mode)
 {
 	struct dwc3_msm *mdwc = NULL;
 	struct dwc3 *dwc = NULL;
@@ -2516,30 +2498,20 @@ int pi5usb_set_msm_usb_host_mode(bool mode)
 	dev_err(mdwc->dev, "%s = %s_mode.\n", __func__, mode?"host":"device");
 
 	if (mode) {
-		/* host mode:bsv=0,id=0 */
-		//mdwc->ext_xceiv.id = false;
 		mdwc->id_state = DWC3_ID_GROUND;
 	} else {
-		/* device mode:bsv=1,id=1 */
-		//mdwc->ext_xceiv.id = true;
 		mdwc->id_state = DWC3_ID_FLOAT;
 	}
 
 	if (atomic_read(&dwc->in_lpm)) {
-		dev_dbg(mdwc->dev, "%s: calling resume_work\n", __func__);
 		dwc3_resume_work(&mdwc->resume_work.work);
 	} else {
-		dev_dbg(mdwc->dev, "%s: notifying xceiv event\n", __func__);
-		//if (mdwc->otg_xceiv)
-			//mdwc->ext_xceiv.notify_ext_events(mdwc->otg_xceiv->otg,
-				//DWC3_EVENT_XCEIV_STATE);
-
 		dwc3_ext_event_notify(mdwc);
 	}
 
 	return mode;
 }
-EXPORT_SYMBOL(pi5usb_set_msm_usb_host_mode);
+EXPORT_SYMBOL(dwc3_set_msm_usb_host_mode);
 
 static int _msm_usb_vbus_on(struct dwc3_msm *_mdwc)
 {
@@ -4648,9 +4620,6 @@ static int dwc3_msm_pm_suspend(struct device *dev)
 	flush_workqueue(mdwc->dwc3_resume_wq);
 	if (!atomic_read(&dwc->in_lpm) && !mdwc->no_wakeup_src_in_hostmode) {
 		dev_err(mdwc->dev, "Abort PM suspend!! (USB is outside LPM)\n");
-#ifdef CONFIG_MACH_LEECO
-		pm_wakeup_event(dev, 2000);
-#endif
 		return -EBUSY;
 	}
 
