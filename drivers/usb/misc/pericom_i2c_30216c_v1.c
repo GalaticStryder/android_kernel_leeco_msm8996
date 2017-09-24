@@ -61,7 +61,7 @@ extern int msm_usb_vbus_set(void *_mdwc, bool on, bool ext_call);
 extern int wcd_mbhc_plug_detect(void);
 extern void cclogic_set_audio_mode_register(void (*func)(bool));
 extern int cclogic_set_vbus(bool on);
-extern int pi5usb_set_msm_usb_host_mode(bool mode);
+extern int dwc3_set_msm_usb_host_mode(bool mode);
 static struct pericom_30216c_data global_pericom_data;
 extern void cclogic_set_typec_headset_with_analog(int val);
 extern bool serial_hw_output_enable(void);
@@ -389,7 +389,7 @@ void pericom_cclogic_set_audio_mode(bool mode)
 	if (mode) {
 		pr_info("pericom switch to audio mode\n");
         msleep(50);
-		pi5usb_set_msm_usb_host_mode(false);/*simulate plugout*/
+		dwc3_set_msm_usb_host_mode(false);/*simulate plugout*/
 
 		gpio_set_value(pericom_data->switch_gpio2, 1);/*Headphone*/
 		gpio_set_value(pericom_data->switch_gpio1, 0);/*MIC*/
@@ -423,7 +423,7 @@ void pericom_cclogic_set_audio_mode(bool mode)
 		gpio_set_value(pericom_data->switch_gpio1, 0);
 
         msleep(30);
-		pi5usb_set_msm_usb_host_mode(true);
+		dwc3_set_msm_usb_host_mode(true);
 		gpio_set_value(pericom_data->cc1_pwr_gpio, 0);
 		gpio_set_value(pericom_data->cc2_pwr_gpio, 0);
 		//pr_info("ptn5150 set usb to host mode\n");
@@ -531,7 +531,7 @@ static void pericom_30216c_irq_serice(struct work_struct *work)
 			wcd_mbhc_plug_detect();
 		}
 
-		pi5usb_set_msm_usb_host_mode(false);/*if not simulate disconnect, open*/
+		dwc3_set_msm_usb_host_mode(false);/*if not simulate disconnect, open*/
         cclogic_updata_port_state(0);/*"cc_state: none"*/
         cclogic_updata_port_polarity(0); /* no typec usb connected*/
         if (typec_set_cc_state) {
@@ -548,7 +548,7 @@ static void pericom_30216c_irq_serice(struct work_struct *work)
             pr_info("pericom UFP is attached!\n");
             gpio_set_value(pericom_data->switch_gpio1, 0);/*MIC*/
             cclogic_set_vbus(1);
-            pi5usb_set_msm_usb_host_mode(true);
+            dwc3_set_msm_usb_host_mode(true);
             cclogic_updata_port_state(2);/*"cc_state: dfp"*/
             //check cc orientation
             pericom_30216c_i2c_read(pericom_data,  reg, 4);
