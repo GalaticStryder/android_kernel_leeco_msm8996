@@ -471,7 +471,7 @@ struct cyccg_platform_data {
 static struct cyccg_platform_data *cyccg_pdata;
 static struct cyccg *g_cyccg;
 static int cyccg_soft_reset = 0;
-extern int pi5usb_set_msm_usb_host_mode(bool mode);
+extern int dwc3_set_msm_usb_host_mode(bool mode);
 extern int wcd_mbhc_plug_detect(void);
 extern void usb_audio_if_letv(bool *letv, int *pid);
 extern void cclogic_set_audio_mode_register(void (*func)(bool));
@@ -983,7 +983,7 @@ void cyccg_cclogic_set_audio_mode(bool mode)
 		 */
 		msleep(50);
 
-		pi5usb_set_msm_usb_host_mode(false);
+		dwc3_set_msm_usb_host_mode(false);
 		cclogic_set_vconn(true);
 
 		typec_vbus_vconn_state = true;
@@ -1017,7 +1017,7 @@ void cyccg_cclogic_set_audio_mode(bool mode)
 			cyccg_analog_headset_plugin = false;
 		}
 		msleep(60);
-		pi5usb_set_msm_usb_host_mode(true);
+		dwc3_set_msm_usb_host_mode(true);
 		pr_info("cyccg set usb to host mode\n");
 		pdata->mode = DFP_MODE;
 		typec_headset_with_analog = 0;
@@ -1092,7 +1092,7 @@ static int cyccg_sync_ap_status(struct cyccg *cyccg,
 		cclogic_updata_port_state(0);
 		pr_info("cyccg disable usb host mode,when cable disconnect\n");
 		cclogic_set_vbus(0);
-		pi5usb_set_msm_usb_host_mode(false);
+		dwc3_set_msm_usb_host_mode(false);
 		if (typec_headset_with_analog != -1) {
 			pr_info("%s: clear type-c connect state!\n", __func__);
 			typec_headset_with_analog = -1;
@@ -1193,7 +1193,7 @@ static int cyccg_sync_ap_status(struct cyccg *cyccg,
 			gpio_set_value(cyccg_pdata->gpio_uart_sw, 1);
 			gpio_set_value(cyccg_pdata->gpio_ad_sel, 0);
 			pr_info("cyccg set usb to host mode\n");
-			pi5usb_set_msm_usb_host_mode(true);
+			dwc3_set_msm_usb_host_mode(true);
 			cyccg_pdata->mode = DFP_MODE;//mobile is DFP, sink device is UFP
 			cclogic_updata_port_state(2);
 //letv_pd s
