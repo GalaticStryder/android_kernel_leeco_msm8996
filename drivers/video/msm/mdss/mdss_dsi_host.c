@@ -3051,7 +3051,7 @@ bool mdss_dsi_ack_err_status(struct mdss_dsi_ctrl_pdata *ctrl)
 			(ctrl->status_mode == ESD_BTA) && (status & 0x1008000))
 			return false;
 
-		pr_err("%s: status=%x\n", __func__, status);
+		pr_debug("%s: status=%x\n", __func__, status);
 		ret = true;
 	}
 
@@ -3114,7 +3114,7 @@ static bool mdss_dsi_fifo_status(struct mdss_dsi_ctrl_pdata *ctrl)
 	if (status & 0xcccc4409) {
 		MIPI_OUTP(base + 0x000c, status);
 
-		pr_err("%s: status=%x\n", __func__, status);
+		pr_debug("%s: status=%x\n", __func__, status);
 
 		/*
 		 * if DSI FIFO overflow is masked,
