@@ -59,24 +59,18 @@
 #include "debug.h"
 #include "xhci.h"
 
-/* Those constants are not the same
- * on stock Kernel, hum... */
-#ifdef CONFIG_MACH_LEECO
-#define DWC3_ACA_CHG_MAX 900
-#define DWC3_CDP_CHG_MAX 1000
-#define DWC3_IDEV_CHG_MAX 1400
-#define DWC3_HVDCP_CHG_MAX 1200
-static struct dwc3_msm *_msm_dwc;
-#else
 #define DWC3_IDEV_CHG_MAX 1500
 #define DWC3_HVDCP_CHG_MAX 1800
-#endif
 
 /* AHB2PHY register offsets */
 #define PERIPH_SS_AHB2PHY_TOP_CFG 0x10
 
 /* AHB2PHY read/write waite value */
 #define ONE_READ_WRITE_WAIT 0x11
+
+#ifdef CONFIG_MACH_LEECO
+static struct dwc3_msm *_msm_dwc;
+#endif
 
 /* cpu to fix usb interrupt */
 static int cpu_to_affin;
@@ -100,18 +94,6 @@ MODULE_PARM_DESC(hvdcp_max_current, "max current drawn for HVDCP charger");
 int dcp_max_current = DWC3_IDEV_CHG_MAX;
 module_param(dcp_max_current, int, S_IRUGO | S_IWUSR);
 MODULE_PARM_DESC(dcp_max_current, "max current drawn for DCP charger");
-
-#ifdef CONFIG_MACH_LEECO
-/* Max current to be drawn for CDP charger */
-int cdp_max_current = DWC3_CDP_CHG_MAX;
-module_param(cdp_max_current, int, S_IRUGO | S_IWUSR);
-MODULE_PARM_DESC(cdp_max_current, "max current drawn for CDP charger");
-
-/* Max current to be drawn for ACA charger */
-int aca_max_current = DWC3_ACA_CHG_MAX;
-module_param(aca_max_current, int, S_IRUGO | S_IWUSR);
-MODULE_PARM_DESC(aca_max_current, "max current drawn for ACA charger");
-#endif
 
 /* XHCI registers */
 #define USB3_HCSPARAMS1		(0x4)
@@ -2403,7 +2385,7 @@ static irqreturn_t msm_dwc3_pwr_irq_thread(int irq, void *_mdwc)
 }
 
 #ifdef CONFIG_MACH_LEECO
-int pi5usb_set_msm_usb_host_mode(bool mode)
+int dwc3_set_msm_usb_host_mode(bool mode)
 {
 	struct dwc3_msm *mdwc = NULL;
 	struct dwc3 *dwc = NULL;
@@ -2417,30 +2399,20 @@ int pi5usb_set_msm_usb_host_mode(bool mode)
 	dev_err(mdwc->dev, "%s = %s_mode.\n", __func__, mode?"host":"device");
 
 	if (mode) {
-		/* host mode:bsv=0,id=0 */
-		//mdwc->ext_xceiv.id = false;
 		mdwc->id_state = DWC3_ID_GROUND;
 	} else {
-		/* device mode:bsv=1,id=1 */
-		//mdwc->ext_xceiv.id = true;
 		mdwc->id_state = DWC3_ID_FLOAT;
 	}
 
 	if (atomic_read(&dwc->in_lpm)) {
-		dev_dbg(mdwc->dev, "%s: calling resume_work\n", __func__);
 		dwc3_resume_work(&mdwc->resume_work.work);
 	} else {
-		dev_dbg(mdwc->dev, "%s: notifying xceiv event\n", __func__);
-		//if (mdwc->otg_xceiv)
-			//mdwc->ext_xceiv.notify_ext_events(mdwc->otg_xceiv->otg,
-				//DWC3_EVENT_XCEIV_STATE);
-
 		dwc3_ext_event_notify(mdwc);
 	}
 
 	return mode;
 }
-EXPORT_SYMBOL(pi5usb_set_msm_usb_host_mode);
+EXPORT_SYMBOL(dwc3_set_msm_usb_host_mode);
 
 static int _msm_usb_vbus_on(struct dwc3_msm *_mdwc)
 {
@@ -3741,7 +3713,7 @@ static int dwc3_msm_gadget_vbus_draw(struct dwc3_msm *mdwc, unsigned mA)
 		return 0;
 
 	if (mdwc->chg_type != DWC3_INVALID_CHARGER) {
-		dev_info(mdwc->dev,
+		dev_err(mdwc->dev,
 			"SKIP setting power supply type again,chg_type = %d\n",
 			mdwc->chg_type);
 		goto skip_psy_type;
@@ -3754,18 +3726,9 @@ static int dwc3_msm_gadget_vbus_draw(struct dwc3_msm *mdwc, unsigned mA)
 		power_supply_type = POWER_SUPPLY_TYPE_USB;
 	else if (mdwc->chg_type == DWC3_CDP_CHARGER)
 		power_supply_type = POWER_SUPPLY_TYPE_USB_CDP;
-#ifdef CONFIG_MACH_LEECO
-	/* Proprietary charger triggers ACA charging below. */
-	else if (mdwc->chg_type == DWC3_DCP_CHARGER)
-#else
 	else if (mdwc->chg_type == DWC3_DCP_CHARGER ||
 			mdwc->chg_type == DWC3_PROPRIETARY_CHARGER)
-#endif
 		power_supply_type = POWER_SUPPLY_TYPE_USB_DCP;
-#ifdef CONFIG_MACH_LEECO
-	else if (mdwc->chg_type == DWC3_PROPRIETARY_CHARGER)
-		power_supply_type = POWER_SUPPLY_TYPE_USB_ACA;
-#endif
 	else
 		power_supply_type = POWER_SUPPLY_TYPE_UNKNOWN;
 
@@ -3774,12 +3737,7 @@ static int dwc3_msm_gadget_vbus_draw(struct dwc3_msm *mdwc, unsigned mA)
 skip_psy_type:
 
 	if (mdwc->chg_type == DWC3_CDP_CHARGER)
-#ifdef CONFIG_MACH_LEECO
-		/* Can we go up to 1600mA? */
-		mA = DWC3_CDP_CHG_MAX;
-#else
 		mA = DWC3_IDEV_CHG_MAX;
-#endif
 
 	/* Save bc1.2 max_curr if type-c charger later moves to diff mode */
 	mdwc->bc1p2_current_max = mA;
@@ -3948,25 +3906,13 @@ static void dwc3_otg_sm_work(struct work_struct *w)
 			dbg_event(0xFF, "undef_b_sess_vld", 0);
 			switch (mdwc->chg_type) {
 			case DWC3_DCP_CHARGER:
-#ifndef CONFIG_MACH_LEECO
-			/* Proprietary charger is actually ACA. */
 			case DWC3_PROPRIETARY_CHARGER:
-#endif
 				dev_dbg(mdwc->dev, "DCP charger\n");
 				dwc3_msm_gadget_vbus_draw(mdwc,
 						dcp_max_current);
 				atomic_set(&dwc->in_lpm, 1);
 				pm_relax(mdwc->dev);
 				break;
-#ifdef CONFIG_MACH_LEECO
-			case DWC3_PROPRIETARY_CHARGER:
-				dev_dbg(mdwc->dev, "ACA charger\n");
-				dwc3_msm_gadget_vbus_draw(mdwc,
-						aca_max_current);
-				atomic_set(&dwc->in_lpm, 1);
-				pm_relax(mdwc->dev);
-				break;
-#endif
 			case DWC3_CDP_CHARGER:
 			case DWC3_SDP_CHARGER:
 				atomic_set(&dwc->in_lpm, 0);
@@ -4017,31 +3963,14 @@ static void dwc3_otg_sm_work(struct work_struct *w)
 			dev_dbg(mdwc->dev, "b_sess_vld\n");
 			switch (mdwc->chg_type) {
 			case DWC3_DCP_CHARGER:
-#ifndef CONFIG_MACH_LEECO
-			/* Proprietary is not DCP, it's ACA. */
 			case DWC3_PROPRIETARY_CHARGER:
-#endif
 				dev_dbg(mdwc->dev, "lpm, DCP charger\n");
 				dwc3_msm_gadget_vbus_draw(mdwc,
 						dcp_max_current);
 				break;
-#ifdef CONFIG_MACH_LEECO
-			/* Should be the target for USB 3.0. */
-			case DWC3_PROPRIETARY_CHARGER:
-				dev_dbg(mdwc->dev, "lpm, ACA charger\n");
-				dwc3_msm_gadget_vbus_draw(mdwc,
-						aca_max_current);
-				break;
-#endif
 			case DWC3_CDP_CHARGER:
 				dwc3_msm_gadget_vbus_draw(mdwc,
-#ifdef CONFIG_MACH_LEECO
-						/* We should be able to set
-						 * this to 1500mA as well. */
-						DWC3_CDP_CHG_MAX);
-#else
 						DWC3_IDEV_CHG_MAX);
-#endif
 				/* fall through */
 			case DWC3_SDP_CHARGER:
 				/*
@@ -4064,10 +3993,6 @@ static void dwc3_otg_sm_work(struct work_struct *w)
 				dwc3_otg_start_peripheral(mdwc, 1);
 				mdwc->otg_state = OTG_STATE_B_PERIPHERAL;
 				work = 1;
-#ifdef CONFIG_MACH_LEECO
-				/* If USB is 2.0, set 500mA. */
-				dwc3_msm_gadget_vbus_draw(mdwc, 500);
-#endif
 				break;
 			/* fall through */
 			default:
@@ -4209,14 +4134,9 @@ static int dwc3_msm_pm_suspend(struct device *dev)
 	dev_dbg(dev, "dwc3-msm PM suspend\n");
 	dbg_event(0xFF, "PM Sus", 0);
 
-#ifndef CONFIG_MACH_LEECO
 	flush_workqueue(mdwc->dwc3_wq);
-#endif
 	if (!atomic_read(&dwc->in_lpm)) {
 		dev_err(mdwc->dev, "Abort PM suspend!! (USB is outside LPM)\n");
-#ifdef CONFIG_MACH_LEECO
-		pm_wakeup_event(dev, 2000);
-#endif
 		return -EBUSY;
 	}
 

@@ -6,11 +6,8 @@ config MACH_LEECO
 	depends on ARCH_MSM8996
 	select USB_CCLOGIC
 	select USB_CYCCG
-	select ANALOGIX_OHIO
-	select LETVS_CLASS
-	select TOUCHKEY_ATMEGA48A_LETV
-	select TOUCHSCREEN_SYNAPTICS_DSX_LETV
 	select MSM_I2C_FLASH
+	select LETVS_CLASS
 	default n
 	help
 	  Once selected, this will apply common Kernel changes
@@ -21,9 +18,8 @@ config MACH_LEECO
 
 	  * USB CC Logic -> USB Type-C
 	  * USB Cypress -> USB Type-C
-	  * Analogix -> USB Type-C
-	  * ATmega48A -> Capacitive Keys
 	  * MSM I2C Flash -> Camera's Flash
+	  * LeTV Class -> Probe Helper
 
 	  This can be used to apply patches from LeEco without touching
 	  other devices or the general purpose of the Linux Kernel.
@@ -60,6 +56,7 @@ config MACH_LEECO_ZL1
 	select SND_SOC_MAX98927
 	select SND_SOC_WCD_MBHC_ZL1
 	select TOUCHSCREEN_FTS
+	select TOUCHSCREEN_SYNAPTICS_DSX_LETV
 	select TOUCHSCREEN_SYNAPTICS_DSX_CORE_LETV
 	select TOUCHSCREEN_SYNAPTICS_DSX_RMI_DEV_LETV
 	select TOUCHSCREEN_SYNAPTICS_DSX_FW_UPDATE_LETV

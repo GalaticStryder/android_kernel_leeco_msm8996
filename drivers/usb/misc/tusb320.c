@@ -106,7 +106,7 @@ struct tusb320_dev	{
 	unsigned int 		cc2_pwr_gpio;
 };
 
-extern int pi5usb_set_msm_usb_host_mode(bool mode);
+extern int dwc3_set_msm_usb_host_mode(bool mode);
 
 static int tusb320_i2c_rxdata(struct i2c_client *client, char *rxdata, int length)
 {
@@ -223,7 +223,7 @@ void tusb320_cclogic_set_audio_mode(bool mode)
 	if (mode) {
 		pr_info("tusb320 switch to audio mode nyx\n");
 		msleep(50);
-		pi5usb_set_msm_usb_host_mode(false);/*simulate plugout*/
+		dwc3_set_msm_usb_host_mode(false);/*simulate plugout*/
 		//msm_usb_vbus_on(NULL);
 		//msm_usb_vbus_set(NULL, 1, true);
 		gpio_set_value(tusb320_dev->switch_gpio2, 1);/*Headphone*/
@@ -258,7 +258,7 @@ void tusb320_cclogic_set_audio_mode(bool mode)
 		gpio_set_value(tusb320_dev->switch_gpio1, 0);
 
 		msleep(30);
-		pi5usb_set_msm_usb_host_mode(true);
+		dwc3_set_msm_usb_host_mode(true);
 		gpio_set_value(tusb320_dev->cc1_pwr_gpio, 0);
 		gpio_set_value(tusb320_dev->cc2_pwr_gpio, 0);
 		//pr_info("tusb320 set usb to host mode\n");
@@ -527,7 +527,7 @@ static void tusb320_status_check(struct work_struct *work)
 			pr_debug("%s, audio headset plug out!!\n", __func__);
 			wcd_mbhc_plug_detect();
 		}
-		pi5usb_set_msm_usb_host_mode(false);/*if not simulate disconnect, open*/
+		dwc3_set_msm_usb_host_mode(false);/*if not simulate disconnect, open*/
 		cclogic_updata_port_state(0);/*"cc_state: none"*/
 		cclogic_updata_port_polarity(0); /* no typec usb connected*/
 		if (typec_set_cc_state) {
@@ -541,7 +541,7 @@ static void tusb320_status_check(struct work_struct *work)
 		//connect DFP device
 		gpio_set_value(tusb320_dev->switch_gpio1, 0);/*MIC*/
 		cclogic_set_vbus(1);
-		pi5usb_set_msm_usb_host_mode(true);
+		dwc3_set_msm_usb_host_mode(true);
 		cclogic_updata_port_state(2);/*"cc_state: dfp"*/
 		pr_info("tusb320_status_check TYPEC_ATTACHED_AS_DFP.\n");
 		//check cc orientation
