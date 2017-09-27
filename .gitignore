@@ -99,3 +99,6 @@ all.config
 
 # compilation script file
 compile.sh
+
+# compilation output folder
+out/
