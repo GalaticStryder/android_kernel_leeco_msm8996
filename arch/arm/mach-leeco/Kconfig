@@ -118,7 +118,6 @@ config MACH_LEECO_ZL1
 	select IR_MAXQ616
 	select TOUCHSCREEN_FTS
 	select SND_SOC_MAX98927
-	select SND_SOC_WCD_MBHC_ZL1
 	select NFC_LETV
 	help
 	  Once selected, barebones Le Pro 3 tuning and drivers will take effect.
@@ -150,14 +149,5 @@ config MACH_LEECO_ZL1_OEM
 
 	  If unsure, say Y here to avoid issues when running stock Android firmware. Otherwise,
 	  say N.
-
-config SND_SOC_WCD_MBHC_ZL1
-	depends on MACH_LEECO_ZL1
-	tristate "Custom MBHC codec for the Le Pro 3 (ZL1)"
-	help
-	  Once selected, this will compile an alternative version of the
-	  MBHC sound codec, specific for the Le Pro 3.
-
-	  This option is automatically enabled when MACH_LEECO_ZL1 is selected.
 
 endmenu
