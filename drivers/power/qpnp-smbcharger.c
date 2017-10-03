@@ -270,7 +270,7 @@ struct smbchg_chip {
 	struct power_supply		*usb_psy;
 	struct power_supply		batt_psy;
 	struct power_supply		dc_psy;
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_AB_CHARGER
 	struct power_supply		le_ab_psy;
 #endif
 	struct power_supply		*bms_psy;
@@ -285,9 +285,11 @@ struct smbchg_chip {
 	struct work_struct		usb_set_online_work;
 	struct delayed_work		vfloat_adjust_work;
 	struct delayed_work		hvdcp_det_work;
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_AB_CHARGER
 	struct delayed_work	    letv_pd_set_vol_cur_work;
 	struct delayed_work		pd_charger_init_work;
+#endif
+#ifdef CONFIG_MACH_LEECO_WEAK_CHARGER
 	struct delayed_work		weak_charger_timeout_work;
 #endif
 #ifdef CONFIG_MACH_LEECO_ZL1
@@ -296,7 +298,7 @@ struct smbchg_chip {
 #endif
 	spinlock_t			sec_access_lock;
 	struct mutex			therm_lvl_lock;
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_AB_CHARGER
 	struct mutex			usb_therm_lvl_lock;
 	struct mutex			black_call_mode_lock;
 	struct mutex			quick_charge_mode_lock;
@@ -622,7 +624,7 @@ module_param_named(
 #endif
 #endif
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_AB_CHARGER
 enum le_pd_type {
 	LE_PD_TYPE_UNKNOWN = 0,
 	LE_PD_TYPE_EV_24ACN,
@@ -651,7 +653,6 @@ static int new_pd_vol = 0;
 static int pre_pd_vol = 0;
 static int pd_det_flag = 0;
 static int le_pd_type_flag = 0;
-/* Ich denke 'ignore_otgidpin' ist sehr rubbish! */
 static bool ignore_otgidpin = false;
 static bool delay_pd_state = false;
 static int pd_init_voltage = 0;
@@ -959,7 +960,7 @@ static bool is_otg_present_schg(struct smbchg_chip *chip)
 	}
 	usbid_val = (usbid_reg[0] << 8) | usbid_reg[1];
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_AB_CHARGER
 	if (ignore_otgidpin == false) {
 		if (usbid_val > USBID_GND_THRESHOLD) {
 			pr_smb(PR_STATUS, "USBID = 0x%04x, too high to be ground\n",
@@ -3382,7 +3383,7 @@ static int set_usb_current_limit_vote_cb(struct device *dev,
 	return 0;
 }
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_AB_CHARGER
 /*
  * Control input current when in black call mode.
  */
@@ -7272,7 +7273,7 @@ static int smbchg_dc_is_writeable(struct power_supply *psy,
 	return rc;
 }
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_AB_CHARGER
 static char *smbchg_le_ab_supplicants[] = {
 	"bms",
 };
@@ -7654,7 +7655,7 @@ out:
 	return IRQ_HANDLED;
 }
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_WEAK_CHARGER
 #define WEAK_CHAEGER_CHECK_DELAY_MS 1000
 #define WEAK_CHARGER_CURRENT_LIMIT_MA 1200
 static void smbchg_weak_chg_timeout(struct work_struct *work)
@@ -9731,8 +9732,7 @@ static void rerun_hvdcp_det_if_necessary(struct smbchg_chip *chip)
 	}
 }
 
-#ifdef CONFIG_MACH_LEECO
-/* TODO NOTE WARNING: Work it out. */
+#ifdef CONFIG_MACH_LEECO_AB_CHARGER
 #define PD_VBUS_LOW_THRESHOLD 5200
 #define PD_VBUS_HIGH_THRESHOLD 9000
 #define PD_CABLE_LOSS_LVL0 800
@@ -10048,7 +10048,7 @@ static int smbchg_probe(struct spmi_device *spmi)
 		}
 	}
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_AB_CHARGER
 	if (of_property_read_bool(spmi->dev.of_node, "qcom,ignore_otgid")) {
 		ignore_otgidpin = true;
 	}
@@ -10149,11 +10149,13 @@ static int smbchg_probe(struct spmi_device *spmi)
 			smbchg_parallel_usb_en_work);
 	INIT_DELAYED_WORK(&chip->vfloat_adjust_work, smbchg_vfloat_adjust_work);
 	INIT_DELAYED_WORK(&chip->hvdcp_det_work, smbchg_hvdcp_det_work);
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_AB_CHARGER
 	INIT_DELAYED_WORK(&chip->letv_pd_set_vol_cur_work,
 		smbchg_letv_pd_set_vol_cur_work);
 	INIT_DELAYED_WORK(&chip->pd_charger_init_work,
 		smbchg_pd_charger_init_work);
+#endif
+#ifdef CONFIG_MACH_LEECO_WEAK_CHARGER
 	INIT_DELAYED_WORK(&chip->weak_charger_timeout_work, smbchg_weak_chg_timeout);
 #endif
 #ifdef CONFIG_MACH_LEECO_ZL1
@@ -10268,7 +10270,7 @@ static int smbchg_probe(struct spmi_device *spmi)
 			goto unregister_batt_psy;
 		}
 	}
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_AB_CHARGER
 	chip->le_ab_psy.name		= "le_ab";
 	chip->le_ab_psy.type		= POWER_SUPPLY_TYPE_LE_AB;
 	chip->le_ab_psy.get_property	= smbchg_le_ab_get_property;
@@ -10296,7 +10298,7 @@ static int smbchg_probe(struct spmi_device *spmi)
 			dev_err(chip->dev,
 					"Unable to register charger led: %d\n",
 					rc);
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_AB_CHARGER
 			goto unregister_le_ab_psy;
 #else
 			goto unregister_dc_psy;
@@ -10372,7 +10374,7 @@ unregister_led_class:
 		led_classdev_unregister(&chip->led_cdev);
 unregister_dc_psy:
 	power_supply_unregister(&chip->dc_psy);
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_AB_CHARGER
 unregister_le_ab_psy:
 	power_supply_unregister(&chip->le_ab_psy);
 #endif
