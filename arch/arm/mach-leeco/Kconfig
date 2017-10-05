@@ -1,11 +1,10 @@
-# LeTV/LeEco devices
+# Configuration menu for LeEco devices
 menu "LeEco device configuration"
 
 config MACH_LEECO
-	bool "Kernel support for LeEco (LeTV) devices"
+	bool "Kernel support for LeEco devices"
 	depends on ARCH_MSM8996
 	select USB_CCLOGIC
-	select USB_CYCCG
 	select MSM_I2C_FLASH
 	select LETVS_CLASS
 	default n
@@ -28,7 +27,7 @@ config MACH_LEECO
 
 config MACH_LEECO_OEM
 	depends on MACH_LEECO
-	bool "OEM extensions for LeEco (LeTV) devices"
+	bool "OEM extensions for LeEco devices"
 	help
 	  Once selected, this option will bring-in OEM changes in Kernel source code, they
 	  aren't usually needed.
@@ -38,12 +37,32 @@ config MACH_LEECO_OEM
 
 config MACH_LEECO_DEBUG
 	depends on MACH_LEECO
-	bool "Debugging conditionals for LeEco (LeTV) devices"
+	bool "Debugging conditionals for LeEco devices"
 	help
 	  Once selected, this option will enable most OEM debugging code in Kernel, this is
 	  not needed unless you're debugging changes on those OEM drivers.
 
 	  If unsure, say N.
+
+config MACH_LEECO_PD
+	depends on MACH_LEECO
+	select USB_CYCCG
+	bool "Support USB PD control protocol for LeEco devices"
+	help
+	  Once selected, this option will enable support for LeEco's PD infrastructure. This
+	  new USB infrastructure is a dependency for some USB controllers like the ANX7418,
+	  it will be available as 'le_ab' power supply type in SMB charger interface.
+
+	  This will select the CYCCG USB driver as a dependency to poll temperature from the
+	  USB controller.
+
+	  If unsure, say N.
+
+config MACH_LEECO_X2
+	tristate
+	depends on MACH_LEECO
+	select ANALOGIX_OHIO
+	# Not ready!
 
 config MACH_LEECO_ZL1
 	bool "Kernel support for the Le Pro 3 (ZL1)"

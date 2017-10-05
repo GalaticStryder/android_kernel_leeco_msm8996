@@ -67,7 +67,6 @@ static int headset_detect_enable = -1;
 static int headset_swap_backmic = -1;
 static bool mbhc_hold_pending = false;
 static bool micbias2_on_state = false;
-extern bool letv_typec_plug_state;
 static int button_intr_count = 0;
 bool letv_typec_4_pole = false;
 extern int tasha_codec_enable_standalone_micbias(struct snd_soc_codec *codec,
@@ -625,8 +624,7 @@ static void wcd_mbhc_report_plug(struct wcd_mbhc *mbhc, int insertion,
 		hphlocp_off_report(mbhc, SND_JACK_OC_HPHL);
 		mbhc->current_plug = MBHC_PLUG_TYPE_NONE;
 #ifdef CONFIG_MACH_LEECO_ZL1
-		if ((jack_type == SND_JACK_HEADSET) &&
-			letv_typec_plug_state) {
+		if (jack_type == SND_JACK_HEADSET) {
 			pr_info("letv_typec disable micbias2!\n");
 			WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_MICB_CTRL, 0);
 			tasha_codec_enable_standalone_micbias(mbhc->codec, 1, false);
@@ -760,8 +758,7 @@ static void wcd_mbhc_report_plug(struct wcd_mbhc *mbhc, int insertion,
 				    WCD_MBHC_JACK_MASK);
 		wcd_mbhc_clr_and_turnon_hph_padac(mbhc);
 #ifdef CONFIG_MACH_LEECO_ZL1
-		if ((jack_type == SND_JACK_HEADSET) &&
-			letv_typec_plug_state) {
+		if (jack_type == SND_JACK_HEADSET) {
 			pr_info("%s: letv_typec enable micbias2!\n", __func__);
 			tasha_codec_enable_standalone_micbias(mbhc->codec, 1, true);
 			micbias2_on_state = true;
