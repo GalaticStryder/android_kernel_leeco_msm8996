@@ -67,7 +67,6 @@ config MACH_LEECO_PD
 config MACH_LEECO_X2
 	bool "Kernel support for the Le Max 2 (X2)"
 	depends on MACH_LEECO
-	select MACH_LEECO_PD
 	select ANALOGIX_OHIO
 	select BACKLIGHT_LM3697
 	select DEEP_SLEEP_LED_SWITCH
@@ -85,7 +84,6 @@ config MACH_LEECO_X2
 
 	  The following drivers will be selected in Kernel:
 
-	  * LeEco PD Infrastructure -> USB Type-C
 	  * Analogix -> USB Type-C
 	  * LM3697 -> Backlight
 	  * TI DRV2604L -> Vibrator

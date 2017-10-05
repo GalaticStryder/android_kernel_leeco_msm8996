@@ -1,4 +1,9 @@
 config ANALOGIX_OHIO
 	tristate "Analogix Type-C interface support"
+	select MACH_LEECO_PD
 	help
 	  Analogix Type-C interface chip support for USB PD protocol.
+
+	  This option depends on the OEM PD protocol in SMB charger interface.
+
+	  If unsure, say N.

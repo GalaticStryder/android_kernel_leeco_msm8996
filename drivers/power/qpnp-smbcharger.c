@@ -239,6 +239,8 @@ struct smbchg_chip {
 	unsigned int			usb_therm_lvl_sel;
 	unsigned int			*usb_thermal_mitigation;
 	unsigned int			usb_prev_therm_lvl;
+#endif
+#ifdef CONFIG_MACH_LEECO_PD
 	unsigned int			prev_black_call_mode;
 	unsigned int			prev_quick_charge_mode;
 #endif
@@ -274,7 +276,7 @@ struct smbchg_chip {
 	struct power_supply		*usb_psy;
 	struct power_supply		batt_psy;
 	struct power_supply		dc_psy;
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	struct power_supply		le_ab_psy;
 #endif
 	struct power_supply		*bms_psy;
@@ -289,9 +291,11 @@ struct smbchg_chip {
 	struct work_struct		usb_set_online_work;
 	struct delayed_work		vfloat_adjust_work;
 	struct delayed_work		hvdcp_det_work;
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	struct delayed_work	    letv_pd_set_vol_cur_work;
 	struct delayed_work		pd_charger_init_work;
+#endif
+#ifdef CONFIG_MACH_LEECO
 	struct delayed_work		weak_charger_timeout_work;
 #endif
 #ifdef CONFIG_MACH_LEECO_ZL1
@@ -302,6 +306,8 @@ struct smbchg_chip {
 	struct mutex			therm_lvl_lock;
 #ifdef CONFIG_MACH_LEECO
 	struct mutex			usb_therm_lvl_lock;
+#endif
+#ifdef CONFIG_MACH_LEECO_PD
 	struct mutex			black_call_mode_lock;
 	struct mutex			quick_charge_mode_lock;
 #endif
@@ -413,7 +419,7 @@ static int mhl_insert_flag;
 #define SW_AICL_ICL_VOTER	"SW_AICL_ICL_VOTER"
 #define CHG_SUSPEND_WORKAROUND_ICL_VOTER "CHG_SUSPEND_WORKAROUND_ICL_VOTER"
 #define	SHUTDOWN_WORKAROUND_ICL_VOTER "SHUTDOWN_WORKAROUND_ICL_VOTER"
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 #define BLACK_CALL_MODE_VOTER	"BLACK_CALL_MODE_VOTER"
 #define QUICK_CHARGE_MODE_VOTER "QUICK_CHARGE_MODE_VOTER"
 #endif
@@ -613,7 +619,7 @@ module_param_named(
 #endif
 #endif
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 enum le_pd_type {
 	LE_PD_TYPE_UNKNOWN = 0,
 	LE_PD_TYPE_EV_24ACN,
@@ -642,14 +648,14 @@ static int new_pd_vol = 0;
 static int pre_pd_vol = 0;
 static int pd_det_flag = 0;
 static int le_pd_type_flag = 0;
-/* Ich denke 'ignore_otgidpin' ist sehr rubbish! */
 static bool ignore_otgidpin = false;
 static bool delay_pd_state = false;
 static int pd_init_voltage = 0;
 static int pd_init_ma = 0;
+#endif
 
+#ifdef CONFIG_MACH_LEECO
 static bool hvdcp_aicl_rerun = false;
-
 static int smbchg_float_voltage_set(struct smbchg_chip *chip, int vfloat_mv);
 #endif
 
@@ -905,6 +911,7 @@ int dw3_id_state = RID_UNKNOW;
 #endif
 
 #ifdef CONFIG_MACH_LEECO
+/* TODO: Condition to CCLOGIC. */
 extern void cclogic_set_smbcharge_init_done(int done);
 #endif
 
@@ -950,7 +957,7 @@ static bool is_otg_present_schg(struct smbchg_chip *chip)
 	}
 	usbid_val = (usbid_reg[0] << 8) | usbid_reg[1];
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	if (ignore_otgidpin == false) {
 		if (usbid_val > USBID_GND_THRESHOLD) {
 			pr_smb(PR_STATUS, "USBID = 0x%04x, too high to be ground\n",
@@ -1098,7 +1105,7 @@ static int get_rid_state(struct smbchg_chip *chip)
 
 static char *usb_type_str[] = {
 	"SDP",		/* bit 0 */
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	"ACA",		/* bit 1 */
 #else
 	"OTHER",	/* bit 1 */
@@ -1126,14 +1133,14 @@ static inline char *get_usb_type_name(int type)
 
 static enum power_supply_type usb_type_enum[] = {
 	POWER_SUPPLY_TYPE_USB,		/* bit 0 */
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	POWER_SUPPLY_TYPE_USB_ACA,	/* bit 1, report ACA */
 #else
 	POWER_SUPPLY_TYPE_USB_DCP,	/* bit 1 */
 #endif
 	POWER_SUPPLY_TYPE_USB_DCP,	/* bit 2 */
 	POWER_SUPPLY_TYPE_USB_CDP,	/* bit 3 */
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	POWER_SUPPLY_TYPE_UNKNOWN,	/* bit 4 error case, report UNKNOWN */
 #else
 	POWER_SUPPLY_TYPE_USB_DCP,	/* bit 4 error case, report DCP */
@@ -1417,7 +1424,8 @@ static int get_prop_batt_voltage_now(struct smbchg_chip *chip)
 	return uv;
 }
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
+/* TODO: Condition to ANX7418. */
 int get_charger_charging_current(void)
 {
 	int cur;
@@ -1762,7 +1770,7 @@ static const int aicl_rerun_period_schg_lite[] = {
 	360,
 };
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 static const int Vol_raw[] = {
 	3000,
 	3200,
@@ -2210,7 +2218,7 @@ static int smbchg_set_usb_current_max(struct smbchg_chip *chip,
 			if (rc < 0)
 				pr_err("Couldn't set override rc = %d\n", rc);
 		}
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	case POWER_SUPPLY_TYPE_USB_PD:
 		/* use override for PD */
 		rc = smbchg_masked_write(chip,
@@ -2840,7 +2848,7 @@ static bool smbchg_is_parallel_usb_ok(struct smbchg_chip *chip,
 		return false;
 	}
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	/* Add conditionals for LeTV PD support. */
 	if ((get_usb_supply_type(type) == POWER_SUPPLY_TYPE_USB)
 		&& (chip->usb_supply_type != POWER_SUPPLY_TYPE_USB_PD)
@@ -3413,7 +3421,6 @@ static void btm_notify_dcin(enum qpnp_tm_state state, void *ctx)
 }
 
 #ifdef CONFIG_MACH_LEECO
-/* NOTE: Should we use SMBCHARGER_REGISTER or OEM_DEBUG? */
 static inline void sys_show_dump_reg(struct smbchg_chip *chip, u16 addr,
 		const char *name, struct seq_file *s)
 {
@@ -3579,7 +3586,7 @@ static int set_usb_current_limit_vote_cb(struct votable *votable,
 	return 0;
 }
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 /*
  * Control input current when in black call mode.
  */
@@ -3675,7 +3682,9 @@ static int smbchg_quick_charge_icl_set(struct smbchg_chip *chip,
 	mutex_unlock(&chip->quick_charge_mode_lock);
 	return rc;
 }
+#endif
 
+#ifdef CONFIG_MACH_LEECO
 #ifdef CONFIG_MACH_LEECO_ZL1
 #if USB_THERMAL_DEBUG
 static int dump_thermal_table(struct smbchg_chip *chip)
@@ -3941,8 +3950,9 @@ static int smbchg_system_temp_level_set(struct smbchg_chip *chip,
 
 /*
  * Polling USB temperature to set icl, split from smbchg_system_temp_level_set.
+ * TODO: Un-split later...
  */
-static int smbchg_usbin_temp_level_set(struct smbchg_chip *chip,
+__maybe_unused static int smbchg_usbin_temp_level_set(struct smbchg_chip *chip,
 								int lvl_sel)
 {
 	int rc = 0;
@@ -5716,7 +5726,8 @@ static int smbchg_change_usb_supply_type(struct smbchg_chip *chip,
 		current_limit_ma = DEFAULT_SDP_MA;
 	else if (type == POWER_SUPPLY_TYPE_USB_CDP)
 		current_limit_ma = DEFAULT_CDP_MA;
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
+	/* NOTO: Seems to be unused, removing it later... */
 	else if (type == POWER_SUPPLY_TYPE_USB_ACA)
 		current_limit_ma = DEFAULT_ACA_MA;
 #endif
@@ -5724,7 +5735,7 @@ static int smbchg_change_usb_supply_type(struct smbchg_chip *chip,
 		current_limit_ma = smbchg_default_hvdcp_icl_ma;
 	else if (type == POWER_SUPPLY_TYPE_USB_HVDCP_3)
 		current_limit_ma = smbchg_default_hvdcp3_icl_ma;
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	else if (type == POWER_SUPPLY_TYPE_USB_PD)
 		current_limit_ma = pd_init_ma;
 	else if (type == POWER_SUPPLY_TYPE_USB_LE_PD)
@@ -5842,7 +5853,7 @@ static void smbchg_hvdcp_det_work(struct work_struct *work)
 		if (chip->psy_registered)
 			power_supply_changed(&chip->batt_psy);
 		smbchg_aicl_deglitch_wa_check(chip);
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 		/* Rerun aicl. */
 		hvdcp_aicl_rerun = true;
 #endif
@@ -5898,7 +5909,7 @@ static void restore_from_hvdcp_detection(struct smbchg_chip *chip)
 	/* Reset back to 5V unregulated */
 	rc = smbchg_sec_masked_write(chip,
 		chip->usb_chgpth_base + USBIN_CHGR_CFG,
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 		/* Continuous regulation 5V~9V. */
 		ADAPTER_ALLOWANCE_MASK, USBIN_ADAPTER_5V_9V_CONT);
 #else
@@ -6017,7 +6028,7 @@ static void handle_usb_removal(struct smbchg_chip *chip)
 	if (!chip->hvdcp_not_supported)
 		restore_from_hvdcp_detection(chip);
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	/* Reload PD variables on removal. */
 	if (pd_det_flag == 1) {
 		pd_det_flag = 0;
@@ -7165,8 +7176,7 @@ static void smbchg_external_power_changed(struct power_supply *psy)
 	rc = chip->usb_psy->get_property(chip->usb_psy,
 				POWER_SUPPLY_PROP_REAL_TYPE, &prop);
 
-/* POWER_SUPPLY_PROP_TYPE and POWER_SUPPLY_PROP_REAL_TYPE must be equal. */
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	/* Register custom LE charging modes as non SDP as well. */
 	rc = chip->usb_psy->get_property(chip->usb_psy,
 		POWER_SUPPLY_PROP_TYPE, &prop);
@@ -7268,7 +7278,7 @@ static enum power_supply_property smbchg_battery_properties[] = {
 	POWER_SUPPLY_PROP_RESTRICTED_CHARGING,
 	POWER_SUPPLY_PROP_ALLOW_HVDCP3,
 	POWER_SUPPLY_PROP_MAX_PULSE_ALLOWED,
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	POWER_SUPPLY_PROP_LE_USB_TEMP_LEVEL,
 #endif
 };
@@ -7360,7 +7370,7 @@ static int smbchg_battery_set_property(struct power_supply *psy,
 			power_supply_changed(&chip->batt_psy);
 		}
 		break;
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	/* Check thermal levels in PD. */
 	case POWER_SUPPLY_PROP_LE_USB_TEMP_LEVEL:
 		if (val->intval >= chip->usb_thermal_levels) {
@@ -7399,7 +7409,7 @@ static int smbchg_battery_is_writeable(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_RERUN_AICL:
 	case POWER_SUPPLY_PROP_RESTRICTED_CHARGING:
 	case POWER_SUPPLY_PROP_ALLOW_HVDCP3:
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	case POWER_SUPPLY_PROP_LE_USB_TEMP_LEVEL:
 #endif
 		rc = 1;
@@ -7449,7 +7459,7 @@ static int smbchg_battery_get_property(struct power_supply *psy,
 		val->intval = get_prop_batt_health(chip);
 		break;
 	case POWER_SUPPLY_PROP_TECHNOLOGY:
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 		val->intval = POWER_SUPPLY_TECHNOLOGY_LIPO;
 #else
 		val->intval = POWER_SUPPLY_TECHNOLOGY_LION;
@@ -7530,7 +7540,7 @@ static int smbchg_battery_get_property(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_MAX_PULSE_ALLOWED:
 		val->intval = chip->max_pulse_allowed;
 		break;
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	case POWER_SUPPLY_PROP_LE_USB_TEMP_LEVEL:
 		val->intval = chip->usb_therm_lvl_sel;
 		break;
@@ -7627,7 +7637,7 @@ static int smbchg_dc_is_writeable(struct power_supply *psy,
 	return rc;
 }
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 static char *smbchg_le_ab_supplicants[] = {
 	"bms",
 };
@@ -8229,6 +8239,7 @@ static irqreturn_t usbin_uv_handler(int irq, void *_chip)
 		goto out;
 
 #ifdef CONFIG_MACH_LEECO
+	/* TODO: Condition to OEM weak charger detection. */
 	if ((reg & USBIN_UV_BIT) && (reg & USBIN_SRC_DET_BIT)) {
 		chip->weak_chg_irq_count++;
 		pr_smb(PR_STATUS, "Very weak charger detected, count=%d\n", chip->weak_chg_irq_count);
@@ -8257,6 +8268,7 @@ static irqreturn_t usbin_uv_handler(int irq, void *_chip)
 			 * draw any current from it.
 			 */
 #ifdef CONFIG_MACH_LEECO
+			/* In this case this is a very weak charger. */
 			chip->very_weak_charger = true;
 #endif
 			rc = vote(chip->usb_suspend_votable,
@@ -8270,6 +8282,7 @@ static irqreturn_t usbin_uv_handler(int irq, void *_chip)
 			 * is only a matter of time when we get back here again
 			 */
 #ifdef CONFIG_MACH_LEECO
+			/* In this case this is a very weak charger. */
 			chip->very_weak_charger = true;
 #endif
 			rc = vote(chip->hw_aicl_rerun_disable_votable,
@@ -9944,7 +9957,7 @@ static int create_debugfs_entries(struct smbchg_chip *chip)
 		return -EINVAL;
 	}
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_DEBUG
 	ent = debugfs_create_file("charger_regs",
 				  S_IRUGO | S_IWUSR,
 				  chip->debug_root, chip,
@@ -10045,7 +10058,7 @@ static void rerun_hvdcp_det_if_necessary(struct smbchg_chip *chip)
 		return;
 
 	read_usb_type(chip, &usb_type_name, &usb_supply_type);
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	if (((usb_supply_type == POWER_SUPPLY_TYPE_USB_DCP)
 		|| (usb_supply_type == POWER_SUPPLY_TYPE_USB_ACA))
 		&& (!is_hvdcp_present(chip))) {
@@ -10090,8 +10103,7 @@ static void rerun_hvdcp_det_if_necessary(struct smbchg_chip *chip)
 	}
 }
 
-#ifdef CONFIG_MACH_LEECO
-/* TODO NOTE WARNING: Work it out. */
+#ifdef CONFIG_MACH_LEECO_PD
 #define PD_VBUS_LOW_THRESHOLD 5200
 #define PD_VBUS_HIGH_THRESHOLD 9000
 #define PD_CABLE_LOSS_LVL0 800
@@ -10407,7 +10419,7 @@ static int smbchg_probe(struct spmi_device *spmi)
 		}
 	}
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	if (of_property_read_bool(spmi->dev.of_node, "qcom,ignore_otgid")) {
 		ignore_otgidpin = true;
 	}
@@ -10521,11 +10533,13 @@ static int smbchg_probe(struct spmi_device *spmi)
 			smbchg_parallel_usb_en_work);
 	INIT_DELAYED_WORK(&chip->vfloat_adjust_work, smbchg_vfloat_adjust_work);
 	INIT_DELAYED_WORK(&chip->hvdcp_det_work, smbchg_hvdcp_det_work);
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	INIT_DELAYED_WORK(&chip->letv_pd_set_vol_cur_work,
 		smbchg_letv_pd_set_vol_cur_work);
 	INIT_DELAYED_WORK(&chip->pd_charger_init_work,
 		smbchg_pd_charger_init_work);
+#endif
+#ifdef CONFIG_MACH_LEECO
 	INIT_DELAYED_WORK(&chip->weak_charger_timeout_work, smbchg_weak_chg_timeout);
 #endif
 #ifdef CONFIG_MACH_LEECO_ZL1
@@ -10548,6 +10562,8 @@ static int smbchg_probe(struct spmi_device *spmi)
 	chip->usb_online = -EINVAL;
 #ifdef CONFIG_MACH_LEECO
 	chip->usb_prev_therm_lvl = 0;
+#endif
+#ifdef CONFIG_MACH_LEECO_PD
 	chip->prev_black_call_mode = 0;
 	chip->prev_quick_charge_mode = 0;
 #endif
@@ -10557,6 +10573,8 @@ static int smbchg_probe(struct spmi_device *spmi)
 	mutex_init(&chip->therm_lvl_lock);
 #ifdef CONFIG_MACH_LEECO
 	mutex_init(&chip->usb_therm_lvl_lock);
+#endif
+#ifdef CONFIG_MACH_LEECO_PD
 	mutex_init(&chip->black_call_mode_lock);
 	mutex_init(&chip->quick_charge_mode_lock);
 #endif
@@ -10641,7 +10659,7 @@ static int smbchg_probe(struct spmi_device *spmi)
 			goto unregister_batt_psy;
 		}
 	}
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	chip->le_ab_psy.name		= "le_ab";
 	chip->le_ab_psy.type		= POWER_SUPPLY_TYPE_LE_AB;
 	chip->le_ab_psy.get_property	= smbchg_le_ab_get_property;
@@ -10669,7 +10687,7 @@ static int smbchg_probe(struct spmi_device *spmi)
 			dev_err(chip->dev,
 					"Unable to register charger led: %d\n",
 					rc);
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 			goto unregister_le_ab_psy;
 #else
 			goto unregister_dc_psy;
@@ -10719,6 +10737,9 @@ static int smbchg_probe(struct spmi_device *spmi)
 	smbchg_sec_masked_write(chip, 0x13FC , 0x10, 0x10);
 	/* cclogic need wait smbcharger, for reboot with otg case */
 	cclogic_set_smbcharge_init_done(true);
+#endif
+
+#ifdef CONFIG_MACH_LEECO_PD
 	/* if pd is inserted when init, call the func again */
 	if (delay_pd_state == true) {
 		letv_pd_notice_charger_in_parameter(pd_init_voltage, pd_init_ma);
@@ -10745,7 +10766,7 @@ unregister_led_class:
 		led_classdev_unregister(&chip->led_cdev);
 unregister_dc_psy:
 	power_supply_unregister(&chip->dc_psy);
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 unregister_le_ab_psy:
 	power_supply_unregister(&chip->le_ab_psy);
 #endif
