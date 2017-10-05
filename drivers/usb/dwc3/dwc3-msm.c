@@ -2535,7 +2535,9 @@ get_prop_usbin_voltage_now(struct dwc3_msm *mdwc)
 		return results.physical;
 	}
 }
+#endif
 
+#ifdef CONFIG_MACH_LEECO_PD
 extern void letv_pd_set_typec_temperature(int temp);
 /*
  * Function to read Type-C temp
@@ -2621,7 +2623,7 @@ static int dwc3_msm_power_get_property_usb(struct power_supply *psy,
 	case POWER_SUPPLY_PROP_USB_OTG:
 		val->intval = !mdwc->id_state;
 		break;
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_PD
 	case POWER_SUPPLY_PROP_LE_USBIN_TEMP:
 		val->intval = get_prop_usbin_temp_now(mdwc);
 		break;
@@ -2800,6 +2802,8 @@ static enum power_supply_property dwc3_msm_pm_power_props_usb[] = {
 	POWER_SUPPLY_PROP_USB_OTG,
 #ifdef CONFIG_MACH_LEECO
 	POWER_SUPPLY_PROP_VOLTAGE_NOW,
+#endif
+#ifdef CONFIG_MACH_LEECO_PD
 	POWER_SUPPLY_PROP_LE_USBIN_TEMP,
 	POWER_SUPPLY_PROP_LE_VPH_VOLTAGE,
 #endif
