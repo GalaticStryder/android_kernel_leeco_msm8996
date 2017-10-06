@@ -2865,7 +2865,8 @@ static void smbchg_parallel_usb_en_work(struct work_struct *work)
 	return;
 
 recheck:
-	schedule_delayed_work(&chip->parallel_en_work, 0);
+	queue_delayed_work(system_power_efficient_wq,
+		&chip->parallel_en_work, 0);
 }
 
 static void smbchg_parallel_usb_check_ok(struct smbchg_chip *chip)
@@ -2876,7 +2877,8 @@ static void smbchg_parallel_usb_check_ok(struct smbchg_chip *chip)
 		return;
 
 	smbchg_stay_awake(chip, PM_PARALLEL_CHECK);
-	schedule_delayed_work(&chip->parallel_en_work, 0);
+	queue_delayed_work(system_power_efficient_wq,
+		&chip->parallel_en_work, 0);
 }
 
 static int charging_suspend_vote_cb(struct device *dev, int suspend,
@@ -4331,7 +4333,8 @@ static void smbchg_vfloat_adjust_check(struct smbchg_chip *chip)
 
 	smbchg_stay_awake(chip, PM_REASON_VFLOAT_ADJUST);
 	pr_smb(PR_STATUS, "Starting vfloat adjustments\n");
-	schedule_delayed_work(&chip->vfloat_adjust_work, 0);
+	queue_delayed_work(system_power_efficient_wq,
+		&chip->vfloat_adjust_work, 0);
 }
 
 #define FV_STS_REG			0xC
@@ -4755,7 +4758,8 @@ static int check_charger_status(struct smbchg_chip *chip)
 			!chip->chg_reset &&
 			ma > MONITOR_CURRET_LIMIT_MA){
 		chip->chg_reset = 1;
-		schedule_delayed_work(&chip->vbus_monitor,0);
+		queue_delayed_work(system_power_efficient_wq,
+			&chip->vbus_monitor,0);
 		pr_info("start charge monitor state\n");
 	}
 
@@ -5494,7 +5498,8 @@ stop:
 	return;
 
 reschedule:
-	schedule_delayed_work(&chip->vfloat_adjust_work,
+	queue_delayed_work(system_power_efficient_wq,
+			&chip->vfloat_adjust_work,
 			msecs_to_jiffies(VFLOAT_RESAMPLE_DELAY_MS));
 	return;
 }
@@ -5949,7 +5954,8 @@ static void handle_usb_insertion(struct smbchg_chip *chip)
 			(usb_supply_type == POWER_SUPPLY_TYPE_USB_DCP)) {
 		cancel_delayed_work_sync(&chip->hvdcp_det_work);
 		smbchg_stay_awake(chip, PM_DETECT_HVDCP);
-		schedule_delayed_work(&chip->hvdcp_det_work,
+		queue_delayed_work(system_power_efficient_wq,
+					&chip->hvdcp_det_work,
 					msecs_to_jiffies(HVDCP_NOTIFY_MS));
 	}
 
@@ -6286,7 +6292,8 @@ static void smbchg_handle_hvdcp3_disable(struct smbchg_chip *chip)
 		read_usb_type(chip, &usb_type_name, &usb_supply_type);
 		smbchg_change_usb_supply_type(chip, usb_supply_type);
 		if (usb_supply_type == POWER_SUPPLY_TYPE_USB_DCP)
-			schedule_delayed_work(&chip->hvdcp_det_work,
+			queue_delayed_work(system_power_efficient_wq,
+				&chip->hvdcp_det_work,
 				msecs_to_jiffies(HVDCP_NOTIFY_MS));
 	} else {
 		smbchg_change_usb_supply_type(chip, POWER_SUPPLY_TYPE_UNKNOWN);
@@ -7408,7 +7415,8 @@ static irqreturn_t batt_warm_handler(int irq, void *_chip)
 	pr_smb(PR_INTERRUPT, "triggered: 0x%02x\n", reg);
 #ifdef CONFIG_MACH_LEECO_ZL1
 	if (chip->batt_warm && chip->jeita_monitor_enable)
-		schedule_delayed_work(&chip->batt_cool_warm_monitor, 0);
+		queue_delayed_work(system_power_efficient_wq,
+			&chip->batt_cool_warm_monitor, 0);
 #endif
 	smbchg_parallel_usb_check_ok(chip);
 	if (chip->psy_registered)
@@ -7428,7 +7436,8 @@ static irqreturn_t batt_cool_handler(int irq, void *_chip)
 	pr_smb(PR_INTERRUPT, "triggered: 0x%02x\n", reg);
 #ifdef CONFIG_MACH_LEECO_ZL1
 	if (chip->batt_cool && chip->jeita_monitor_enable)
-		schedule_delayed_work(&chip->batt_cool_warm_monitor, 0);
+		queue_delayed_work(system_power_efficient_wq,
+			&chip->batt_cool_warm_monitor, 0);
 #endif
 	smbchg_parallel_usb_check_ok(chip);
 	if (chip->psy_registered)
@@ -7752,7 +7761,8 @@ static void smbchg_batt_cool_warm_monitor(struct work_struct *work)
 
 	if(batt_temp > chip->batt_warm_ma - HYSTERISIS_DECIDEGC ||
 			 batt_temp < chip->batt_cool_ma + HYSTERISIS_DECIDEGC)
-		schedule_delayed_work(&chip->batt_cool_warm_monitor,HZ);
+		queue_delayed_work(system_power_efficient_wq,
+			&chip->batt_cool_warm_monitor,HZ);
 }
 
 static unsigned int mon_cn  = 0;
@@ -7807,7 +7817,8 @@ static void vbus_monitor_work(struct work_struct *work)
 			ma > MONITOR_CURRET_LIMIT_MA) {
 
 		if(mon_cn < VBUS_MONITOR_CN) {
-			schedule_delayed_work(&chip->vbus_monitor,msecs_to_jiffies(VBUS_MONITOR_MS));
+			queue_delayed_work(system_power_efficient_wq,
+				&chip->vbus_monitor,msecs_to_jiffies(VBUS_MONITOR_MS));
 			return;
 		}else {
 			chip->chg_reset = 0;
@@ -7850,7 +7861,8 @@ static irqreturn_t usbin_uv_handler(int irq, void *_chip)
 	u8 reg;
 
 #ifdef CONFIG_MACH_LEECO_ZL1
-	schedule_delayed_work(&chip->vbus_monitor, msecs_to_jiffies(0));
+	queue_delayed_work(system_power_efficient_wq,
+		&chip->vbus_monitor, msecs_to_jiffies(0));
 #endif
 
 	rc = smbchg_read(chip, &reg, chip->usb_chgpth_base + RT_STS, 1);
@@ -7892,7 +7904,8 @@ static irqreturn_t usbin_uv_handler(int irq, void *_chip)
 		if (chip->weak_chg_check_timeout) {
 			pr_smb(PR_STATUS, "Call weak_charger_timeout_work\n");
 			chip->weak_chg_check_timeout = false;
-			schedule_delayed_work(&chip->weak_charger_timeout_work,
+			queue_delayed_work(system_power_efficient_wq,
+				&chip->weak_charger_timeout_work,
 				msecs_to_jiffies(WEAK_CHAEGER_CHECK_DELAY_MS));
 		}
 #else
@@ -7968,7 +7981,8 @@ static irqreturn_t src_detect_handler(int irq, void *_chip)
 #ifdef CONFIG_MACH_LEECO_ZL1
 	int vbus_mv = 0;
 	union power_supply_propval prop = {0,};
-	schedule_delayed_work(&chip->vbus_monitor,msecs_to_jiffies(0));
+	queue_delayed_work(system_power_efficient_wq,
+		&chip->vbus_monitor,msecs_to_jiffies(0));
 
 	rc = chip->usb_psy->get_property(chip->usb_psy,
 				POWER_SUPPLY_PROP_VOLTAGE_NOW, &prop);
@@ -9739,7 +9753,8 @@ static void rerun_hvdcp_det_if_necessary(struct smbchg_chip *chip)
 		if (!chip->hvdcp_not_supported) {
 			cancel_delayed_work_sync(&chip->hvdcp_det_work);
 			smbchg_stay_awake(chip, PM_DETECT_HVDCP);
-			schedule_delayed_work(&chip->hvdcp_det_work,
+			queue_delayed_work(system_power_efficient_wq,
+					&chip->hvdcp_det_work,
 					msecs_to_jiffies(HVDCP_NOTIFY_MS));
 		}
 	}
@@ -9849,7 +9864,7 @@ static void smbchg_letv_pd_set_vol_cur_work(struct work_struct *work)
 		pre_pd_vol = new_pd_vol;
 		letv_pd_set_adjust_charger_parameter(new_pd_vol, PD_CONSTANT_MA);
 	}
-	schedule_delayed_work(
+	queue_delayed_work(system_power_efficient_wq,
 		&chip->letv_pd_set_vol_cur_work,
 		msecs_to_jiffies(PD_CHECK_WROK_UPDATE_MS));
 }
@@ -9914,7 +9929,7 @@ static void smbchg_pd_charger_init_work(struct work_struct *work)
 		pr_err("Couldn't disable AICL rc=%d\n", rc);
 
 	if (le_pd_type_flag != LE_PD_TYPE_UNKNOWN)
-		schedule_delayed_work(
+		queue_delayed_work(system_power_efficient_wq,
 			&chip->letv_pd_set_vol_cur_work,
 			msecs_to_jiffies(LE_PD_ADJUST_VOL_DELAY));
 	return;
@@ -9958,7 +9973,7 @@ int letv_pd_notice_charger_in_parameter(int voltage, int mA)
 	}
 
 	pd_det_flag = 1;
-	schedule_delayed_work(
+	queue_delayed_work(system_power_efficient_wq,
 		&pd_smbchg_chip->pd_charger_init_work,
 		msecs_to_jiffies(PD_CHARGER_INIT_WORK_DELAY));
 
