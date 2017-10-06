@@ -15,7 +15,9 @@
 #include <linux/init.h>
 #include <linux/string.h>
 
+#ifdef CONFIG_INPUT_GP5XX8_POCKET
 #include "goodixfp/gf_spi.h"
+#endif
 
 /**
  * This driver maintains a sysfs interface used by the pocket bridge system
@@ -31,7 +33,10 @@ EXPORT_SYMBOL(pocket_judge_inpocket);
 
 static void pocket_judge_update(void)
 {
+#ifdef CONFIG_INPUT_GP5XX8_POCKET
+	/* Fingerprint */
 	gf_enable_global(!pocket_judge_inpocket);
+#endif
 }
 
 static ssize_t inpocket_show(struct device *dev, struct device_attribute *attr,

@@ -47,7 +47,9 @@ struct gf_key_map
 #define GF_FASYNC	1	/* If supports fasync mechanism. */
 struct gf_dev {
 	dev_t devt;
+#ifdef CONFIG_INPUT_GP5XX8_POCKET
 	spinlock_t spinlock;
+#endif
 	struct list_head device_entry;
 #if defined(USE_SPI_BUS)
 	struct spi_device *spi;
@@ -85,6 +87,8 @@ int gf_power_off_8996(struct gf_dev *gf_dev);
 int gf_hw_reset(struct gf_dev *gf_dev, unsigned int delay_ms);
 int gf_irq_num(struct gf_dev *gf_dev);
 
+#ifdef CONFIG_INPUT_GP5XX8_POCKET
 void gf_enable_global(_Bool enabled);
+#endif
 
 #endif /*__GF_SPI_H*/

@@ -106,7 +106,9 @@ static DEFINE_MUTEX(device_list_lock);
 static struct gf_dev gf;
 struct wake_lock FP_wakelock;
 
+#ifdef CONFIG_INPUT_GP5XX8_POCKET
 static struct gf_dev *gf_global = NULL;
+#endif
 
 static void gf_enable_irq(struct gf_dev *gf_dev)
 {
@@ -710,7 +712,9 @@ static int gf_probe(struct platform_device *pdev)
 		}
 	}
 	device_init_wakeup(&gf_dev->input->dev,1);
+#ifdef CONFIG_INPUT_GP5XX8_POCKET
 	gf_global = gf_dev;
+#endif
 	//wake_lock_init(&FP_wakelock,WAKE_LOCK_SUSPEND,"Fp_wakelock");
 	printk("goodix : gf_probe ***4*****\n");
 	return status;
@@ -806,6 +810,7 @@ static int gf_resume(struct platform_device *pdev)
 	return 0;
 }
 
+#ifdef CONFIG_INPUT_GP5XX8_POCKET
 void gf_enable_global(bool enabled)
 {
 	struct gf_dev *gf_dev = &gf;
@@ -822,6 +827,7 @@ void gf_enable_global(bool enabled)
 
 	spin_unlock(&gf_global->spinlock);
 }
+#endif
 
 /*
 static const struct dev_pm_ops gx_pm = {

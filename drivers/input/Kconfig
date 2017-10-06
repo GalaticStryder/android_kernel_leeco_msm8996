@@ -190,6 +190,13 @@ config INPUT_KEYCOMBO
 	  To compile this driver as a module, choose M here: the
 	  module will be called keycombo.
 
+config INPUT_POCKET
+	tristate "Pocket mode interface"
+	depends on INPUT
+	---help---
+	  Say Y here if you want to create a sysfs interface to be used
+	  with the pocket bridge system service.
+
 comment "Input Device Drivers"
 
 source "drivers/input/keyboard/Kconfig"
