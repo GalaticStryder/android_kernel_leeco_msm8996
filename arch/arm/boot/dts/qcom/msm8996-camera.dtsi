@@ -45,7 +45,6 @@
 			"ispif_ahb_clk", "csiphy_timer_src_clk",
 			"csiphy_timer_clk", "camss_ahb_clk",
 			"csiphy_3p_clk_src", "csi_phy_3p_clk";
-		/* G.S.: Adjust and update the API by zeroing third column. */
 		qcom,clock-rates = <0 0 0 200000000 0 0 320000000 0>;
 	};
 
@@ -275,23 +274,18 @@
 			"vfe0_clk_src", "camss_vfe_vfe0_clk", "camss_csi_vfe0_clk",
 			"vfe1_clk_src", "camss_vfe_vfe1_clk", "camss_csi_vfe1_clk";
 		qcom,clock-rates = <0 0 0 0
-			0 0 0 0
-			0 0 0 0
-			0 0 0 0
-			0 0 0 0
+			200000000 0 0 0
+			200000000 0 0 0
+			200000000 0 0 0
+			200000000 0 0 0
 			0 0 0
 			0 0 0>;
-		qcom,clock-cntl-support;
 		qcom,clock-control = "NO_SET_RATE", "NO_SET_RATE",
 			"NO_SET_RATE", "NO_SET_RATE",
-			"INIT_RATE",
-			"NO_SET_RATE", "NO_SET_RATE", "NO_SET_RATE",
-			"INIT_RATE",
-			"NO_SET_RATE", "NO_SET_RATE", "NO_SET_RATE",
-			"INIT_RATE",
-			"NO_SET_RATE", "NO_SET_RATE", "NO_SET_RATE",
-			"INIT_RATE",
-			"NO_SET_RATE", "NO_SET_RATE", "NO_SET_RATE",
+			"SET_RATE", "NO_SET_RATE", "NO_SET_RATE", "NO_SET_RATE",
+			"SET_RATE", "NO_SET_RATE", "NO_SET_RATE", "NO_SET_RATE",
+			"SET_RATE", "NO_SET_RATE", "NO_SET_RATE", "NO_SET_RATE",
+			"SET_RATE", "NO_SET_RATE", "NO_SET_RATE", "NO_SET_RATE",
 			"INIT_RATE", "NO_SET_RATE", "NO_SET_RATE",
 			"INIT_RATE", "NO_SET_RATE", "NO_SET_RATE";
 		status = "ok";
