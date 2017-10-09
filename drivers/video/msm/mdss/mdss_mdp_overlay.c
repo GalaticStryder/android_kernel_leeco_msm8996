@@ -48,10 +48,6 @@
 
 #define BUF_POOL_SIZE 32
 
-#ifdef CONFIG_MACH_LEECO
-static struct workqueue_struct *letv_retire_wq;
-#endif
-
 #define DFPS_DATA_MAX_HFP 8192
 #define DFPS_DATA_MAX_HBP 8192
 #define DFPS_DATA_MAX_HPW 8192
@@ -5497,11 +5493,7 @@ static void __vsync_retire_handle_vsync(struct mdss_mdp_ctl *ctl, ktime_t t)
 	}
 
 	mdp5_data = mfd_to_mdp5_data(mfd);
-#ifdef CONFIG_MACH_LEECO
-	queue_work(letv_retire_wq, &mdp5_data->retire_work);
-#else
 	schedule_work(&mdp5_data->retire_work);
-#endif
 }
 
 static void __vsync_retire_work_handler(struct work_struct *work)
@@ -5710,15 +5702,6 @@ int mdss_mdp_overlay_init(struct msm_fb_data_type *mfd)
 	struct mdss_overlay_private *mdp5_data = NULL;
 	struct irq_info *mdss_irq;
 	int rc;
-
-#ifdef CONFIG_MACH_LEECO
-	/* Allocate retire workqueue on high priority */
-	letv_retire_wq = alloc_workqueue("letv_retire_wq", WQ_UNBOUND | WQ_HIGHPRI, 0);
-	if (!letv_retire_wq) {
-		pr_err("failed to allocate letv_retire_wq");
-		return -ENOMEM;
-	}
-#endif
 
 	mdp5_data = kzalloc(sizeof(struct mdss_overlay_private), GFP_KERNEL);
 	if (!mdp5_data) {
