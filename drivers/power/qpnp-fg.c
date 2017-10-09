@@ -243,9 +243,17 @@ enum fg_mem_data_index {
 static struct fg_mem_setting settings[FG_MEM_SETTING_MAX] = {
 	/*       ID                    Address, Offset, Value*/
 	SETTING(SOFT_COLD,       0x454,   0,      100),
+#ifdef CONFIG_MACH_LEECO_OEM
+	SETTING(SOFT_HOT,        0x454,   1,      450),
+#else
 	SETTING(SOFT_HOT,        0x454,   1,      400),
+#endif
 	SETTING(HARD_COLD,       0x454,   2,      50),
+#ifdef CONFIG_MACH_LEECO_OEM
+	SETTING(HARD_HOT,        0x454,   3,      550),
+#else
 	SETTING(HARD_HOT,        0x454,   3,      450),
+#endif
 	SETTING(RESUME_SOC,      0x45C,   1,      0),
 	SETTING(BCL_LM_THRESHOLD, 0x47C,   2,      50),
 	SETTING(BCL_MH_THRESHOLD, 0x47C,   3,      752),
