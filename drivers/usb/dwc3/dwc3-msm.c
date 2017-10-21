@@ -2030,7 +2030,6 @@ static int dwc3_msm_suspend(struct dwc3_msm *mdwc)
 	can_suspend_ssphy = !(mdwc->in_host_mode &&
 				dwc3_msm_is_host_superspeed(mdwc));
 
-	tasklet_kill(&dwc->bh);
 	/* Disable core irq */
 	if (dwc->irq)
 		disable_irq(dwc->irq);
@@ -2094,8 +2093,6 @@ static int dwc3_msm_suspend(struct dwc3_msm *mdwc)
 		dev_dbg(mdwc->dev, "defer suspend with %d(msecs)\n",
 					mdwc->lpm_to_suspend_delay);
 		pm_wakeup_event(mdwc->dev, mdwc->lpm_to_suspend_delay);
-	} else {
-		pm_relax(mdwc->dev);
 	}
 
 	atomic_set(&dwc->in_lpm, 1);
@@ -2131,8 +2128,6 @@ static int dwc3_msm_resume(struct dwc3_msm *mdwc)
 		dev_dbg(mdwc->dev, "%s: Already resumed\n", __func__);
 		return 0;
 	}
-
-	pm_stay_awake(mdwc->dev);
 
 	/* Enable bus voting */
 	if (mdwc->bus_perf_client) {
@@ -3363,7 +3358,6 @@ static int dwc3_msm_probe(struct platform_device *pdev)
 		register_cpu_notifier(&mdwc->dwc3_cpu_notifier);
 
 	device_init_wakeup(mdwc->dev, 1);
-	pm_stay_awake(mdwc->dev);
 
 #ifdef CONFIG_MACH_LEECO
 	/* Register headset on Type-C. */
@@ -3915,7 +3909,6 @@ static void dwc3_otg_sm_work(struct work_struct *w)
 				dwc3_msm_gadget_vbus_draw(mdwc,
 						dcp_max_current);
 				atomic_set(&dwc->in_lpm, 1);
-				pm_relax(mdwc->dev);
 				break;
 			case DWC3_CDP_CHARGER:
 			case DWC3_SDP_CHARGER:
