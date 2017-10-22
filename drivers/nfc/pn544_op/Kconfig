@@ -1,0 +1,8 @@
+config NFC_PN544_OP
+	tristate "PN544 NFC driver which is frozen from the OnePlus code drop"
+	depends on I2C
+	select CRC_CCITT
+	default n
+	---help---
+	  Say yes if you want PN544 Near Field Communication driver by OnePlus.
+	  This is for i2c connected version. If unsure, say N here.

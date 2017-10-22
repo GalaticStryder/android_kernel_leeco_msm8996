@@ -71,7 +71,6 @@ config MACH_LEECO_ZL1
 	select INPUT_DRV2604L_HAPTICS
 	select INPUT_GP5XX8
 	select IR_MAXQ616
-	select NFC_LETV
 	select SND_SOC_MAX98927
 	select TOUCHSCREEN_FTS
 	select TOUCHSCREEN_SYNAPTICS_DSX_LETV
@@ -93,7 +92,6 @@ config MACH_LEECO_ZL1
 	  * MAXQ616 -> Infrared Remote Control
 	  * Maxim MAX98927 -> Smart PA
 	  * Custom ZL1 MBHC -> Audio Socket
-	  * PN544 -> NFC
 	  * Pericom 30216C -> USB Type-C
 	  * Texas Instruments TUSB320 -> USB Type-C Audio
 
