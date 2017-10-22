@@ -556,14 +556,20 @@ int clockevents_notify(unsigned long reason, void *arg)
 
 	switch (reason) {
 	case CLOCK_EVT_NOTIFY_BROADCAST_ON:
+		tick_broadcast_enable();
+		break;
 	case CLOCK_EVT_NOTIFY_BROADCAST_OFF:
+		tick_broadcast_disable();
+		break;
 	case CLOCK_EVT_NOTIFY_BROADCAST_FORCE:
-		tick_broadcast_on_off(reason, arg);
+		tick_broadcast_force();
 		break;
 
 	case CLOCK_EVT_NOTIFY_BROADCAST_ENTER:
+		tick_broadcast_enter();
+		break;
 	case CLOCK_EVT_NOTIFY_BROADCAST_EXIT:
-		ret = tick_broadcast_oneshot_control(reason);
+		tick_broadcast_exit();
 		break;
 
 	case CLOCK_EVT_NOTIFY_CPU_DYING:
