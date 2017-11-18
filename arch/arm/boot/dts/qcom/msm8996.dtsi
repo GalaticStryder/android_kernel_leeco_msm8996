@@ -231,6 +231,12 @@
 			reg = <0 0x88800000 0 0x6200000>;
 		};
 
+		ramoops_mem: ramoops_region@ac000000 {
+			compatible = "removed-dma-pool";
+			no-map;
+			reg = <0 0xAC000000 0 0x200000>;
+		};
+
 		dfps_data_mem: dfps_data_mem@83400000 {
 		       reg = <0 0x83400000 0 0x1000>;
 		       label = "dfps_data_mem";
@@ -3999,6 +4005,15 @@
 		pinctrl-0 = <&pinctrl_pps>;
 		gpios = <&tlmm 128 0>;
 		status = "okay";
+	};
+
+
+	ramoops {
+		compatible = "ramoops";
+		memory-region = <&ramoops_mem>;
+		record-size = <0x0 0x20000>;
+		console-size = <0x0 0x100000>;
+		pmsg-size = <0x0 0x80000>;
 	};
 };
 
