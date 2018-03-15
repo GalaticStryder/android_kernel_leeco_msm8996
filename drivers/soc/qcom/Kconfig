@@ -878,6 +878,14 @@ config MSM_REMOTEQDSS
 	  enable/disable these events. Interface located in
 	  /sys/class/remoteqdss.
 
+config DEEP_SLEEP_LED_SWITCH
+	bool "Enable deep sleep LED light support for LeTV devices"
+	depends on MACH_LEECO
+	default n
+	help
+	  Add support for LeTV's hardware based deep sleep LED switcher
+	  (on/off) present on some of their devices, check your device tree.
+
 config QCOM_SMCINVOKE
 	bool "Secure QSEE Support"
 	help

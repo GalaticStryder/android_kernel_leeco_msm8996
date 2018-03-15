@@ -3192,6 +3192,7 @@ static int synaptics_rmi4_gpio_setup(int gpio, bool config, int dir, int state)
 	return retval;
 }
 
+#ifdef CONFIG_MACH_LEECO_ZL1
 static int synaptics_dsx_pinctrl_init(struct synaptics_rmi4_data *rmi4_data)
 {
 	int retval;
@@ -3233,6 +3234,7 @@ err_pinctrl_get:
 	rmi4_data->ts_pinctrl = NULL;
 	return retval;
 }
+#endif
 
 static void synaptics_rmi4_set_params(struct synaptics_rmi4_data *rmi4_data)
 {
@@ -4219,6 +4221,7 @@ static int synaptics_rmi4_probe(struct platform_device *pdev)
 		goto err_enable_reg;
 	}
 
+#ifdef CONFIG_MACH_LEECO_ZL1
 	retval = synaptics_dsx_pinctrl_init(rmi4_data);
 	if (!retval && rmi4_data->ts_pinctrl) {
 	/*
@@ -4234,6 +4237,7 @@ static int synaptics_rmi4_probe(struct platform_device *pdev)
 					__func__, PINCTRL_STATE_ACTIVE, retval);
 		}
 	}
+#endif
 
 
 	retval = synaptics_rmi4_set_gpio(rmi4_data);
@@ -4417,9 +4421,11 @@ err_set_input_dev:
 
 err_ui_hw_init:
 err_set_gpio:
+#ifdef CONFIG_MACH_LEECO_ZL1
 	if (NULL != rmi4_data->ts_pinctrl) {
 		devm_pinctrl_put(rmi4_data->ts_pinctrl);
 	}
+#endif
 	synaptics_rmi4_enable_reg(rmi4_data, false);
 
 err_enable_reg:
@@ -4803,7 +4809,9 @@ static int synaptics_rmi4_suspend(struct device *dev)
 {
 	struct synaptics_rmi4_exp_fhandler *exp_fhandler;
 	struct synaptics_rmi4_data *rmi4_data = dev_get_drvdata(dev);
+#if defined(CONFIG_MACH_LEECO_ZL1) || defined(FB_READY_RESET)
 	int retval;
+#endif
 
 	if (rmi4_data->stay_awake)
 		return 0;
@@ -4825,6 +4833,7 @@ static int synaptics_rmi4_suspend(struct device *dev)
 		}
 	}
 
+#ifdef CONFIG_MACH_LEECO_ZL1
 	if (rmi4_data->ts_pinctrl) {
 		retval = pinctrl_select_state(rmi4_data->ts_pinctrl,
 			rmi4_data->pinctrl_state_suspend);
@@ -4833,6 +4842,7 @@ static int synaptics_rmi4_suspend(struct device *dev)
 					"Suspend Cannot get default pinctrl state\n");
 		}
 	}
+#endif
 
 exit:
 	mutex_lock(&exp_data.mutex);
@@ -4850,7 +4860,9 @@ exit:
 
 static int synaptics_rmi4_resume(struct device *dev)
 {
+#if defined(CONFIG_MACH_LEECO_ZL1) || defined(FB_READY_RESET)
 	int retval;
+#endif
 	struct synaptics_rmi4_exp_fhandler *exp_fhandler;
 	struct synaptics_rmi4_data *rmi4_data = dev_get_drvdata(dev);
 	const struct synaptics_dsx_board_data *bdata =
@@ -4859,6 +4871,7 @@ static int synaptics_rmi4_resume(struct device *dev)
 	if (rmi4_data->stay_awake)
 		return 0;
 
+#ifdef CONFIG_MACH_LEECO_ZL1
 	if (rmi4_data->ts_pinctrl) {
 		retval = pinctrl_select_state(rmi4_data->ts_pinctrl,
 				rmi4_data->pinctrl_state_active);
@@ -4867,6 +4880,7 @@ static int synaptics_rmi4_resume(struct device *dev)
 					"Cannot get default pinctrl state\n");
 		}
 	}
+#endif
 
 	if (bdata->reset_gpio >= 0) {
 		gpio_set_value(bdata->reset_gpio, bdata->reset_on_state);
