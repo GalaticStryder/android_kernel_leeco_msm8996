@@ -83,11 +83,15 @@
 #define MDP_TIME_PERIOD_CALC_FPS_US	1000000
 
 #ifdef CONFIG_MACH_LEECO
-#define MDSS_FB_SPEC_CAR_SEQ_CMDLINE_MAX 30
+#ifdef CONFIG_MACH_LEECO_ZL1
 #define MDSS_FB_TURBO_OLED_FLIP_CHARGEMODE 30
+#endif
+#define MDSS_FB_SPEC_CAR_SEQ_CMDLINE_MAX 32
 
+#ifdef CONFIG_MACH_LEECO_ZL1
 bool flip_chargermode_flag = false;
 char flip_chargermode[MDSS_FB_TURBO_OLED_FLIP_CHARGEMODE];
+#endif
 char spec_char_seq[MDSS_FB_SPEC_CAR_SEQ_CMDLINE_MAX];
 #endif
 
@@ -893,6 +897,8 @@ static ssize_t mdss_fb_get_persist_mode(struct device *dev,
 }
 
 #ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
+/* I don't think this is for X2 nor ZL1, removing later... */
 static int __init turbo_oled_flip_chargemode(char *str)
 {
     strlcpy(flip_chargermode, str, MDSS_FB_TURBO_OLED_FLIP_CHARGEMODE);
@@ -903,6 +909,7 @@ static int __init turbo_oled_flip_chargemode(char *str)
     return 1;
 }
 __setup("android.letv.chargerflip=", turbo_oled_flip_chargemode);
+#endif
 
 static int __init get_spec_char_seq(char *str)
 {

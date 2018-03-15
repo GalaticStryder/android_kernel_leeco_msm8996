@@ -120,9 +120,11 @@
 #define MASK_2BIT 0x03
 #define MASK_1BIT 0x01
 
+#ifdef CONFIG_MACH_LEECO_ZL1
 #define PINCTRL_STATE_ACTIVE    "pmx_ts_active"
 #define PINCTRL_STATE_SUSPEND   "pmx_ts_suspend"
 #define PINCTRL_STATE_RELEASE   "pmx_ts_release"
+#endif
 
 enum exp_fn {
 	RMI_DEV = 0,
@@ -401,10 +403,12 @@ struct synaptics_rmi4_data {
 			bool attn_only);
 	void (*sleep_enable)(struct synaptics_rmi4_data *rmi4_data,
 			bool enable);
+#ifdef CONFIG_MACH_LEECO_ZL1
 	struct pinctrl *ts_pinctrl;
 	struct pinctrl_state *pinctrl_state_active;
 	struct pinctrl_state *pinctrl_state_suspend;
 	struct pinctrl_state *pinctrl_state_release;
+#endif
 };
 
 

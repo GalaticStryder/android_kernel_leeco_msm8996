@@ -190,6 +190,9 @@ obj-$(CONFIG_SND_SOC_MSM_HDMI_DBA_CODEC_RX) := msm_hdmi_dba_codec_rx.o
 snd-soc-max9877-objs := max9877.o
 snd-soc-tpa6130a2-objs := tpa6130a2.o
 snd-soc-tas2552-objs := tas2552.o
+snd-soc-es9018-objs := es9018.o
+snd-soc-tfa98xx-objs := tfa_debug.o tfa9888_init.o tfa9897_init.o tfa9891_init.o tfa9890_init.o
+snd-soc-tfa98xx-objs += tfa9887B_init.o tfa9887_init.o tfa98xx.o tfa_dsp.o tfa_container.o
 snd-soc-max98927-objs := max98927.o
 
 obj-$(CONFIG_SND_SOC_88PM860X)	+= snd-soc-88pm860x.o
@@ -379,4 +382,6 @@ obj-$(CONFIG_SND_SOC_MSM_STUB)  += snd-soc-msm-stub.o
 # Amp
 obj-$(CONFIG_SND_SOC_MAX9877)	+= snd-soc-max9877.o
 obj-$(CONFIG_SND_SOC_TPA6130A2)	+= snd-soc-tpa6130a2.o
+obj-$(CONFIG_SND_SOC_ES9018)	+= snd-soc-es9018.o
+obj-$(CONFIG_SND_SOC_TFA98XX)	+=snd-soc-tfa98xx.o
 obj-$(CONFIG_SND_SOC_MAX98927)	+= snd-soc-max98927.o

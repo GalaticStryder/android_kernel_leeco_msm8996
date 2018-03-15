@@ -122,7 +122,7 @@ void mdss_dsi_ctrl_init(struct device *ctrl_dev,
 	mdss_dsi_buf_alloc(ctrl_dev, &ctrl->tx_buf, SZ_4K);
 	mdss_dsi_buf_alloc(ctrl_dev, &ctrl->rx_buf, SZ_4K);
 	mdss_dsi_buf_alloc(ctrl_dev, &ctrl->status_buf, SZ_4K);
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 	mdss_dsi_buf_alloc(ctrl_dev, &ctrl->status_buf1, SZ_4K);
 	mdss_dsi_buf_alloc(ctrl_dev, &ctrl->status_buf2, SZ_4K);
 #endif
@@ -1148,7 +1148,7 @@ static int mdss_dsi_read_status(struct mdss_dsi_ctrl_pdata *ctrl)
 	return rc;
 }
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 static int mdss_dsi_read_status1(struct mdss_dsi_ctrl_pdata *ctrl)
 {
 	struct dcs_cmd_req cmdreq1;
@@ -1235,7 +1235,7 @@ int mdss_dsi_reg_status_check(struct mdss_dsi_ctrl_pdata *ctrl_pdata)
 		}
 	}
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 		/* Second register check */
 		if (true == ctrl_pdata->enable_reg_check1)
 		{
@@ -2703,7 +2703,7 @@ int mdss_dsi_cmdlist_commit(struct mdss_dsi_ctrl_pdata *ctrl, int from_mdp)
 	if (req && (req->flags & CMD_REQ_HS_MODE))
 		hs_req = true;
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 	if (!ctrl->burst_mode_enabled ||
 		(from_mdp && ctrl->shared_data->cmd_clk_ln_recovery_en)) {
 #else
@@ -3118,7 +3118,6 @@ static bool mdss_dsi_fifo_status(struct mdss_dsi_ctrl_pdata *ctrl)
 		MIPI_OUTP(base + 0x000c, status);
 
 		pr_err("%s: status=%x\n", __func__, status);
-
 		/*
 		 * if DSI FIFO overflow is masked,
 		 * do not report overflow error

@@ -142,13 +142,6 @@
 };
 */
 
-&msm_imem {
-	msm-imem-crash@1c {
-		compatible = "qcom,msm-imem-crash-magic";
-		reg = <0x1c 4>;
-	};
-};
-
 &dsi_ft8716_1080p_video {
 	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
 	qcom,mdss-dsi-bl-min-level = <1>;

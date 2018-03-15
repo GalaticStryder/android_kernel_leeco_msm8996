@@ -35,7 +35,7 @@
 
 DEFINE_LED_TRIGGER(bl_led_trigger);
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 int panel_rst_gpio = -1;
 bool panel_rst_high_flag = 0;
 #endif
@@ -243,7 +243,7 @@ static void mdss_dsi_panel_bklt_dcs(struct mdss_dsi_ctrl_pdata *ctrl, int level)
 	memset(&cmdreq, 0, sizeof(cmdreq));
 	cmdreq.cmds = &backlight_cmd;
 	cmdreq.cmds_cnt = 1;
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 	cmdreq.flags = CMD_REQ_COMMIT | CMD_REQ_HS_MODE;
 #else
 	cmdreq.flags = CMD_REQ_COMMIT;
@@ -353,6 +353,7 @@ disp_en_gpio_err:
 	return rc;
 }
 
+#ifdef CONFIG_MACH_LEECO_ZL1
 void mdss_dsi_panel_reset_high(int enable)
 {
 	if (enable)
@@ -367,17 +368,28 @@ void mdss_dsi_panel_reset_high(int enable)
 		}
 	}
 }
+#endif
 
+#ifdef CONFIG_MACH_LEECO
+extern char spec_char_seq[32];
+#endif
 int mdss_dsi_panel_reset(struct mdss_panel_data *pdata, int enable)
 {
 	struct mdss_dsi_ctrl_pdata *ctrl_pdata = NULL;
 	struct mdss_panel_info *pinfo = NULL;
 	int i, rc = 0;
+#ifdef CONFIG_MACH_LEECO
+	static char panel_id[2];
+#endif
 
 	if (pdata == NULL) {
 		pr_err("%s: Invalid input data\n", __func__);
 		return -EINVAL;
 	}
+
+#ifdef CONFIG_MACH_LEECO
+	strncpy(panel_id, spec_char_seq, 2);
+#endif
 
 	ctrl_pdata = container_of(pdata, struct mdss_dsi_ctrl_pdata,
 				panel_data);
@@ -510,7 +522,10 @@ int mdss_dsi_panel_reset(struct mdss_panel_data *pdata, int enable)
 			gpio_free(ctrl_pdata->disp_en_gpio);
 		}
 #ifdef CONFIG_MACH_LEECO
-		gpio_set_value((ctrl_pdata->rst_gpio), 0);
+		if (strcmp (panel_id, "5A") == 0)
+			gpio_set_value((ctrl_pdata->rst_gpio), 1);
+		else
+			gpio_set_value((ctrl_pdata->rst_gpio), 0);
 #else
 		gpio_set_value((ctrl_pdata->rst_gpio), 0);
 #endif
@@ -917,8 +932,7 @@ static int mdss_dsi_panel_on(struct mdss_panel_data *pdata)
 		on_cmds = &bist_cmds;
 	else
 		on_cmds = &ctrl->on_cmds;
-	/* G.S. switched this to info from debug */
-	pr_info("[panel]:%s: bist_cmds_on=%d\n", __func__,bist_cmds_on);
+	pr_debug("[panel]:%s: bist_cmds_on=%d\n", __func__,bist_cmds_on);
 #else
 	on_cmds = &ctrl->on_cmds;
 #endif
@@ -1755,7 +1769,7 @@ static bool mdss_dsi_cmp_panel_reg_v2(struct mdss_dsi_ctrl_pdata *ctrl)
 }
 #endif
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 void mdss_dsi_write_status1(struct mdss_dsi_ctrl_pdata *ctrl)
 {
 	if (ctrl->status_on_cmds1.cmd_cnt)
@@ -2039,7 +2053,44 @@ static void mdss_dsi_parse_esd_params(struct device_node *np,
 	if (!pinfo->esd_check_enabled)
 		return;
 
-#ifdef CONFIG_MACH_LEECO
+	ctrl->status_mode = ESD_MAX;
+	/* Check first mode */
+	rc = of_property_read_string(np,
+			"qcom,mdss-dsi-panel-status-check-mode", &string);
+	if (!rc) {
+		if (!strcmp(string, "bta_check")) {
+			ctrl->status_mode = ESD_BTA;
+		} else if (!strcmp(string, "reg_read")) {
+			ctrl->status_mode = ESD_REG;
+			ctrl->check_read_status =
+				mdss_dsi_gen_read_status;
+		} else if (!strcmp(string, "reg_read_nt35596")) {
+			ctrl->status_mode = ESD_REG_NT35596;
+			ctrl->status_error_count = 0;
+			ctrl->check_read_status =
+				mdss_dsi_nt35596_read_status;
+		} else if (!strcmp(string, "te_signal_check")) {
+			if (pinfo->mipi.mode == DSI_CMD_MODE) {
+				ctrl->status_mode = ESD_TE;
+			} else {
+				pr_err("TE-ESD not valid for video mode\n");
+				goto error;
+			}
+		} else {
+			pr_err("No valid panel-status-check-mode string\n");
+			goto error;
+		}
+	}
+
+	if ((ctrl->status_mode == ESD_BTA) || (ctrl->status_mode == ESD_TE) ||
+			(ctrl->status_mode == ESD_MAX))
+		return;
+
+	mdss_dsi_parse_dcs_cmds(np, &ctrl->status_cmds,
+			"qcom,mdss-dsi-panel-status-command",
+				"qcom,mdss-dsi-panel-status-command-state");
+
+#ifdef CONFIG_MACH_LEECO_ZL1
 	/* Check second mode */
 	rc = of_property_read_string(np,
 			"qcom,mdss-dsi-panel-status-check-mode1", &string);
@@ -2139,43 +2190,6 @@ static void mdss_dsi_parse_esd_params(struct device_node *np,
 	}
 #endif
 
-	ctrl->status_mode = ESD_MAX;
-	/* Check first mode */
-	rc = of_property_read_string(np,
-			"qcom,mdss-dsi-panel-status-check-mode", &string);
-	if (!rc) {
-		if (!strcmp(string, "bta_check")) {
-			ctrl->status_mode = ESD_BTA;
-		} else if (!strcmp(string, "reg_read")) {
-			ctrl->status_mode = ESD_REG;
-			ctrl->check_read_status =
-				mdss_dsi_gen_read_status;
-		} else if (!strcmp(string, "reg_read_nt35596")) {
-			ctrl->status_mode = ESD_REG_NT35596;
-			ctrl->status_error_count = 0;
-			ctrl->check_read_status =
-				mdss_dsi_nt35596_read_status;
-		} else if (!strcmp(string, "te_signal_check")) {
-			if (pinfo->mipi.mode == DSI_CMD_MODE) {
-				ctrl->status_mode = ESD_TE;
-			} else {
-				pr_err("TE-ESD not valid for video mode\n");
-				goto error;
-			}
-		} else {
-			pr_err("No valid panel-status-check-mode string\n");
-			goto error;
-		}
-	}
-
-	if ((ctrl->status_mode == ESD_BTA) || (ctrl->status_mode == ESD_TE) ||
-			(ctrl->status_mode == ESD_MAX))
-		return;
-
-	mdss_dsi_parse_dcs_cmds(np, &ctrl->status_cmds,
-			"qcom,mdss-dsi-panel-status-command",
-				"qcom,mdss-dsi-panel-status-command-state");
-
 	rc = of_property_read_u32(np, "qcom,mdss-dsi-panel-max-error-count",
 		&tmp);
 	ctrl->max_status_error_count = (!rc ? tmp : 0);
@@ -2235,7 +2249,7 @@ error1:
 	kfree(ctrl->status_valid_params);
 	kfree(ctrl->status_cmds_rlen);
 error:
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 	kfree(ctrl->status_value1);
 	kfree(ctrl->status_value2);
 #endif
@@ -2673,7 +2687,7 @@ static int mdss_dsi_panel_timing_from_dt(struct device_node *np,
 	return 0;
 }
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 extern bool flip_chargermode_flag;
 #endif
 static int  mdss_dsi_panel_config_res_properties(struct device_node *np,
@@ -2685,7 +2699,7 @@ static int  mdss_dsi_panel_config_res_properties(struct device_node *np,
 
 	mdss_dsi_parse_roi_alignment(np, pt);
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 	if (flip_chargermode_flag == true) {
 		mdss_dsi_parse_dcs_cmds(np, &pt->on_cmds,
 			"qcom,mdss-dsi-on-flip-chargermode-command",
@@ -3104,7 +3118,7 @@ int mdss_dsi_panel_init(struct device_node *node,
 
 	pr_debug("%s:%d\n", __func__, __LINE__);
 	pinfo->panel_name[0] = '\0';
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 	pinfo->rst_timing_compatible = of_property_read_bool(node,
 		"qcom,rst-timing-compatible");
 #endif
@@ -3115,7 +3129,7 @@ int mdss_dsi_panel_init(struct device_node *node,
 	} else {
 		pr_info("%s: Panel Name = %s\n", __func__, panel_name);
 		strlcpy(&pinfo->panel_name[0], panel_name, MDSS_MAX_PANEL_LEN);
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 		if (pinfo->rst_timing_compatible) {
 			/* Use high reset for ft8716 and s6d6fa1 panels */
 			if(!strcmp("mdss_dsi_ft8716_1080p_video",&pinfo->panel_name[0])

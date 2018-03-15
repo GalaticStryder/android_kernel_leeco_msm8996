@@ -1901,7 +1901,7 @@
 		clock-frequency = <32768>;
 	};
 
-	msm_imem: qcom,msm-imem@66bf000 {
+	qcom,msm-imem@66bf000 {
 		compatible = "qcom,msm-imem";
 		reg = <0x66bf000 0x1000>; /* Address and size of IMEM */
 		ranges = <0x0 0x66bf000 0x1000>;
@@ -1931,6 +1931,11 @@
 		pil@94c {
 			compatible = "qcom,msm-imem-pil";
 			reg = <0x94c 200>;
+		};
+
+		sleep_light@b38 {
+			compatible = "qcom,msm-imem-sleep_light";
+			reg = <0xb38 8>;
 		};
 	};
 
