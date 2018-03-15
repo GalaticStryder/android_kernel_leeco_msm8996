@@ -4943,6 +4943,60 @@ static struct snd_soc_dai_link msm8996_hdmi_dai_link[] = {
 	},
 };
 
+#ifdef CONFIG_SND_SOC_ES9018
+static struct snd_soc_dai_link msm8996_hifi_dai_link[] = {
+	/* HIFI BACK END DAI Link */
+		{
+		.name = LPASS_BE_SEC_MI2S_RX,
+		.stream_name = "Secondary MI2S Playback",
+		.cpu_dai_name = "msm-dai-q6-mi2s.1",
+		.platform_name = "msm-pcm-routing",
+		.codec_name = "es9018-codec",
+		.codec_dai_name = "es9018-hifi",
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.be_id = MSM_BACKEND_DAI_SECONDARY_MI2S_RX,
+		.be_hw_params_fixup = msm_sec_mi2s_rx_be_hw_params_fixup,
+		.ops = &msm8996_sec_mi2s_be_ops,
+		.ignore_suspend = 1,
+	},
+	{
+		.name = LPASS_BE_SEC_MI2S_TX,
+		.stream_name = "Secondary MI2S Capture",
+		.cpu_dai_name = "msm-dai-q6-mi2s.1",
+		.platform_name = "msm-pcm-routing",
+		.codec_name = "es9018-codec",
+		.codec_dai_name = "es9018-hifi",
+		.no_pcm = 1,
+		.dpcm_capture = 1,
+		.be_id = MSM_BACKEND_DAI_SECONDARY_MI2S_TX,
+		.be_hw_params_fixup = msm_sec_mi2s_tx_be_hw_params_fixup,
+		.ops = &msm8996_sec_mi2s_be_ops,
+		.ignore_suspend = 1,
+	},
+};
+#endif
+
+#ifdef CONFIG_SND_SOC_TFA98XX
+static struct snd_soc_dai_link msm8996_smartpa_dai_link[] = {
+	/* TFA98XX SMARTPA BACK END DAI Link */
+	{
+		.name = LPASS_BE_TERT_MI2S_RX,
+		.stream_name = "Tertiary MI2S Playback",
+		.cpu_dai_name = "msm-dai-q6-mi2s.2",
+		.platform_name = "msm-pcm-routing",
+		.codec_name = "tfa98xx.8-0034",
+		.codec_dai_name = "tfa98xx_codec",
+		.no_pcm = 1,
+		.dpcm_playback = 1,
+		.be_id = MSM_BACKEND_DAI_TERTIARY_MI2S_RX,
+		.be_hw_params_fixup = msm_tert_mi2s_rx_be_hw_params_fixup,
+		.ops = &msm8996_tert_mi2s_be_ops,
+		.ignore_suspend = 1,
+	},
+};
+#endif
+
 #ifdef CONFIG_SND_SOC_MAX98927
 static struct snd_soc_dai_link msm8996_max98927_dai_link[] = {
 	/* MAX98927 SMARTPA BACK END DAI Link */

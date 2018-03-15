@@ -319,16 +319,26 @@ void mdss_dsi_panel_reset_high(int enable)
 	}
 }
 
+#ifdef CONFIG_MACH_LEECO
+extern char spec_char_seq[32];
+#endif
 int mdss_dsi_panel_reset(struct mdss_panel_data *pdata, int enable)
 {
 	struct mdss_dsi_ctrl_pdata *ctrl_pdata = NULL;
 	struct mdss_panel_info *pinfo = NULL;
 	int i, rc = 0;
+#ifdef CONFIG_MACH_LEECO
+	static char panel_id[2];
+#endif
 
 	if (pdata == NULL) {
 		pr_err("%s: Invalid input data\n", __func__);
 		return -EINVAL;
 	}
+
+#ifdef CONFIG_MACH_LEECO
+	strncpy(panel_id, spec_char_seq, 2);
+#endif
 
 	ctrl_pdata = container_of(pdata, struct mdss_dsi_ctrl_pdata,
 				panel_data);
@@ -431,7 +441,10 @@ int mdss_dsi_panel_reset(struct mdss_panel_data *pdata, int enable)
 			gpio_free(ctrl_pdata->disp_en_gpio);
 		}
 #ifdef CONFIG_MACH_LEECO
-		gpio_set_value((ctrl_pdata->rst_gpio), 0);
+		if (strcmp (panel_id, "5A") == 0)
+			gpio_set_value((ctrl_pdata->rst_gpio), 1);
+		else
+			gpio_set_value((ctrl_pdata->rst_gpio), 0);
 #else
 		gpio_set_value((ctrl_pdata->rst_gpio), 0);
 #endif
