@@ -102,3 +102,9 @@ compile.sh
 
 # compilation output folder
 out/
+
+# temporary modules folder
+temp/
+
+# formula file
+fmrl.txt
