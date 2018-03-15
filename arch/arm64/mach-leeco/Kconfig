@@ -49,6 +49,47 @@ config MACH_LEECO_DEBUG
 
 	  If unsure, say N.
 
+config MACH_LEECO_X2
+	bool "Kernel support for the Le Max 2 (X2)"
+	depends on MACH_LEECO
+	select BACKLIGHT_LM3697
+	select DEEP_SLEEP_LED_SWITCH
+	select INPUT_DRV2604L_HAPTICS
+	select IR_MAXQ616
+	select TOUCHSCREEN_ATMEL_MXT_LETV
+	select TOUCHSCREEN_SYNAPTICS_DSX_CORE_LETV
+	select TOUCHSCREEN_SYNAPTICS_DSX_RMI_DEV_LETV
+	select TOUCHSCREEN_SYNAPTICS_DSX_FW_UPDATE_LETV
+	select TOUCHSCREEN_SYNAPTICS_DSX_TEST_REPORTING_LETV
+	select TOUCHSCREEN_HIDEEP_TP_LETV
+	select SND_SOC_ES9018
+	select SND_SOC_TFA98XX
+	help
+	  Once selected, barebones Le Max 2 tuning and drivers will take effect.
+
+	  The following drivers will be selected in Kernel:
+
+	  * LM3697 -> Backlight
+	  * TI DRV2604L -> Vibrator
+	  * MAXQ616 -> Infrared Remote Control
+
+	  OEM changes such as custom init, cpufreq modifications, VR support and proprietary
+	  sound controllers aren't covered in this option.
+	  Thus, if you want those OEM changes you'll need to select the next
+	  option right down below.
+
+	  If unsure, you're the expert. Otherwise, always say N.
+
+config MACH_LEECO_X2_OEM
+	depends on MACH_LEECO_X2
+	bool "OEM extensions for the Le Max 2 (X2)"
+	help
+	  Once selected, this option will bring-in OEM changes in Kernel source code, they
+	  aren't usually needed.
+
+	  If unsure, say Y here to avoid issues when running stock Android firmware. Otherwise,
+	  say N.
+
 config MACH_LEECO_ZL1
 	bool "Kernel support for the Le Pro 3 (ZL1)"
 	depends on MACH_LEECO
