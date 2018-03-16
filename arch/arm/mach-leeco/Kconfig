@@ -52,6 +52,7 @@ config MACH_LEECO_DEBUG
 config MACH_LEECO_PD
 	depends on MACH_LEECO
 	select USB_CYCCG
+	select QPNP_MHL
 	bool "Support USB PD control protocol for LeEco devices"
 	help
 	  Once selected, this option will enable support for LeEco's PD infrastructure. This
@@ -77,6 +78,8 @@ config MACH_LEECO_X2
 	select IR_MAXQ616
 	select SND_SOC_ES9018
 	select SND_SOC_TFA98XX
+	select FB_MSM_MDSS_HDMI_MHL_SII6400
+	select FB_MSM_MDSS_HDMI_DP_ANX7816
 	help
 	  Once selected, barebones Le Max 2 tuning and drivers will take effect.
 
@@ -92,6 +95,8 @@ config MACH_LEECO_X2
 	  * MAXQ616 -> Infrared Remote Control
 	  * ES9018 -> Hi-Fi Audio
 	  * TFA98XX -> SmartPA Amplifier
+	  * SII6400 -> USB-to-HDMI Peripheral
+	  * ANX7816 -> Slimport Peripheral
 
 	  OEM changes such as custom init, cpufreq modifications, VR support and proprietary
 	  sound controllers aren't covered in this option.
