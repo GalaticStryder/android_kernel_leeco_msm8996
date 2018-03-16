@@ -105,7 +105,7 @@ struct ptn5150_dev	{
 	//spinlock_t			irq_enabled_lock;
 };
 
-extern int pi5usb_set_msm_usb_host_mode(bool mode);
+extern int dwc3_set_msm_usb_host_mode(bool mode);
 
 static int ptn5150_i2c_rxdata(struct i2c_client *client, char *rxdata, int length)
 {
@@ -222,7 +222,7 @@ void ptn5150_cclogic_set_audio_mode(bool mode)
 	if (mode) {
 		pr_info("ptn5150 switch to audio mode\n");
         msleep(50);
-		pi5usb_set_msm_usb_host_mode(false);/*simulate plugout*/
+		dwc3_set_msm_usb_host_mode(false);/*simulate plugout*/
 
 		gpio_set_value(ptn5150_dev->switch_gpio2, 1);/*Headphone*/
 		gpio_set_value(ptn5150_dev->switch_gpio1, 0);/*MIC*/
@@ -254,7 +254,7 @@ void ptn5150_cclogic_set_audio_mode(bool mode)
 		gpio_set_value(ptn5150_dev->switch_gpio1, 0);/*MIC*/
 
         msleep(30);
-		pi5usb_set_msm_usb_host_mode(true);
+		dwc3_set_msm_usb_host_mode(true);
 		gpio_set_value(ptn5150_dev->cc1_pwr_gpio, 0);
 		gpio_set_value(ptn5150_dev->cc2_pwr_gpio, 0);
 		//pr_info("ptn5150 set usb to host mode\n");
@@ -561,7 +561,7 @@ static void ptn5150_status_check(struct work_struct *work)
 					wcd_mbhc_plug_detect();
 				}
 
-				pi5usb_set_msm_usb_host_mode(false);/*if not simulate disconnect, open*/
+				dwc3_set_msm_usb_host_mode(false);/*if not simulate disconnect, open*/
                 cclogic_updata_port_state(0);/*"cc_state: none"*/
 
                 if (typec_set_cc_state) {
@@ -618,7 +618,7 @@ static void ptn5150_status_check(struct work_struct *work)
                 pr_debug("UFP is attached!\n");
                 gpio_set_value(ptn5150_dev->switch_gpio1, 0);/*MIC*/
                 cclogic_set_vbus(1);
-                pi5usb_set_msm_usb_host_mode(true);
+                dwc3_set_msm_usb_host_mode(true);
                 cclogic_updata_port_state(2);/*"cc_state: dfp"*/
                 //check cc orientation
                 ptn5150_read_reg(ptn5150_dev->client, PTN5150_CC_STATUS_REG, &Register_Value);
@@ -646,7 +646,7 @@ static void ptn5150_status_check(struct work_struct *work)
 			if(Reg_Data_tmp != 0)
 				schedule_delayed_work(&ptn5150_dev->check_work, 0);
 
-			//pi5usb_set_msm_usb_host_mode(true);
+			//dwc3_set_msm_usb_host_mode(true);
 			//ptn5150_set_mode(ptn5150_dev->client, PORT_SET_DFP);
 			cclogic_updata_port_state(3);/*"cc_state: audio"*/
 			//notify audio module for headset plug in

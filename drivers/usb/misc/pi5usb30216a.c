@@ -31,7 +31,7 @@ extern int start_usb_DebugMode(void);
 #define PI5USB_REG2_ROLE_MODE_MASK	0x6
 #define PI5USB_REG2_INTERRUPT_MASK	0x1
 
-extern int pi5usb_set_msm_usb_host_mode(bool mode);
+extern int dwc3_set_msm_usb_host_mode(bool mode);
 /*
 Write data to chip
 reg: register address
@@ -51,7 +51,7 @@ int start_usb_DRPMode(void)
 int start_usb_DFPMode(bool mode)
 {
 	printk("%s:\n", __func__);
-	pi5usb_set_msm_usb_host_mode(mode);
+	dwc3_set_msm_usb_host_mode(mode);
 	return 0;
 }
 
