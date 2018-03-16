@@ -65,7 +65,7 @@ struct device *g_ohio_device;
 static bool usb_audio_insert = false;
 
 /* ohio power status, sync with interface and cable detection thread */
-extern int pi5usb_set_msm_usb_host_mode(bool mode);
+extern int dwc3_set_msm_usb_host_mode(bool mode);
 extern int wcd_mbhc_plug_detect(void);
 extern void usb_audio_if_letv(bool *letv, int *pid);
 extern int cclogic_set_audio_mode_register(void (*func)(bool));
@@ -394,7 +394,7 @@ void anx_cclogic_set_audio_mode(bool mode)
 #endif
 	if(mode){
 		pr_info("ohio switch to audio mode\n");
-		pi5usb_set_msm_usb_host_mode(false);
+		dwc3_set_msm_usb_host_mode(false);
 		msm_usb_vbus_set(NULL, 1, true);
 		gpio_set_value(pdata->gpio_uart_sw, 1);
 		gpio_set_value(pdata->gpio_uart_sw2, 0);
@@ -408,7 +408,7 @@ void anx_cclogic_set_audio_mode(bool mode)
 		gpio_set_value(pdata->gpio_uart_sw2, 1);
 		gpio_set_value(pdata->gpio_ad_sel, 0);
 		msm_usb_vbus_set(NULL, 0, true);
-		pi5usb_set_msm_usb_host_mode(true);
+		dwc3_set_msm_usb_host_mode(true);
 		pr_info("ohio set usb to host mode\n");
 		pdata->mode = DFP_MODE;
 		//notify audio module for headset plug out
@@ -465,8 +465,8 @@ void ohio_main_process(int cable_connected)
 				gpio_set_value(pdata->gpio_ad_sel, 0);
 
 				pr_info("ohio set usb to device mode\n");
-//				pi5usb_set_msm_usb_host_mode(false);
-				pi5usb_set_msm_usb_host_mode(true);
+//				dwc3_set_msm_usb_host_mode(false);
+				dwc3_set_msm_usb_host_mode(true);
 				pdata->mode = DEBUG_MODE;
 				cclogic_updata_port_state(2);
 			}else if ( (i & 0x0f) == 0xf ) {
@@ -476,7 +476,7 @@ void ohio_main_process(int cable_connected)
 				gpio_set_value(pdata->gpio_ad_sel, 1);
 
 				pr_info("ohio set usb to device mode\n");
-				pi5usb_set_msm_usb_host_mode(false);
+				dwc3_set_msm_usb_host_mode(false);
 				pdata->mode = AUDIO_MODE;
 				//notify audio module for headset plug in
 				wcd_mbhc_plug_detect();
@@ -489,13 +489,13 @@ void ohio_main_process(int cable_connected)
 				gpio_set_value(pdata->gpio_ad_sel, 0);
 
 				if( (j & 0x08) == 0 ) {
-					pi5usb_set_msm_usb_host_mode(true);
+					dwc3_set_msm_usb_host_mode(true);
 					pr_info("ohio set usb to host mode\n");
 					pdata->mode = DFP_MODE;
 					cclogic_updata_port_state(2);
 				}else {
 					pr_info("ohio set usb to device mode\n");
-					pi5usb_set_msm_usb_host_mode(false);
+					dwc3_set_msm_usb_host_mode(false);
 					pdata->mode = UFP_MODE;
 					cclogic_updata_port_state(1);
 				}
@@ -515,7 +515,7 @@ void ohio_main_process(int cable_connected)
 			gpio_set_value(pdata->gpio_ad_sel, 0);
 
 			pr_info("ohio set usb to device mode,when cable disconnect\n");
-			pi5usb_set_msm_usb_host_mode(false);
+			dwc3_set_msm_usb_host_mode(false);
 			if (pdata->mode == AUDIO_MODE) {
 				pr_info("%s: call headset plug out detect\n", __func__);
 				//notify audio module for headset plug out
