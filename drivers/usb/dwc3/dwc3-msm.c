@@ -64,7 +64,6 @@
 #define DWC3_CDP_CHG_MAX 1000
 #define DWC3_IDEV_CHG_MAX 1400
 #define DWC3_HVDCP_CHG_MAX 1200
-#define DWC3_FLOAT_CHG_MAX 600
 static struct dwc3_msm *_msm_dwc;
 #else
 #define DWC3_IDEV_CHG_MAX 1500
@@ -93,13 +92,6 @@ MODULE_PARM_DESC(override_phy_init, "Override HSPHY Init Seq");
 static int hvdcp_max_current = DWC3_HVDCP_CHG_MAX;
 module_param(hvdcp_max_current, int, S_IRUGO|S_IWUSR);
 MODULE_PARM_DESC(hvdcp_max_current, "max current drawn for HVDCP charger");
-
-#ifdef CONFIG_MACH_LEECO
-/* Max current to be drawn for float charger */
-static int float_max_current = DWC3_FLOAT_CHG_MAX;
-module_param(float_max_current, int, S_IRUGO|S_IWUSR);
-MODULE_PARM_DESC(float_max_current, "max current drawn for float charger");
-#endif
 
 /* Max current to be drawn for DCP charger */
 int dcp_max_current = DWC3_IDEV_CHG_MAX;
@@ -241,9 +233,6 @@ struct dwc3_msm {
 	bool			in_restart;
 	struct workqueue_struct *dwc3_wq;
 	struct delayed_work	sm_work;
-#ifdef CONFIG_MACH_LEECO
-	struct delayed_work	float_chgtype_work;
-#endif
 	unsigned long		inputs;
 	enum dwc3_chg_type	chg_type;
 	unsigned		max_power;
@@ -2681,11 +2670,6 @@ static int dwc3_msm_power_set_property_usb(struct power_supply *psy,
 		case POWER_SUPPLY_TYPE_USB_ACA:
 			mdwc->chg_type = DWC3_PROPRIETARY_CHARGER;
 			break;
-#ifdef CONFIG_MACH_LEECO
-		case POWER_SUPPLY_TYPE_USB_FLOAT:
-			mdwc->chg_type = DWC3_FLOATED_CHARGER;
-			break;
-#endif
 		default:
 			mdwc->chg_type = DWC3_INVALID_CHARGER;
 			break;
@@ -2782,8 +2766,6 @@ static int dwc3_cpu_notifier_cb(struct notifier_block *nfb,
 static void dwc3_otg_sm_work(struct work_struct *w);
 
 #ifdef CONFIG_MACH_LEECO
-static void dwc3_float_chgtype_work(struct work_struct *w);
-
 #ifdef MHL_POWER_OUT
 struct platform_device *dwc3_mhl_t;
 struct dwc3_mhl *dwc3_mhl_n;
@@ -3002,9 +2984,6 @@ static int dwc3_msm_probe(struct platform_device *pdev)
 	INIT_WORK(&mdwc->restart_usb_work, dwc3_restart_usb_work);
 	INIT_WORK(&mdwc->bus_vote_w, dwc3_msm_bus_vote_w);
 	INIT_DELAYED_WORK(&mdwc->sm_work, dwc3_otg_sm_work);
-#ifdef CONFIG_MACH_LEECO
-	INIT_DELAYED_WORK(&mdwc->float_chgtype_work, dwc3_float_chgtype_work);
-#endif
 
 	mdwc->dwc3_wq = alloc_ordered_workqueue("dwc3_wq", 0);
 	if (!mdwc->dwc3_wq) {
@@ -3441,10 +3420,6 @@ static int dwc3_msm_remove(struct platform_device *pdev)
 }
 
 #define VBUS_REG_CHECK_DELAY	(msecs_to_jiffies(1000))
-#ifdef CONFIG_MACH_LEECO
-#define FLOATED_CHARGER_CHECK_DELAY_3S	   (msecs_to_jiffies(3000))
-#define FLOATED_CHARGER_CHECK_DELAY_5S	   (msecs_to_jiffies(5000))
-#endif
 
 /**
  * dwc3_otg_start_host -  helper function for starting/stoping the host controller driver.
@@ -3657,17 +3632,6 @@ static int dwc3_otg_start_peripheral(struct dwc3_msm *mdwc, int on)
 
 		dwc3_set_mode(dwc, DWC3_GCTL_PRTCAP_DEVICE);
 		usb_gadget_vbus_connect(&dwc->gadget);
-
-#ifdef CONFIG_MACH_LEECO
-		if (mdwc->chg_type == DWC3_SDP_CHARGER) {
-			if (bringup)
-				delay = FLOATED_CHARGER_CHECK_DELAY_5S;
-			else
-				delay = FLOATED_CHARGER_CHECK_DELAY_3S;
-
-			schedule_delayed_work(&mdwc->float_chgtype_work, delay);
-		}
-#endif
 	} else {
 		dev_dbg(mdwc->dev, "%s: turn off gadget %s\n",
 					__func__, dwc->gadget.name);
@@ -3675,9 +3639,6 @@ static int dwc3_otg_start_peripheral(struct dwc3_msm *mdwc, int on)
 		usb_phy_notify_disconnect(mdwc->hs_phy, USB_SPEED_HIGH);
 		usb_phy_notify_disconnect(mdwc->ss_phy, USB_SPEED_SUPER);
 		dwc3_gadget_usb3_phy_suspend(dwc, false);
-#ifdef CONFIG_MACH_LEECO
-		cancel_delayed_work_sync(&mdwc->float_chgtype_work);
-#endif
 	}
 
 	pm_runtime_put_sync(mdwc->dev);
@@ -3694,12 +3655,7 @@ static int dwc3_msm_gadget_vbus_draw(struct dwc3_msm *mdwc, unsigned mA)
 	if (mdwc->charging_disabled)
 		return 0;
 
-#ifdef CONFIG_MACH_LEECO
-	if (mdwc->chg_type != DWC3_INVALID_CHARGER
-		&& mdwc->chg_type != DWC3_FLOATED_CHARGER) {
-#else
 	if (mdwc->chg_type != DWC3_INVALID_CHARGER) {
-#endif
 		dev_dbg(mdwc->dev,
 			"SKIP setting power supply type again,chg_type = %d\n",
 			mdwc->chg_type);
@@ -3724,8 +3680,6 @@ static int dwc3_msm_gadget_vbus_draw(struct dwc3_msm *mdwc, unsigned mA)
 #ifdef CONFIG_MACH_LEECO
 	else if (mdwc->chg_type == DWC3_PROPRIETARY_CHARGER)
 		power_supply_type = POWER_SUPPLY_TYPE_USB_ACA;
-	else if (mdwc->chg_type == DWC3_FLOATED_CHARGER)
-		power_supply_type = POWER_SUPPLY_TYPE_USB_FLOAT;
 #endif
 	else
 		power_supply_type = POWER_SUPPLY_TYPE_UNKNOWN;
@@ -3828,31 +3782,6 @@ static void dwc3_initialize(struct dwc3_msm *mdwc)
 	dwc3_msm_write_reg_field(mdwc->base, PWR_EVNT_IRQ_MASK_REG,
 			PWR_EVNT_POWERDOWN_IN_P3_MASK, 1);
 }
-
-#ifdef CONFIG_MACH_LEECO
-static void dwc3_float_chgtype_work(struct work_struct *w)
-{
-	struct dwc3_msm *mdwc = _msm_dwc;
-	struct dwc3 *dwc = NULL;
-
-	if (mdwc->dwc3)
-		dwc = platform_get_drvdata(mdwc->dwc3);
-
-	if (!dwc) {
-		dev_err(mdwc->dev, "dwc is NULL.\n");
-		return;
-	}
-
-	if ((mdwc->chg_type == DWC3_SDP_CHARGER)
-		&& (dwc->gadget.state != USB_STATE_CONFIGURED)) {
-		mdwc->chg_type = DWC3_FLOATED_CHARGER;
-		dwc3_msm_gadget_vbus_draw(mdwc, float_max_current);
-		dev_info(mdwc->dev, "float charger inplug\n");
-	}
-
-	return;
-}
-#endif
 
 /**
  * dwc3_otg_sm_work - workqueue function.
