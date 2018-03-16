@@ -51,7 +51,7 @@
 #define FAKE_REM_RETRY_ATTEMPTS 3
 #define MAX_IMPED 60000
 
-#ifdef CONFIG_MACH_LEECO_ZL1
+#ifdef CONFIG_MACH_LEECO
 #define MBHC_PENDING_TIMEOUT 2000000
 #define BUTTON_INTR_COUNT 2
 #endif
@@ -60,14 +60,16 @@
 #define ANC_DETECT_RETRY_CNT 7
 #define WCD_MBHC_SPL_HS_CNT  2
 
-#ifdef CONFIG_MACH_LEECO_ZL1
+#ifdef CONFIG_MACH_LEECO
 static struct wcd_mbhc *g_mbhc;
 static struct delayed_work mbhc_pending_dwork;
 static int headset_detect_enable = -1;
 static int headset_swap_backmic = -1;
 static bool mbhc_hold_pending = false;
 static bool micbias2_on_state = false;
+#ifdef CONFIG_USB_CYCCG
 extern bool letv_typec_plug_state;
+#endif
 static int button_intr_count = 0;
 bool letv_typec_4_pole = false;
 extern int tasha_codec_enable_standalone_micbias(struct snd_soc_codec *codec,
@@ -624,9 +626,13 @@ static void wcd_mbhc_report_plug(struct wcd_mbhc *mbhc, int insertion,
 		hphrocp_off_report(mbhc, SND_JACK_OC_HPHR);
 		hphlocp_off_report(mbhc, SND_JACK_OC_HPHL);
 		mbhc->current_plug = MBHC_PLUG_TYPE_NONE;
-#ifdef CONFIG_MACH_LEECO_ZL1
+#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_USB_CYCCG
 		if ((jack_type == SND_JACK_HEADSET) &&
 			letv_typec_plug_state) {
+#else
+		if (jack_type == SND_JACK_HEADSET) {
+#endif
 			pr_info("letv_typec disable micbias2!\n");
 			WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_MICB_CTRL, 0);
 			tasha_codec_enable_standalone_micbias(mbhc->codec, 1, false);
@@ -654,7 +660,7 @@ static void wcd_mbhc_report_plug(struct wcd_mbhc *mbhc, int insertion,
 		    jack_type == SND_JACK_LINEOUT) &&
 		    (mbhc->hph_status && mbhc->hph_status != jack_type)) {
 
-#ifdef CONFIG_MACH_LEECO_ZL1
+#ifdef CONFIG_MACH_LEECO
 			if (mbhc->micbias_enable) {
 #else
 			if (mbhc->micbias_enable &&
@@ -759,9 +765,13 @@ static void wcd_mbhc_report_plug(struct wcd_mbhc *mbhc, int insertion,
 				    (mbhc->hph_status | SND_JACK_MECHANICAL),
 				    WCD_MBHC_JACK_MASK);
 		wcd_mbhc_clr_and_turnon_hph_padac(mbhc);
-#ifdef CONFIG_MACH_LEECO_ZL1
+#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_USB_CYCCG
 		if ((jack_type == SND_JACK_HEADSET) &&
 			letv_typec_plug_state) {
+#else
+		if (jack_type == SND_JACK_HEADSET) {
+#endif
 			pr_info("%s: letv_typec enable micbias2!\n", __func__);
 			tasha_codec_enable_standalone_micbias(mbhc->codec, 1, true);
 			micbias2_on_state = true;
@@ -874,7 +884,7 @@ static void wcd_mbhc_find_plug_and_report(struct wcd_mbhc *mbhc,
 		goto exit;
 	}
 
-#ifdef CONFIG_MACH_LEECO_ZL1
+#ifdef CONFIG_MACH_LEECO
 	if (plug_type == MBHC_PLUG_TYPE_HIGH_HPH)
 		plug_type = MBHC_PLUG_TYPE_HEADSET;
 #endif
@@ -1035,7 +1045,7 @@ static bool wcd_is_special_headset(struct wcd_mbhc *mbhc)
 	pr_debug("%s: special headset, start register writes\n", __func__);
 
 	WCD_MBHC_REG_READ(WCD_MBHC_HS_COMP_RESULT, hs_comp_res);
-#ifdef CONFIG_MACH_LEECO_ZL1
+#ifdef CONFIG_MACH_LEECO
 	/* Treat hs_comp_res as a valid plug. */
 	while (hs_comp_res)  {
 #else
@@ -1217,18 +1227,18 @@ static void wcd_correct_swch_plug(struct work_struct *work)
 	unsigned long timeout;
 	u16 hs_comp_res, hphl_sch, mic_sch, btn_result;
 	bool wrk_complete = false;
-#ifndef CONFIG_MACH_LEECO_ZL1
+#ifndef CONFIG_MACH_LEECO
 	int pt_gnd_mic_swap_cnt = 0;
 	int no_gnd_mic_swap_cnt = 0;
 #endif
 	bool is_pa_on = false, spl_hs = false;
 	bool micbias2 = false;
 	bool micbias1 = false;
-#ifndef CONFIG_MACH_LEECO_ZL1
+#ifndef CONFIG_MACH_LEECO
 	int ret = 0;
 #endif
 	int rc, spl_hs_count = 0;
-#ifdef CONFIG_MACH_LEECO_ZL1
+#ifdef CONFIG_MACH_LEECO
 	int tmp_button_intr_count = 0;
 	int mic_gnd_switch_count = 0;
 #endif
@@ -1254,7 +1264,7 @@ static void wcd_correct_swch_plug(struct work_struct *work)
 	/* Enable HW FSM */
 	WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_FSM_EN, 1);
 
-#ifdef CONFIG_MACH_LEECO_ZL1
+#ifdef CONFIG_MACH_LEECO
 	button_intr_count = 0;
 #endif
 
@@ -1301,7 +1311,7 @@ static void wcd_correct_swch_plug(struct work_struct *work)
 	}
 
 	if ((plug_type == MBHC_PLUG_TYPE_HEADSET ||
-#ifdef CONFIG_MACH_LEECO_ZL1
+#ifdef CONFIG_MACH_LEECO
 	     /* Treat hs_comp_res as a valid plug. */
 	     plug_type == MBHC_PLUG_TYPE_HIGH_HPH) &&
 #else
@@ -1361,7 +1371,7 @@ correct_plug_type:
 		}
 		WCD_MBHC_REG_READ(WCD_MBHC_HS_COMP_RESULT, hs_comp_res);
 
-#ifdef CONFIG_MACH_LEECO_ZL1
+#ifdef CONFIG_MACH_LEECO
 		if ((button_intr_count > tmp_button_intr_count) &&
 			(button_intr_count > BUTTON_INTR_COUNT)) {
 			if (mic_gnd_switch_count >= 1) {
@@ -1402,7 +1412,7 @@ correct_plug_type:
 			}
 		}
 
-#ifndef CONFIG_MACH_LEECO_ZL1
+#ifndef CONFIG_MACH_LEECO
 		if ((!hs_comp_res) && (!is_pa_on)) {
 			/* Check for cross connection*/
 			ret = wcd_check_cross_conn(mbhc);
@@ -1729,7 +1739,7 @@ static void wcd_mbhc_swch_irq_handler(struct wcd_mbhc *mbhc)
 	pr_debug("%s: leave\n", __func__);
 }
 
-#ifndef CONFIG_MACH_LEECO_ZL1
+#ifndef CONFIG_MACH_LEECO
 static irqreturn_t wcd_mbhc_mech_plug_detect_irq(int irq, void *data)
 {
 	int r = IRQ_HANDLED;
@@ -1750,7 +1760,7 @@ static irqreturn_t wcd_mbhc_mech_plug_detect_irq(int irq, void *data)
 #endif
 
 /* TODO: Switch this configuration to Type-C adapter related. */
-#ifdef CONFIG_MACH_LEECO_ZL1
+#ifdef CONFIG_MACH_LEECO
 int wcd_mbhc_plug_detect(void)
 {
 	pr_info("%s: enter\n", __func__);
@@ -1860,7 +1870,7 @@ static int wcd_mbhc_get_button_mask(struct wcd_mbhc *mbhc)
 	return mask;
 }
 
-#ifndef CONFIG_MACH_LEECO_ZL1
+#ifndef CONFIG_MACH_LEECO
 static irqreturn_t wcd_mbhc_hs_ins_irq(int irq, void *data)
 {
 	struct wcd_mbhc *mbhc = data;
@@ -2138,7 +2148,7 @@ static irqreturn_t wcd_mbhc_btn_press_handler(int irq, void *data)
 	if (mask == SND_JACK_BTN_0)
 		mbhc->btn_press_intr = true;
 
-#ifdef CONFIG_MACH_LEECO_ZL1
+#ifdef CONFIG_MACH_LEECO
 	button_intr_count++;
 #endif
 
@@ -2311,7 +2321,7 @@ static int wcd_mbhc_initialise(struct wcd_mbhc *mbhc)
 	if (mbhc->mbhc_cfg->gnd_det_en && mbhc->mbhc_cb->mbhc_gnd_det_ctrl)
 		mbhc->mbhc_cb->mbhc_gnd_det_ctrl(codec, true);
 	WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_HS_L_DET_PULL_UP_COMP_CTRL, 1);
-#ifndef CONFIG_MACH_LEECO_ZL1
+#ifndef CONFIG_MACH_LEECO
 	WCD_MBHC_REG_UPDATE_BITS(WCD_MBHC_L_DET_EN, 1);
 #endif
 
@@ -2511,7 +2521,7 @@ int wcd_mbhc_start(struct wcd_mbhc *mbhc,
 				 __func__, mbhc->mbhc_fw, mbhc->mbhc_cal);
 	}
 
-#ifdef CONFIG_MACH_LEECO_ZL1
+#ifdef CONFIG_MACH_LEECO
 	if (mbhc_hold_pending) {
 		schedule_delayed_work(&mbhc_pending_dwork,
 				usecs_to_jiffies(MBHC_PENDING_TIMEOUT));
@@ -2672,11 +2682,11 @@ int wcd_mbhc_init(struct wcd_mbhc *mbhc, struct snd_soc_codec *codec,
 	init_waitqueue_head(&mbhc->wait_btn_press);
 	mutex_init(&mbhc->codec_resource_lock);
 
-#ifdef CONFIG_MACH_LEECO_ZL1
+#ifdef CONFIG_MACH_LEECO
 	g_mbhc = mbhc;
 #endif
 
-#ifndef CONFIG_MACH_LEECO_ZL1
+#ifndef CONFIG_MACH_LEECO
 	ret = mbhc->mbhc_cb->request_irq(codec, mbhc->intr_ids->mbhc_sw_intr,
 				  wcd_mbhc_mech_plug_detect_irq,
 				  "mbhc sw intr", mbhc);
@@ -2708,7 +2718,7 @@ int wcd_mbhc_init(struct wcd_mbhc *mbhc, struct snd_soc_codec *codec,
 		goto err_btn_release_irq;
 	}
 
-#ifndef CONFIG_MACH_LEECO_ZL1
+#ifndef CONFIG_MACH_LEECO
 	ret = mbhc->mbhc_cb->request_irq(codec,
 					 mbhc->intr_ids->mbhc_hs_ins_intr,
 					 wcd_mbhc_hs_ins_irq,
@@ -2754,7 +2764,7 @@ int wcd_mbhc_init(struct wcd_mbhc *mbhc, struct snd_soc_codec *codec,
 		goto err_hphr_ocp_irq;
 	}
 
-#ifdef CONFIG_MACH_LEECO_ZL1
+#ifdef CONFIG_MACH_LEECO
 	INIT_DELAYED_WORK(&mbhc_pending_dwork, mbhc_pending_handler);
 #endif
 	pr_debug("%s: leave ret %d\n", __func__, ret);
@@ -2764,7 +2774,7 @@ err_hphr_ocp_irq:
 	mbhc->mbhc_cb->free_irq(codec, mbhc->intr_ids->hph_left_ocp, mbhc);
 err_hphl_ocp_irq:
 	mbhc->mbhc_cb->free_irq(codec, mbhc->intr_ids->mbhc_hs_rem_intr, mbhc);
-#ifndef CONFIG_MACH_LEECO_ZL1
+#ifndef CONFIG_MACH_LEECO
 err_mbhc_hs_rem_irq:
 	mbhc->mbhc_cb->free_irq(codec, mbhc->intr_ids->mbhc_hs_ins_intr, mbhc);
 err_mbhc_hs_ins_irq:
@@ -2776,7 +2786,7 @@ err_btn_release_irq:
 				mbhc);
 err_btn_press_irq:
 	mbhc->mbhc_cb->free_irq(codec, mbhc->intr_ids->mbhc_sw_intr, mbhc);
-#ifndef CONFIG_MACH_LEECO_ZL1
+#ifndef CONFIG_MACH_LEECO
 err_mbhc_sw_irq:
 	if (mbhc->mbhc_cb->register_notifier)
 		mbhc->mbhc_cb->register_notifier(codec, &mbhc->nblock, false);
