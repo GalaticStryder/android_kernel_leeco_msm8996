@@ -5131,6 +5131,12 @@ static struct snd_soc_dai_link msm8996_tasha_dai_links[
 			 ARRAY_SIZE(msm8996_tasha_fe_dai_links) +
 			 ARRAY_SIZE(msm8996_common_be_dai_links) +
 			 ARRAY_SIZE(msm8996_tasha_be_dai_links) +
+#ifdef CONFIG_SND_SOC_ES9018
+			 ARRAY_SIZE(msm8996_hifi_dai_link) +
+#endif
+#ifdef CONFIG_SND_SOC_TFA98XX
+			 ARRAY_SIZE(msm8996_smartpa_dai_link) +
+#endif
 			 ARRAY_SIZE(msm8996_hdmi_dai_link)];
 
 #ifdef WSA881X_PA
@@ -5381,6 +5387,30 @@ static struct snd_soc_card *populate_snd_card_dailinks(struct device *dev)
 	} else {
 		dev_dbg(dev, "%s(): No hdmi audio support\n", __func__);
 	}
+
+#ifdef CONFIG_SND_SOC_ES9018
+	if (of_property_read_bool(dev->of_node, "letv,hifi-audio")) {
+		pr_info("%s(): hifi audio support present\n",
+				__func__);
+		memcpy(dailink + len_4, msm8996_hifi_dai_link,
+			sizeof(msm8996_hifi_dai_link));
+		len_4 += ARRAY_SIZE(msm8996_hifi_dai_link);
+	} else {
+		pr_info("%s(): No hifi audio support\n", __func__);
+	}
+#endif
+
+#ifdef CONFIG_SND_SOC_TFA98XX
+	if (of_property_read_bool(dev->of_node, "letv,smartpa-audio")) {
+		pr_info( "%s(): SmartPA audio support present\n",
+				__func__);
+		memcpy(dailink + len_4, msm8996_smartpa_dai_link,
+			sizeof(msm8996_smartpa_dai_link));
+		len_4 += ARRAY_SIZE(msm8996_smartpa_dai_link);
+	} else {
+		pr_info("%s(): No SmartPA audio support\n", __func__);
+	}
+#endif
 
 #ifdef CONFIG_SND_SOC_MAX98927
 	if (of_property_read_bool(dev->of_node, "letv,smartpa-audio-max98927")) {
