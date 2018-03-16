@@ -3643,7 +3643,9 @@ static int smbchg_system_temp_level_set(struct smbchg_chip *chip,
 	int rc = 0;
 	int prev_therm_lvl;
 	int thermal_fcc_ma;
+#ifdef CONFIG_MACH_LEECO_ZL1
 	int usb_icl_ma = 0;
+#endif
 
 #if USB_THERMAL_DEBUG
 	if (system_temp_debug > 0) {
@@ -3710,6 +3712,7 @@ static int smbchg_system_temp_level_set(struct smbchg_chip *chip,
 		vote(chip->usb_icl_votable, THERMAL_ICL_VOTER, false,0);
 
 	} else {
+#ifdef CONFIG_MACH_LEECO_ZL1
 		if(chip->therm_scn == THERMAL_SCN) {
 			thermal_fcc_ma = (int)chip->thermal_mitigation_scn[chip->therm_lvl_sel];
 			usb_icl_ma = (int)chip->usb_thermal_mitigation[chip->therm_lvl_sel];
@@ -3719,14 +3722,16 @@ static int smbchg_system_temp_level_set(struct smbchg_chip *chip,
 			pr_info("temp lvl: %d,fcc ma:%d,icl:%d\n",
 				chip->therm_lvl_sel,thermal_fcc_ma,usb_icl_ma);
 		} else {
+#endif
 			thermal_fcc_ma = (int)chip->thermal_mitigation[chip->therm_lvl_sel];
 			//disable usb icl limit for normal scn
 			vote(chip->usb_icl_votable, THERMAL_ICL_VOTER, false,0);
 
 			pr_info("temp lvl: %d,fcc ma:%d\n",
 				chip->therm_lvl_sel,thermal_fcc_ma);
+#ifdef CONFIG_MACH_LEECO_ZL1
 		}
-
+#endif
 
 		rc = vote(chip->fcc_votable, THERMAL_FCC_VOTER, true,
 					thermal_fcc_ma);
@@ -10341,13 +10346,13 @@ static int smbchg_probe(struct spmi_device *spmi)
 		letv_pd_notice_charger_in_parameter(pd_init_voltage, pd_init_ma);
 		delay_pd_state = false;
 	}
+#endif
 
 #ifdef CONFIG_MACH_LEECO_ZL1
 	/*
 	 * workaround ldo19 current reverse boost
 	 */
 	smbchg_sec_masked_write(chip, 0x16F2 , 0x10, 0x0);
-#endif
 
 	chip->chg_reset = 0;
 	smbchg_charging_en(chip,0);
