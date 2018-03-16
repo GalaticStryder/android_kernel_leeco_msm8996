@@ -3768,18 +3768,9 @@ static int dwc3_msm_gadget_vbus_draw(struct dwc3_msm *mdwc, unsigned mA)
 		power_supply_type = POWER_SUPPLY_TYPE_USB;
 	else if (mdwc->chg_type == DWC3_CDP_CHARGER)
 		power_supply_type = POWER_SUPPLY_TYPE_USB_CDP;
-#ifdef CONFIG_MACH_LEECO
-	/* Remove DWC3_PROPRIETARY_CHARGER as we use this for QC stack */
-	else if (mdwc->chg_type == DWC3_DCP_CHARGER)
-#else
 	else if (mdwc->chg_type == DWC3_DCP_CHARGER ||
 			mdwc->chg_type == DWC3_PROPRIETARY_CHARGER)
-#endif
 		power_supply_type = POWER_SUPPLY_TYPE_USB_DCP;
-#ifdef CONFIG_MACH_LEECO
-	else if (mdwc->chg_type == DWC3_PROPRIETARY_CHARGER)
-		power_supply_type = POWER_SUPPLY_TYPE_USB_ACA;
-#endif
 	else
 		power_supply_type = POWER_SUPPLY_TYPE_UNKNOWN;
 
@@ -3788,11 +3779,7 @@ static int dwc3_msm_gadget_vbus_draw(struct dwc3_msm *mdwc, unsigned mA)
 skip_psy_type:
 
 	if (mdwc->chg_type == DWC3_CDP_CHARGER)
-#ifdef CONFIG_MACH_LEECO
-		mA = DWC3_CDP_CHG_MAX;
-#else
 		mA = DWC3_IDEV_CHG_MAX;
-#endif
 
 	/* Save bc1.2 max_curr if type-c charger later moves to diff mode */
 	mdwc->bc1p2_current_max = mA;
@@ -3961,24 +3948,13 @@ static void dwc3_otg_sm_work(struct work_struct *w)
 			dbg_event(0xFF, "undef_b_sess_vld", 0);
 			switch (mdwc->chg_type) {
 			case DWC3_DCP_CHARGER:
-#ifndef CONFIG_MACH_LEECO
 			case DWC3_PROPRIETARY_CHARGER:
-#endif
 				dev_dbg(mdwc->dev, "DCP charger\n");
 				dwc3_msm_gadget_vbus_draw(mdwc,
 						dcp_max_current);
 				atomic_set(&dwc->in_lpm, 1);
 				pm_relax(mdwc->dev);
 				break;
-#ifdef CONFIG_MACH_LEECO
-			case DWC3_PROPRIETARY_CHARGER:
-				dev_dbg(mdwc->dev, "ACA charger\n");
-				dwc3_msm_gadget_vbus_draw(mdwc,
-						aca_max_current);
-				atomic_set(&dwc->in_lpm, 1);
-				pm_relax(mdwc->dev);
-				break;
-#endif
 			case DWC3_CDP_CHARGER:
 			case DWC3_SDP_CHARGER:
 				atomic_set(&dwc->in_lpm, 0);
@@ -4029,27 +4005,14 @@ static void dwc3_otg_sm_work(struct work_struct *w)
 			dev_dbg(mdwc->dev, "b_sess_vld\n");
 			switch (mdwc->chg_type) {
 			case DWC3_DCP_CHARGER:
-#ifndef CONFIG_MACH_LEECO
 			case DWC3_PROPRIETARY_CHARGER:
-#endif
 				dev_dbg(mdwc->dev, "lpm, DCP charger\n");
 				dwc3_msm_gadget_vbus_draw(mdwc,
 						dcp_max_current);
 				break;
-#ifdef CONFIG_MACH_LEECO
-			case DWC3_PROPRIETARY_CHARGER:
-				dev_dbg(mdwc->dev, "lpm, ACA charger\n");
-				dwc3_msm_gadget_vbus_draw(mdwc,
-						aca_max_current);
-				break;
-#endif
 			case DWC3_CDP_CHARGER:
 				dwc3_msm_gadget_vbus_draw(mdwc,
-#ifdef CONFIG_MACH_LEECO
-						DWC3_CDP_CHG_MAX);
-#else
 						DWC3_IDEV_CHG_MAX);
-#endif
 				/* fall through */
 			case DWC3_SDP_CHARGER:
 				/*
@@ -4072,9 +4035,6 @@ static void dwc3_otg_sm_work(struct work_struct *w)
 				dwc3_otg_start_peripheral(mdwc, 1);
 				mdwc->otg_state = OTG_STATE_B_PERIPHERAL;
 				work = 1;
-#ifdef CONFIG_MACH_LEECO
-				dwc3_msm_gadget_vbus_draw(mdwc, 500);
-#endif
 				break;
 			/* fall through */
 			default:
