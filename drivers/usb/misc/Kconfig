@@ -283,31 +283,31 @@ menuconfig USB_CCLOGIC
 if USB_CCLOGIC
 
 config USB_CCLOGIC_TUSB302L
-	default y if USB_CCLOGIC=y
+	default y if MACH_LEECO_X2=y
 	bool "USB Type-C logic TUSB302L driver"
 	help
 	  This driver is for Type-C logic chip TUSB302L.
 
 config USB_CCLOGIC_TUSB320
-	default y if USB_CCLOGIC=y
+	default y if MACH_LEECO_ZL1=y
 	bool "USB Type-C logic TUSB320 driver"
 	help
 	  This driver is for Type-C logic chip TUSB320.
 
 config USB_CCLOGIC_PI5USB
-	default y if USB_CCLOGIC=y
+	default y if MACH_LEECO_X2=y
 	bool "USB Type-C logic PI5USB driver"
 	help
 	  This driver is for Type-C logic chip PI5USB.
 
 config USB_CCLOGIC_PTN5150
-	default y if USB_CCLOGIC=y
+	default y if MACH_LEECO_ZL1=y
 	bool "USB Type-C logic PTN5150 driver"
 	help
 	  This driver is for Type-C logic chip PTN5150.
 
 config USB_CCLOGIC_PER30216
-	default y if USB_CCLOGIC=y
+	default y if MACH_LEECO_ZL1=y
 	bool "USB Type-C logic PER30216 driver"
 	help
 	  This driver is for Type-C logic chip PER30216.
