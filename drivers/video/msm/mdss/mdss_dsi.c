@@ -313,7 +313,7 @@ end:
 	return ret;
 }
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 int mdss_dsi_panel_esd_check_power_off(struct mdss_panel_data *pdata)
 {
 	return mdss_dsi_panel_power_off(pdata);
@@ -333,7 +333,7 @@ static int mdss_dsi_panel_power_on(struct mdss_panel_data *pdata)
 	ctrl_pdata = container_of(pdata, struct mdss_dsi_ctrl_pdata,
 				panel_data);
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 	if (ctrl_pdata->status_error_count >= MAX_STATUS_ERROR_COUNT)
 	{
 		pr_err("%s:ESD check Error_cnt = %i\n",__func__,ctrl_pdata->status_error_count);
@@ -4167,7 +4167,7 @@ static int mdss_dsi_parse_ctrl_params(struct platform_device *ctrl_pdev,
 
 }
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 extern int panel_rst_gpio;
 #endif
 static int mdss_dsi_parse_gpio_params(struct platform_device *ctrl_pdev,
@@ -4209,7 +4209,7 @@ static int mdss_dsi_parse_gpio_params(struct platform_device *ctrl_pdev,
 		pr_err("%s:%d, reset gpio not specified\n",
 						__func__, __LINE__);
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 	if (pinfo->rst_timing_compatible)
 	{
 		panel_rst_gpio = ctrl_pdata->rst_gpio;

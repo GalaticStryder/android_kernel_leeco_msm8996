@@ -35,7 +35,7 @@
 
 DEFINE_LED_TRIGGER(bl_led_trigger);
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 int panel_rst_gpio = -1;
 bool panel_rst_high_flag = 0;
 #endif
@@ -243,7 +243,7 @@ static void mdss_dsi_panel_bklt_dcs(struct mdss_dsi_ctrl_pdata *ctrl, int level)
 	memset(&cmdreq, 0, sizeof(cmdreq));
 	cmdreq.cmds = &backlight_cmd;
 	cmdreq.cmds_cnt = 1;
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 	cmdreq.flags = CMD_REQ_COMMIT | CMD_REQ_HS_MODE;
 #else
 	cmdreq.flags = CMD_REQ_COMMIT;
@@ -353,6 +353,7 @@ disp_en_gpio_err:
 	return rc;
 }
 
+#ifdef CONFIG_MACH_LEECO_ZL1
 void mdss_dsi_panel_reset_high(int enable)
 {
 	if (enable)
@@ -367,6 +368,7 @@ void mdss_dsi_panel_reset_high(int enable)
 		}
 	}
 }
+#endif
 
 #ifdef CONFIG_MACH_LEECO
 extern char spec_char_seq[32];
@@ -1767,7 +1769,7 @@ static bool mdss_dsi_cmp_panel_reg_v2(struct mdss_dsi_ctrl_pdata *ctrl)
 }
 #endif
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 void mdss_dsi_write_status1(struct mdss_dsi_ctrl_pdata *ctrl)
 {
 	if (ctrl->status_on_cmds1.cmd_cnt)
@@ -2088,7 +2090,7 @@ static void mdss_dsi_parse_esd_params(struct device_node *np,
 			"qcom,mdss-dsi-panel-status-command",
 				"qcom,mdss-dsi-panel-status-command-state");
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 	/* Check second mode */
 	rc = of_property_read_string(np,
 			"qcom,mdss-dsi-panel-status-check-mode1", &string);
@@ -2247,7 +2249,7 @@ error1:
 	kfree(ctrl->status_valid_params);
 	kfree(ctrl->status_cmds_rlen);
 error:
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 	kfree(ctrl->status_value1);
 	kfree(ctrl->status_value2);
 #endif
@@ -2685,7 +2687,7 @@ static int mdss_dsi_panel_timing_from_dt(struct device_node *np,
 	return 0;
 }
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 extern bool flip_chargermode_flag;
 #endif
 static int  mdss_dsi_panel_config_res_properties(struct device_node *np,
@@ -2697,7 +2699,7 @@ static int  mdss_dsi_panel_config_res_properties(struct device_node *np,
 
 	mdss_dsi_parse_roi_alignment(np, pt);
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 	if (flip_chargermode_flag == true) {
 		mdss_dsi_parse_dcs_cmds(np, &pt->on_cmds,
 			"qcom,mdss-dsi-on-flip-chargermode-command",
@@ -3116,7 +3118,7 @@ int mdss_dsi_panel_init(struct device_node *node,
 
 	pr_debug("%s:%d\n", __func__, __LINE__);
 	pinfo->panel_name[0] = '\0';
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 	pinfo->rst_timing_compatible = of_property_read_bool(node,
 		"qcom,rst-timing-compatible");
 #endif
@@ -3127,7 +3129,7 @@ int mdss_dsi_panel_init(struct device_node *node,
 	} else {
 		pr_info("%s: Panel Name = %s\n", __func__, panel_name);
 		strlcpy(&pinfo->panel_name[0], panel_name, MDSS_MAX_PANEL_LEN);
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 		if (pinfo->rst_timing_compatible) {
 			/* Use high reset for ft8716 and s6d6fa1 panels */
 			if(!strcmp("mdss_dsi_ft8716_1080p_video",&pinfo->panel_name[0])
