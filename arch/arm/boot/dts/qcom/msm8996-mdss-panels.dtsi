@@ -30,9 +30,6 @@
 #include "dsi-panel-sharp-dualmipi-1080p-120hz.dtsi"
 #include "dsi-panel-sharp-1080p-cmd.dtsi"
 #include "dsi-panel-sharp-dsc-4k-video.dtsi"
-#include "dsi-panel-sharp-dsc-4k-cmd.dtsi"
-#include "dsi-panel-truly-1080p-video.dtsi"
-#include "dsi-panel-truly-1080p-cmd.dtsi"
 
 &soc {
 	dsi_panel_pwr_supply: dsi_panel_pwr_supply {
@@ -148,14 +145,6 @@
 		21 15 06 07 04 03 04 a0];
 };
 
-&dsi_sharp_4k_dsc_cmd {
-	qcom,mdss-dsi-panel-timings-8996 = [21 1e 06 08 04 03 04 a0
-		21 1e 06 08 04 03 04 a0
-		21 1e 06 08 04 03 04 a0
-		21 1e 06 08 04 03 04 a0
-		21 15 06 07 04 03 04 a0];
-};
-
 &dsi_dual_sharp_video {
 	qcom,mdss-dsi-panel-timings-8996 = [23 20 06 09 05 03 04 a0
 			23 20 06 09 05 03 04 a0
@@ -252,22 +241,6 @@
 		23 1f 07 09 05 03 04 a0
 		23 1f 07 09 05 03 04 a0
 		23 19 08 08 05 03 04 a0];
-};
-
-&dsi_truly_1080_vid {
-	qcom,mdss-dsi-panel-timings-8996 = [23 1e 08 09 05 03 04 a0
-		23 1e 08 09 05 03 04 a0
-		23 1e 08 09 05 03 04 a0
-		23 1e 08 09 05 03 04 a0
-		23 1a 08 09 05 03 04 a0];
-};
-
-&dsi_truly_1080_cmd {
-	qcom,mdss-dsi-panel-timings-8996 = [23 1e 08 09 05 03 04 a0
-		23 1e 08 09 05 03 04 a0
-		23 1e 08 09 05 03 04 a0
-		23 1e 08 09 05 03 04 a0
-		23 1a 08 09 05 03 04 a0];
 };
 
 &dsi_sharp_1080_cmd {
