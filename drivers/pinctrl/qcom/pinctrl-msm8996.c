@@ -1691,7 +1691,7 @@ static const struct msm_pingroup msm8996_groups[] = {
 		 atest_usb13, NA, NA, NA),
 	PINGROUP(9, blsp_spi10, blsp_uart10, blsp_uim10, atest_bbrx0,
 		 atest_usb12, NA, NA, NA, NA),
-#ifdef CONFIG_MACH_LEECO_ZL1
+#ifdef CONFIG_MACH_LEECO
 	PINGROUP(10, mdp_vsync, NA, blsp_spi10, blsp_uart10, blsp_i2c10,
 		 NA, NA, NA, NA),
 	PINGROUP(11, mdp_vsync, NA, blsp_spi10, blsp_uart10, blsp_i2c10,
