@@ -211,7 +211,7 @@ vreg_get_fail:
 } /* msm_dss_config_vreg */
 EXPORT_SYMBOL(msm_dss_config_vreg);
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 extern bool panel_rst_high_flag;
 extern void mdss_dsi_panel_reset_high(int enable);
 #endif
@@ -240,7 +240,7 @@ int msm_dss_enable_vreg(struct dss_vreg *in_vreg, int num_vreg, int enable)
 					in_vreg[i].vreg_name);
 				goto vreg_set_opt_mode_fail;
 			}
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 			if ((!strcmp(in_vreg[i].vreg_name, "lab"))
 					&& panel_rst_high_flag) {
 				/* Use overloaded panel reset */

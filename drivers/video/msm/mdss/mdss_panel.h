@@ -623,7 +623,7 @@ struct mdss_panel_info {
 	/* current fps, once is programmed in hw */
 	int current_fps;
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 	bool rst_timing_compatible;
 #endif
 	int panel_max_fps;

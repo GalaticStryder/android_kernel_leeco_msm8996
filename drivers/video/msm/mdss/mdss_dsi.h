@@ -65,7 +65,7 @@
 #define NONE_PANEL "none"
 
 /* LeTV panel features */
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 #define LCD_BIST_TEST
 #define MAX_STATUS_ERROR_COUNT 5
 #endif
@@ -474,7 +474,7 @@ struct mdss_dsi_ctrl_pdata {
 	struct dsi_panel_cmds status_cmds;
 	u32 status_cmds_rlen;
 	u32 *status_value;
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 	struct dsi_panel_cmds status_cmds1;
 	u32 status_cmds_rlen1;
 	u32 *status_value1;
@@ -524,7 +524,7 @@ struct mdss_dsi_ctrl_pdata {
 	struct dsi_buf tx_buf;
 	struct dsi_buf rx_buf;
 	struct dsi_buf status_buf;
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 	struct dsi_buf status_buf1;
 	struct dsi_buf status_buf2;
 #endif
@@ -681,7 +681,7 @@ void mdss_dsi_dsc_config(struct mdss_dsi_ctrl_pdata *ctrl,
 void mdss_dsi_dfps_config_8996(struct mdss_dsi_ctrl_pdata *ctrl);
 void mdss_dsi_set_burst_mode(struct mdss_dsi_ctrl_pdata *ctrl);
 
-#ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_MACH_LEECO_ZL1
 int mdss_dsi_panel_esd_check_power_off(struct mdss_panel_data *pdata);
 #endif
 
