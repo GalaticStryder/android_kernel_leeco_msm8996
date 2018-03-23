@@ -123,14 +123,16 @@
 	};
 };
 
+/* Expose battery data information for SMBCHG. */
 /{
-	mtp_batterydata: qcom,battery-data {
+	le_batterydata: qcom,battery-data {
 		qcom,batt-id-range-pct = <15>;
 		#include "batterydata-le-x2-3200mah.dtsi"
 	};
 };
 
 &pmi8994_charger {
+	qcom,battery-data = <&le_batterydata>;
 	qcom,float-voltage-mv = <4400>;
 	qcom,ignore_otgid;
 };

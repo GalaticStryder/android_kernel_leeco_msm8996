@@ -425,8 +425,9 @@
 };
 /*haptics end*/
 
+/* Expose battery data information for SMBCHG. */
 /{
-	mtp_batterydata: qcom,battery-data {
+	le_batterydata: qcom,battery-data {
 		qcom,batt-id-range-pct = <15>;
 		#include "batterydata-max-plus-3395mah.dtsi"
 	};

@@ -400,14 +400,16 @@
 };
 /*haptics end*/
 
+/* Expose battery data information for SMBCHG. */
 /{
-	mtp_batterydata: qcom,battery-data {
+	le_batterydata: qcom,battery-data {
 		qcom,batt-id-range-pct = <15>;
 		#include "batterydata-le-x2-3200mah.dtsi"
 	};
 };
 
 &pmi8994_charger {
+	qcom,battery-data = <&le_batterydata>;
 	qcom,float-voltage-mv = <4400>;
 	qcom,fastchg-current-ma = <4500>;
 	qcom,thermal-mitigation = <4500 3800 3000 1000 500>;
@@ -418,6 +420,7 @@
 };
 
 &pmi8994_fg {
+	qcom,battery-data = <&le_batterydata>;
 	qcom,cold-bat-decidegc = <0>;
 	qcom,cool-bat-decidegc = <150>;
 	qcom,hot-bat-decidegc = <500>;
