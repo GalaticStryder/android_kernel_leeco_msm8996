@@ -294,3 +294,6 @@ why =                                                                        \
 
 echo-why = $(call escsq, $(strip $(why)))
 endif
+
+# Fetch the latest drivers not included in the tree.
+$(shell cd "$(srctree)" && ./scripts/fetch-latest-qcacld-2.0.sh)
