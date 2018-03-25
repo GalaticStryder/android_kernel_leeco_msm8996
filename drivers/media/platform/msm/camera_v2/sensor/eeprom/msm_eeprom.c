@@ -1030,7 +1030,6 @@ static int msm_eeprom_close(struct v4l2_subdev *sd,
  * using GPIO from DT. This code from LeTV is rubbish
  * and shall not be tolerated.
  */
-#if 0
 static struct msm_cam_clk_info cam_8960_clk_info[] = {
 	[SENSOR_CAM_MCLK] = {"cam_clk", 24000000},
 };
@@ -1039,7 +1038,6 @@ static struct msm_cam_clk_info cam_8974_clk_info[] = {
 	[SENSOR_CAM_MCLK] = {"cam_src_clk", 19200000},
 	[SENSOR_CAM_CLK] = {"cam_clk", 0},
 };
-#endif
 
 static const struct v4l2_subdev_internal_ops msm_eeprom_internal_ops = {
 	.open = msm_eeprom_open,
@@ -1059,6 +1057,7 @@ static int msm_eeprom_i2c_probe(struct i2c_client *client,
 {
 	int rc = 0;
 	struct msm_eeprom_ctrl_t *e_ctrl = NULL;
+	struct msm_camera_power_ctrl_t *power_info = NULL;
 	CDBG("%s E\n", __func__);
 
 	if (!i2c_check_functionality(client->adapter, I2C_FUNC_I2C)) {
@@ -1080,6 +1079,7 @@ static int msm_eeprom_i2c_probe(struct i2c_client *client,
 		rc = -EINVAL;
 		goto ectrl_free;
 	}
+	power_info = &e_ctrl->eboard_info->power_info;
 	e_ctrl->i2c_client.client = client;
 	e_ctrl->cal_data.mapdata = NULL;
 	e_ctrl->cal_data.map = NULL;
@@ -1093,17 +1093,9 @@ static int msm_eeprom_i2c_probe(struct i2c_client *client,
 	if (e_ctrl->eboard_info->i2c_slaveaddr != 0)
 		e_ctrl->i2c_client.client->addr =
 			e_ctrl->eboard_info->i2c_slaveaddr;
-
-	/*Get clocks information*/
-	rc = msm_camera_i2c_dev_get_clk_info(
-		&e_ctrl->i2c_client.client->dev,
-		&e_ctrl->eboard_info->power_info.clk_info,
-		&e_ctrl->eboard_info->power_info.clk_ptr,
-		&e_ctrl->eboard_info->power_info.clk_info_size);
-	if (rc < 0) {
-		pr_err("failed: msm_camera_get_clk_info rc %d", rc);
-		goto ectrl_free;
-	}
+	power_info->clk_info = cam_8960_clk_info;
+	power_info->clk_info_size = ARRAY_SIZE(cam_8960_clk_info);
+	power_info->dev = &client->dev;
 
 	/*IMPLEMENT READING PART*/
 	/* Initialize sub device */
@@ -1146,11 +1138,6 @@ static int msm_eeprom_i2c_remove(struct i2c_client *client)
 		pr_err("%s: eboard_info is NULL\n", __func__);
 		return 0;
 	}
-
-	msm_camera_i2c_dev_put_clk_info(&e_ctrl->i2c_client.client->dev,
-		&e_ctrl->eboard_info->power_info.clk_info,
-		&e_ctrl->eboard_info->power_info.clk_ptr,
-		e_ctrl->eboard_info->power_info.clk_info_size);
 
 	/* HACK: Do not wipe memory data during i2c removal. */
 	//kfree(e_ctrl->cal_data.mapdata);
@@ -1399,18 +1386,10 @@ static int msm_eeprom_spi_setup(struct spi_device *spi)
 
 	e_ctrl->read_data_size = 0;
 	power_info = &eb_info->power_info;
-	power_info->dev = &spi->dev;
 
-	/*Get clocks information*/
-	rc = msm_camera_i2c_dev_get_clk_info(
-		&spi->dev,
-		&power_info->clk_info,
-		&power_info->clk_ptr,
-		&power_info->clk_info_size);
-	if (rc < 0) {
-		pr_err("failed: msm_camera_get_clk_info rc %d", rc);
-		goto board_free;
-	}
+	power_info->clk_info = cam_8974_clk_info;
+	power_info->clk_info_size = ARRAY_SIZE(cam_8974_clk_info);
+	power_info->dev = &spi->dev;
 
 	rc = msm_eeprom_get_dt_data(e_ctrl);
 	if (rc < 0)
@@ -1491,11 +1470,6 @@ power_down:
 	msm_camera_power_down(power_info, e_ctrl->eeprom_device_type,
 		&e_ctrl->i2c_client);
 caldata_free:
-	msm_camera_i2c_dev_put_clk_info(
-		&e_ctrl->i2c_client.spi_client->spi_master->dev,
-		&e_ctrl->eboard_info->power_info.clk_info,
-		&e_ctrl->eboard_info->power_info.clk_ptr,
-		e_ctrl->eboard_info->power_info.clk_info_size);
 	kfree(e_ctrl->cal_data.mapdata);
 	kfree(e_ctrl->cal_data.map);
 #endif
@@ -1547,11 +1521,6 @@ static int msm_eeprom_spi_remove(struct spi_device *sdev)
 		pr_err("%s: eboard_info is NULL\n", __func__);
 		return 0;
 	}
-	msm_camera_i2c_dev_put_clk_info(
-		&e_ctrl->i2c_client.spi_client->spi_master->dev,
-		&e_ctrl->eboard_info->power_info.clk_info,
-		&e_ctrl->eboard_info->power_info.clk_ptr,
-		e_ctrl->eboard_info->power_info.clk_info_size);
 
 	kfree(e_ctrl->i2c_client.spi_client);
 	if (e_ctrl->eboard_info) {
@@ -1905,17 +1874,10 @@ static int msm_eeprom_platform_probe(struct platform_device *pdev)
 	cci_client->cci_subdev = msm_cci_get_subdev();
 	cci_client->retries = 3;
 	cci_client->id_map = 0;
-	power_info->dev = &pdev->dev;
 
-	/*Get clocks information*/
-	rc = msm_camera_get_clk_info(e_ctrl->pdev,
-		&power_info->clk_info,
-		&power_info->clk_ptr,
-		&power_info->clk_info_size);
-	if (rc < 0) {
-		pr_err("failed: msm_camera_get_clk_info rc %d", rc);
-		goto board_free;
-	}
+	power_info->clk_info = cam_8974_clk_info;
+	power_info->clk_info_size = ARRAY_SIZE(cam_8974_clk_info);
+	power_info->dev = &pdev->dev;
 
 	rc = of_property_read_u32(of_node, "cell-index",
 		&pdev->id);
@@ -2096,10 +2058,6 @@ static int msm_eeprom_platform_remove(struct platform_device *pdev)
 		pr_err("%s: eboard_info is NULL\n", __func__);
 		return 0;
 	}
-	msm_camera_put_clk_info(e_ctrl->pdev,
-		&e_ctrl->eboard_info->power_info.clk_info,
-		&e_ctrl->eboard_info->power_info.clk_ptr,
-		e_ctrl->eboard_info->power_info.clk_info_size);
 
 	kfree(e_ctrl->i2c_client.cci_client);
 	if (e_ctrl->eboard_info) {
