@@ -1,17 +1,17 @@
-# LeTV/LeEco devices
+# Configuration menu for LeEco devices
 menu "LeEco device configuration"
 
 config MACH_LEECO
-	bool "Kernel support for LeEco (LeTV) devices"
+	bool "Kernel support for LeEco devices"
 	depends on ARCH_MSM8996
 	select USB_CCLOGIC
-	select USB_CYCCG
-	select ANALOGIX_OHIO
-	select LETVS_CLASS
-	select TOUCHKEY_ATMEGA48A_LETV
 	select TOUCHSCREEN_SYNAPTICS_DSX_LETV
+	select TOUCHSCREEN_SYNAPTICS_DSX_CORE_LETV
+	select TOUCHSCREEN_SYNAPTICS_DSX_RMI_DEV_LETV
+	select TOUCHSCREEN_SYNAPTICS_DSX_FW_UPDATE_LETV
+	select TOUCHSCREEN_SYNAPTICS_DSX_TEST_REPORTING_LETV
 	select MSM_I2C_FLASH
-	select QPNP_MHL
+	select LETVS_CLASS
 	default n
 	help
 	  Once selected, this will apply common Kernel changes
@@ -21,11 +21,9 @@ config MACH_LEECO
 	  The following drivers will be selected in Kernel:
 
 	  * USB CC Logic -> USB Type-C
-	  * USB Cypress -> USB Type-C
-	  * Analogix -> USB Type-C
-	  * ATmega48A -> Capacitive Keys
-	  * QPNP MHL -> MHL State
+	  * Synaptics DSX -> Touchscreen
 	  * MSM I2C Flash -> Camera's Flash
+	  * LeTV Class -> Probe Helper
 
 	  This can be used to apply patches from LeEco without touching
 	  other devices or the general purpose of the Linux Kernel.
@@ -34,7 +32,7 @@ config MACH_LEECO
 
 config MACH_LEECO_OEM
 	depends on MACH_LEECO
-	bool "OEM extensions for LeEco (LeTV) devices"
+	bool "OEM extensions for LeEco devices"
 	help
 	  Once selected, this option will bring-in OEM changes in Kernel source code, they
 	  aren't usually needed.
@@ -44,36 +42,61 @@ config MACH_LEECO_OEM
 
 config MACH_LEECO_DEBUG
 	depends on MACH_LEECO
-	bool "Debugging conditionals for LeEco (LeTV) devices"
+	bool "Debugging conditionals for LeEco devices"
 	help
 	  Once selected, this option will enable most OEM debugging code in Kernel, this is
 	  not needed unless you're debugging changes on those OEM drivers.
 
 	  If unsure, say N.
 
+config MACH_LEECO_PD
+	depends on MACH_LEECO
+	select USB_CYCCG
+	select QPNP_MHL
+	bool "Support USB PD control protocol for LeEco devices"
+	help
+	  Once selected, this option will enable support for LeEco's PD infrastructure. This
+	  new USB infrastructure is a dependency for some USB controllers like the ANX7418,
+	  it will be available as 'le_ab' power supply type in SMB charger interface.
+
+	  This will select the CYCCG USB driver as a dependency to poll temperature from the
+	  USB controller.
+
+	  If unsure, say N.
+
 config MACH_LEECO_X2
 	bool "Kernel support for the Le Max 2 (X2)"
 	depends on MACH_LEECO
+	select MACH_LEECO_PD
+	select ANALOGIX_OHIO
 	select BACKLIGHT_LM3697
 	select DEEP_SLEEP_LED_SWITCH
 	select INPUT_DRV2604L_HAPTICS
-	select IR_MAXQ616
+	select TOUCHKEY_ATMEGA48A_LETV
 	select TOUCHSCREEN_ATMEL_MXT_LETV
-	select TOUCHSCREEN_SYNAPTICS_DSX_CORE_LETV
-	select TOUCHSCREEN_SYNAPTICS_DSX_RMI_DEV_LETV
-	select TOUCHSCREEN_SYNAPTICS_DSX_FW_UPDATE_LETV
-	select TOUCHSCREEN_SYNAPTICS_DSX_TEST_REPORTING_LETV
 	select TOUCHSCREEN_HIDEEP_TP_LETV
+	select IR_MAXQ616
 	select SND_SOC_ES9018
 	select SND_SOC_TFA98XX
+	select FB_MSM_MDSS_HDMI_MHL_SII6400
+	select FB_MSM_MDSS_HDMI_DP_ANX7816
 	help
 	  Once selected, barebones Le Max 2 tuning and drivers will take effect.
 
 	  The following drivers will be selected in Kernel:
 
+	  * LeEco PD Infrastructure -> USB Type-C
+	  * Analogix -> USB Type-C
 	  * LM3697 -> Backlight
 	  * TI DRV2604L -> Vibrator
+	  * ATmega48A -> Capacitive Keys
+	  * Atmel MXT -> Display Panel
+	  * Hideep TP -> Panel Pressure Reporting
 	  * MAXQ616 -> Infrared Remote Control
+	  * ES9018 -> Hi-Fi Audio
+	  * TFA98XX -> SmartPA Amplifier
+	  * SII6400 -> USB-to-HDMI Peripheral
+	  * ANX7816 -> Slimport Peripheral
 
 	  OEM changes such as custom init, cpufreq modifications, VR support and proprietary
 	  sound controllers aren't covered in this option.
@@ -99,27 +122,20 @@ config MACH_LEECO_ZL1
 	select INPUT_DRV2604L_HAPTICS
 	select INPUT_GP5XX8
 	select IR_MAXQ616
-	select NFC_LETV
-	select SND_SOC_MAX98927
-	select SND_SOC_WCD_MBHC_ZL1
 	select TOUCHSCREEN_FTS
-	select TOUCHSCREEN_SYNAPTICS_DSX_CORE_LETV
-	select TOUCHSCREEN_SYNAPTICS_DSX_RMI_DEV_LETV
-	select TOUCHSCREEN_SYNAPTICS_DSX_FW_UPDATE_LETV
-	select TOUCHSCREEN_SYNAPTICS_DSX_TEST_REPORTING_LETV
-	select FB_MSM_MDSS_HDMI_DP_ANX7816
+	select SND_SOC_MAX98927
+	select NFC_LETV
 	help
 	  Once selected, barebones Le Pro 3 tuning and drivers will take effect.
 
 	  The following drivers will be selected in Kernel:
 
 	  * LM3697 -> Backlight
-	  * Goodix 5208 -> Fingerprint Sensor
-	  * Focaltech FTS -> Touchsreen
-	  * ANX7816 -> Slimport (Colorado 3)
 	  * TI DRV2604L -> Vibrator
+	  * Goodix 5208 -> Fingerprint Sensor
 	  * MAXQ616 -> Infrared Remote Control
-	  * Maxim MAX98927 -> Smart PA
+	  * Focaltech FTS -> Display Panel
+	  * Maxim MAX98927 -> SmartPA Amplifier
 	  * Custom ZL1 MBHC -> Audio Socket
 	  * PN544 -> NFC
 
@@ -139,14 +155,5 @@ config MACH_LEECO_ZL1_OEM
 
 	  If unsure, say Y here to avoid issues when running stock Android firmware. Otherwise,
 	  say N.
-
-config SND_SOC_WCD_MBHC_ZL1
-	depends on MACH_LEECO_ZL1
-	tristate "Custom MBHC codec for the Le Pro 3 (ZL1)"
-	help
-	  Once selected, this will compile an alternative version of the
-	  MBHC sound codec, specific for the Le Pro 3.
-
-	  This option is automatically enabled when MACH_LEECO_ZL1 is selected.
 
 endmenu
