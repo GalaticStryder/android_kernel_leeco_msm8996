@@ -1741,7 +1741,7 @@ static int mdss_dsi_parse_reset_seq(struct device_node *np,
 	return 0;
 }
 
-#ifndef CONFIG_MACH_LEECO
+#ifndef CONFIG_MACH_LEECO_ZL1
 static bool mdss_dsi_cmp_panel_reg_v2(struct mdss_dsi_ctrl_pdata *ctrl)
 {
 	int i, j;

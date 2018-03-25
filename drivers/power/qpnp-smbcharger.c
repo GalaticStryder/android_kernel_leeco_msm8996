@@ -3055,9 +3055,6 @@ static int charging_suspend_vote_cb(struct votable *votable, void *data,
 		suspend = false;
 	}
 
-#ifdef CONFIG_MACH_LEECO_DEBUG
-	pr_info("suspend: %d, client: %d\n", !suspend, client);
-#endif
 	rc = smbchg_charging_en(chip, !suspend);
 	if (rc < 0) {
 		dev_err(chip->dev,
@@ -3081,9 +3078,6 @@ static int usb_suspend_vote_cb(struct votable *votable,
 		suspend = false;
 	}
 
-#ifdef CONFIG_MACH_LEECO_DEBUG
-	pr_info("usb_suspend: %d, client: %d\n", suspend, client);
-#endif
 	rc = smbchg_usb_suspend(chip, suspend);
 	if (rc < 0)
 		return rc;
@@ -3110,9 +3104,6 @@ static int dc_suspend_vote_cb(struct votable *votable,
 		suspend = false;
 	}
 
-#ifdef CONFIG_MACH_LEECO_DEBUG
-	pr_info("dc_suspend: %d, client:%d\n", suspend, client);
-#endif
 	rc = smbchg_dc_suspend(chip, suspend);
 	if (rc < 0)
 		return rc;

@@ -1480,7 +1480,6 @@ static long msm_flash_subdev_fops_ioctl(struct file *file,
 }
 #endif
 
-<<<<<<< HEAD
 static int msm_camera_flash_i2c_probe(struct i2c_client *client,
 	const struct i2c_device_id *id)
 {
