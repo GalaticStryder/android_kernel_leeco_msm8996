@@ -89,8 +89,6 @@
 bool flip_chargermode_flag = false;
 char flip_chargermode[MDSS_FB_TURBO_OLED_FLIP_CHARGEMODE];
 char spec_char_seq[MDSS_FB_SPEC_CAR_SEQ_CMDLINE_MAX];
-static struct fb_info *fbi_list[MAX_FBI_LIST];
-static int fbi_list_index;
 #endif
 
 static struct fb_info *fbi_list[MAX_FBI_LIST];
