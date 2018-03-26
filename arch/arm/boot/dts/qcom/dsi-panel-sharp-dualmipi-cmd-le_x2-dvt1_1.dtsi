@@ -61,7 +61,6 @@
 		qcom,mdss-dsi-te-using-te-pin;
 		qcom,ulps-enabled;
 		qcom,dcs-cmd-by-left;
-		qcom,config-select = <&dsi_sharp_qhd_dualdsi_cmd_le_x2_config0>;
 		qcom,mdss-dsi-on-command = [
 					15 01 00 00 00 00 02 FF 10
 					15 01 00 00 00 00 02 FB 01
@@ -84,8 +83,5 @@
 					15 01 00 00 78 00 02 4f 01];
 		qcom,mdss-dsi-off-command-state = "dsi_lp_mode";
 		//qcom,mdss-tear-check-sync-cfg-height = <2580>;
-		dsi_sharp_qhd_dualdsi_cmd_le_x2_config0: config0 {
-		qcom,split-mode = "pingpong-split";
-		};
 	};
 };
