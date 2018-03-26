@@ -12,36 +12,31 @@
 
 #include "msm8996-mtp.dtsi"
 #include "msm8996-pinctrl-le_zl1.dtsi"
-#include "msm8996-le_zl1-common.dtsi"
-#include "zs-goodix-fp.dtsi"
+#include "goodix-fingerprint-sensor-le_zl1.dtsi"
 #include "dsi-panel-ft8716-1080p-video.dtsi"
 #include "dsi-panel-s6d6fa1-1080p-video.dtsi"
 #include "dsi-panel-r69338-byd-1080p-video.dtsi"
 #include "dsi-panel-r69338-truly-1080p-video.dtsi"
-#include "msm8996-camera-sensor-le_zl1-evt.dtsi"
-#include "letv-tp-focaltech_ts.dtsi"
-#include "letv-tp-synaptics-dsx-i2c-le_zl1.dtsi"
-#include "le_zl1_audio.dtsi"
+#include "msm8996-camera-sensor-le_zl1.dtsi"
+#include "focaltech-touchscreen-le_zl1.dtsi"
+#include "synaptics-dsx-i2c-le_zl1.dtsi"
+#include "msm8996-audio-le_zl1.dtsi"
 
 /*
- * add ft8716 touchscreen of device
+ * Add FT8716 touchscreen device
  */
 &soc {
 	i2c@75ba000{
 		focaltech@38{
 			status = "ok";
 		};
+		//synaptics_dsx@20{
+			//status = "ok";
+		//};
 	};
 
 	i2c_11: i2c@75b9000 {
 		status = "disabled";
-	};
-
-	qcom,msm-imem@66bf000 {
-		msm-imem-crash@1c {
-			compatible = "qcom,msm-imem-crash-magic";
-			reg = <0x1c 4>;
-		};
 	};
 };
 
@@ -87,7 +82,7 @@
 	};
 
 	qcom,pm8994@0 {
-		/* configure pm8994 MPP2 as back-light of touch key */
+		/* Configure PM8994 MPP2 as backlight for the touch keys */
 		touch_key_led: qcom,leds@a100 {
 			compatible = "qcom,leds-qpnp";
 			reg = <0xa100 0x100>;
@@ -110,9 +105,8 @@
 			};
 		};
 
-		/*long press power key hardreset,  long press power+vol_donw into ramdump mode*/
+		/* Long press power key to hard reset, long press power and vol_down to ramdump mode */
 		qcom,power-on@800 {
-
 			compatible = "qcom,qpnp-power-on";
 			reg = <0x800 0x100>;
 			interrupts = <0x0 0x8 0x0>,
@@ -141,6 +135,13 @@
 	};
 };
 
+/*
+&rgb_leds {
+	deepsleep_gpio = <&tlmm 133 0x00>;
+	deepsleep_gpio_label = "rpm_led_switch";
+};
+*/
+
 &dsi_ft8716_1080p_video {
 	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
 	qcom,mdss-dsi-bl-min-level = <1>;
@@ -155,6 +156,7 @@
 		23 1e 07 08 05 03 04 a0
 		23 19 07 08 05 03 04 a0];
 };
+
 &dsi_s6d6fa1_1080p_video {
 	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
 	qcom,mdss-dsi-bl-min-level = <1>;
@@ -169,6 +171,7 @@
 		24 1f 08 09 05 03 04 a0
 		24 1b 08 09 05 03 04 a0];
 };
+
 &dsi_r69338_byd_1080p_video {
 	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
 	qcom,mdss-dsi-bl-min-level = <1>;
@@ -323,7 +326,7 @@
 };
 
 &i2c_7 {
-	silabs4705@11 { /* SiLabs FM chip, slave id 0x11*/
+	silabs4705@11 {
 		status = "disabled";
 	};
 
@@ -360,7 +363,6 @@
 		interrupts = <73 0x02>;
 		irq-gpio = <&tlmm 73 0x00>;
 	};
-
 };
 
 &i2c_8 {
@@ -408,8 +410,8 @@
 /{
 	mtp_batterydata: qcom,battery-data {
 		qcom,batt-id-range-pct = <15>;
-		#include "batterydata-zl1-pro-lishen-4000mAh.dtsi"
-		#include "batterydata-zl1-pro-scud-4000mAh.dtsi"
+		#include "batterydata-le_zl1-lishen-4000mAh.dtsi"
+		#include "batterydata-le_zl1-scud-4000mAh.dtsi"
 	};
 };
 
@@ -424,11 +426,11 @@
 	qcom,wave-shape = "sine";
 };
 
-/* SiI6400 device for MHL/WiHD function */
 &pcie1 {
 	status = "disabled";
 };
-&spi_11 {
+
+&spi_11 { /* BLSP2 QUP5 */
 	status = "disabled";
 	sii6400@0 {
 		status = "disabled";
@@ -442,7 +444,7 @@
 		rst-gpio = <&tlmm 14 0>;
 		pwr-gpio = <&tlmm 94 0>;
 		mhl-sel1-gpio = <&tlmm 30 0>;
-		/*avcc_18-supply = <&pma8084_l14>;*/
+		/* avcc_18-supply = <&pma8084_l14>; */
 		qcom,hdmi-tx-map = <&mdss_hdmi_tx>;
 	};
 };
@@ -450,11 +452,6 @@
 &pmi8994_charger {
 	qcom,mhl-wihd = <1>;
 };
-
-&pm8994_rtc {
-	   qcom,qpnp-rtc-alarm-pwrup = <1>;
-};
-
 
 &mdss_hdmi_pll {
 	compatible = "qcom,mdss_hdmi_pll_8996_v3_1p8";
@@ -467,17 +464,17 @@
 };
 
 &qusb_phy0 {
-		qcom,qusb-phy-init-seq = <0x78 0x80
-								0xAC 0x84
-								0x94 0x88
-								0xCF 0x8C
-								0x30 0x08
-								0x79 0x0C
-								0x21 0x10
-								0x14 0x9C
-								0x80 0x04
-								0x9F 0x1C
-								0x00 0x18>;
+	qcom,qusb-phy-init-seq = <0x78 0x80
+							0xAC 0x84
+							0x94 0x88
+							0xCF 0x8C
+							0x30 0x08
+							0x79 0x0C
+							0x21 0x10
+							0x14 0x9C
+							0x80 0x04
+							0x9F 0x1C
+							0x00 0x18>;
 };
 
 &i2c_11{
