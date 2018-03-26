@@ -442,6 +442,32 @@
 /*********** audio MI2S gpio config end ***********/
 
 /*********** lcd gpio config start ***********/
+		mdss_te_active: mdss_te_active {
+			mux {
+				pins = "gpio97";
+				function = "mdp_vsync_p_b";
+			};
+			config {
+				pins = "gpio97";
+				drive-strength = <2>; /* 8 mA */
+				bias-pull-down; /* pull down*/
+			};
+		};
+
+
+		mdss_te_suspend: mdss_te_suspend {
+			mux {
+				pins = "gpio97";
+				function = "mdp_vsync_p_b";
+			};
+			config {
+				pins = "gpio97";
+				drive-strength = <2>; /* 2 mA */
+				bias-pull-down; /* pull down */
+			};
+		};
+
+
 		pmx_mdss: pmx_mdss {
 			mdss_dsi_active: mdss_dsi_active {
 				mux {
@@ -467,31 +493,6 @@
 					drive-strength = <2>; /* 2 mA */
 					bias-pull-down;	/* pull	down */
 				};
-			};
-		};
-
-		mdss_te_active: mdss_te_active {
-			mux {
-				pins = "gpio97";
-				function = "mdp_vsync_p_b";
-			};
-			config {
-				pins = "gpio97";
-				drive-strength = <2>; /* 8 mA */
-				bias-pull-down; /* pull down*/
-			};
-		};
-
-
-		mdss_te_suspend: mdss_te_suspend {
-			mux {
-				pins = "gpio97";
-				function = "mdp_vsync_p_b";
-			};
-			config {
-				pins = "gpio97";
-				drive-strength = <2>; /* 2 mA */
-				bias-pull-down; /* pull down */
 			};
 		};
 /*********** lcd gpio config end ***********/

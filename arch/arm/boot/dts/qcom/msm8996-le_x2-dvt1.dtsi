@@ -12,6 +12,7 @@
 
 #include "msm8996-mtp.dtsi"
 #include "msm8996-pinctrl-le_x2.dtsi"
+#include "msm8996-le-common.dtsi"
 #include "dsi-panel-truly-dualmipi-cmd-le_x2-dvt1.dtsi"
 #include "dsi-panel-truly-dualmipi-cmd-le_x2-pvt.dtsi"
 #include "dsi-panel-ofilm-dualmipi-cmd-le_x2-pvt.dtsi"
@@ -198,16 +199,16 @@
 			"AMIC6", "MIC BIAS1",
 			"MIC BIAS1", "Main Mic2";
 
-		asoc-platform = <&pcm0>, <&pcm1>, <&pcm2>, <&voip>, <&voice>,
-				<&loopback>, <&compress>, <&hostless>,
-				<&afe>, <&lsm>, <&routing>, <&cpe>,
-				<&compr>, <&pcmnoirq>, <&cpe3>;
-		asoc-platform-names = "msm-pcm-dsp.0", "msm-pcm-dsp.1", "msm-pcm-dsp.2",
-				"msm-voip-dsp", "msm-pcm-voice", "msm-pcm-loopback",
-				"msm-compress-dsp", "msm-pcm-hostless", "msm-pcm-afe",
-				"msm-lsm-client", "msm-pcm-routing", "msm-cpe-lsm",
-				"msm-compr-dsp", "msm-pcm-dsp-noirq",
-				"msm-cpe-lsm.3";
+                asoc-platform = <&pcm0>, <&pcm1>, <&pcm2>, <&voip>, <&voice>,
+                                <&loopback>, <&compress>, <&hostless>,
+                                <&afe>, <&lsm>, <&routing>, <&cpe>,
+                                <&compr>, <&pcmnoirq>, <&cpe3>;
+                asoc-platform-names = "msm-pcm-dsp.0", "msm-pcm-dsp.1", "msm-pcm-dsp.2",
+                                "msm-voip-dsp", "msm-pcm-voice", "msm-pcm-loopback",
+                                "msm-compress-dsp", "msm-pcm-hostless", "msm-pcm-afe",
+                                "msm-lsm-client", "msm-pcm-routing", "msm-cpe-lsm",
+                                "msm-compr-dsp", "msm-pcm-dsp-noirq",
+                                "msm-cpe-lsm.3";
 		asoc-cpu = <&dai_pri_auxpcm>, <&dai_sec_auxpcm>, <&dai_hdmi>,
 				<&dai_pri_mi2s>, <&dai_sec_mi2s>,
 				<&dai_tert_mi2s>, <&dai_quat_mi2s>,
@@ -414,16 +415,12 @@
 	qcom,usb-thermal-mitigation = <3000 2000 1000 0>;
 	qcom,fastchg-current-comp = <1200>;
 	qcom,float-voltage-comp = <16>;
-	qcom,iterm-ma = <160>;
 };
 
 &pmi8994_fg {
 	qcom,cold-bat-decidegc = <0>;
 	qcom,cool-bat-decidegc = <150>;
 	qcom,hot-bat-decidegc = <500>;
-	qcom,fg-iterm-ma = <320>;
-	qcom,fg-chg-iterm-ma = <160>;
-	qcom,fg-cc-cv-threshold-mv = <4390>;
 };
 
 &uartblsp2dm1 {

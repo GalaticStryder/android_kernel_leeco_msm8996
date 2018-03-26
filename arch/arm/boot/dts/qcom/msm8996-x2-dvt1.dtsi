@@ -14,8 +14,11 @@
 #include "msm8996-pinctrl-x2.dtsi"
 #include "dsi-panel-truly-dualmipi-cmd-x2-dvt1.dtsi"
 #include "letv-tp-synaptics-dsx-i2c.dtsi"
-#include "msm8996-camera-sensor-x2-dvt1.dtsi"
 #include "letv-ft-hideep-i2c.dtsi"
+#include "dsi-panel-sharp-dualmipi-cmd.dtsi"
+#include "dsi-panel-sharp-dualmipi-video.dtsi"
+#include "letv-tp-atmel_mxt_ts.dtsi"
+#include "msm8996-camera-sensor-x2-dvt1.dtsi"
 
 &sdhc_2 {
 	status = "disabled";
@@ -96,7 +99,7 @@
 	qcom,cont-splash-enabled;
 	qcom,panel-supply-entries = <&dsi_panel_pwr_supply>;
 
-	qcom,mdss-dsi-panel-timings-8996 = [22 1e 07 08 04 03 04 a0
+	qcom,mdss-dsi-panel-timings-phy-v2 = [22 1e 07 08 04 03 04 a0
 		22 1e 07 08 04 03 04 a0
 		22 1e 07 08 04 03 04 a0
 		22 1e 07 08 04 03 04 a0
