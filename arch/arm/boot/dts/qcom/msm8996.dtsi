@@ -219,22 +219,16 @@
 			size = <0 0x5c00000>;
 		};
 
-		pstore_reserve_mem: pstore_reserve_mem_region {
-			compatible = "shared-dma-pool";
+		pstore_mem: pstore_mem_region@91500000 {
+			compatible = "removed-dma-pool";
 			no-map;
-			reg = <0 0x91500000 0 0x00100000>;
+			reg = <0 0x91500000 0 0x200000>;
 		};
 
 		modem_mem: modem_region@88800000 {
 			compatible = "removed-dma-pool";
 			no-map;
 			reg = <0 0x88800000 0 0x6200000>;
-		};
-
-		ramoops_mem: ramoops_region@ac000000 {
-			compatible = "removed-dma-pool";
-			no-map;
-			reg = <0 0xAC000000 0 0x200000>;
 		};
 
 		dfps_data_mem: dfps_data_mem@83400000 {
@@ -4010,7 +4004,7 @@
 
 	ramoops {
 		compatible = "ramoops";
-		memory-region = <&ramoops_mem>;
+		memory-region = <&pstore_mem>;
 		record-size = <0x0 0x20000>;
 		console-size = <0x0 0x100000>;
 		pmsg-size = <0x0 0x80000>;
