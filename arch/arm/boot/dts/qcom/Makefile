@@ -1,15 +1,4 @@
 ifeq ($(CONFIG_MACH_LEECO),y)
-dtb-$(CONFIG_MACH_LEECO) += msm8996-v2-pmi8994-cdp.dtb \
-	msm8996-v2-pmi8994-mtp.dtb \
-	msm8996-v3-pmi8994-mtp.dtb \
-	msm8996-v3-pmi8996-mtp.dtb \
-	msm8996pro-pmi8994-mtp.dtb \
-	msm8996pro-pmi8996-mtp.dtb \
-	msm8996pro-v1.1-pmi8994-mtp.dtb \
-	msm8996pro-v1.1-pmi8996-mtp.dtb \
-	msm8996-v3.0-pmi8994-mtp.dtb \
-	msm8996-v3.0-pmi8996-mtp.dtb
-
 dtb-$(CONFIG_MACH_LEECO_X2) += msm8996-v2-pmi8994-le_x2-evt.dtb \
 	msm8996-v2-pmi8994-le_x2-dvt1.dtb \
 	msm8996-v3-pmi8994-le_x2-evt.dtb \
