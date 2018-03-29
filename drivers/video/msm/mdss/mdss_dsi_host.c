@@ -1155,7 +1155,7 @@ static int mdss_dsi_read_status1(struct mdss_dsi_ctrl_pdata *ctrl)
 	memset(&cmdreq1, 0, sizeof(cmdreq1));
 	cmdreq1.cmds = ctrl->status_cmds1.cmds;
 	cmdreq1.cmds_cnt = ctrl->status_cmds1.cmd_cnt;
-	cmdreq1.flags = CMD_REQ_COMMIT | CMD_CLK_CTRL | CMD_REQ_RX;
+	cmdreq1.flags = CMD_REQ_COMMIT | CMD_REQ_RX;
 	cmdreq1.rlen = ctrl->status_cmds_rlen1;
 	cmdreq1.cb = NULL;
 	cmdreq1.rbuf = ctrl->status_buf1.data;
@@ -1173,7 +1173,7 @@ static int mdss_dsi_read_status2(struct mdss_dsi_ctrl_pdata *ctrl)
 	memset(&cmdreq2, 0, sizeof(cmdreq2));
 	cmdreq2.cmds = ctrl->status_cmds2.cmds;
 	cmdreq2.cmds_cnt = ctrl->status_cmds2.cmd_cnt;
-	cmdreq2.flags = CMD_REQ_COMMIT | CMD_CLK_CTRL | CMD_REQ_RX;
+	cmdreq2.flags = CMD_REQ_COMMIT | CMD_REQ_RX;
 	cmdreq2.rlen = ctrl->status_cmds_rlen2;
 	cmdreq2.cb = NULL;
 	cmdreq2.rbuf = ctrl->status_buf2.data;
