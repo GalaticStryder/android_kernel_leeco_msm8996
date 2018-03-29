@@ -162,7 +162,9 @@ enum tasha_sido_voltage {
 };
 
 #ifdef CONFIG_MACH_LEECO
+#ifdef CONFIG_USB_CYCCG
 extern bool letv_typec_plug_state;
+#endif
 extern bool letv_typec_4_pole;
 #endif
 
@@ -1460,8 +1462,12 @@ static int tasha_micbias_control(struct snd_soc_codec *codec,
 		/* TODO: Get rid of debugging */
 		if ((tasha->micb_ref[micb_index] == 0) &&
 		    (tasha->pullup_ref[micb_index] > 0)) {
+#ifdef CONFIG_USB_CYCCG
 			if (letv_typec_4_pole && letv_typec_plug_state &&
 				(micb_num == MIC_BIAS_2)) {
+#else
+			if (letv_typec_4_pole && (micb_num == MIC_BIAS_2)) {
+#endif
 				snd_soc_update_bits(codec, micb_reg, 0xC0, 0xC0);
 				pr_info("1: letv_headset still pluged!!\n");
 			} else {
@@ -1473,8 +1479,12 @@ static int tasha_micbias_control(struct snd_soc_codec *codec,
 			if (pre_off_event)
 				blocking_notifier_call_chain(&tasha->notifier,
 						pre_off_event, &tasha->mbhc);
+#ifdef CONFIG_USB_CYCCG
 			if (letv_typec_4_pole && letv_typec_plug_state &&
 				(micb_num == MIC_BIAS_2)) {
+#else
+			if (letv_typec_4_pole && (micb_num == MIC_BIAS_2)) {
+#endif
 				snd_soc_update_bits(codec, micb_reg, 0xC0, 0x40);
 				pr_info("2: letv_headset still pluged!!\n");
 			} else {
