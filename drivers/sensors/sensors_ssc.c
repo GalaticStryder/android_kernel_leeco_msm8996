@@ -14,6 +14,7 @@
 #include <linux/msm_dsps.h>
 #include <linux/module.h>
 #include <linux/init.h>
+#include <linux/io.h>
 #include <linux/slab.h>
 #include <linux/platform_device.h>
 #include <linux/cdev.h>
