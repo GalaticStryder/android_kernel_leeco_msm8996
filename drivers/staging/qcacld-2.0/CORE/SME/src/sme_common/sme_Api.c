@@ -3257,6 +3257,15 @@ eHalStatus sme_ProcessMsg(tHalHandle hHal, vos_msg_t* pMsg)
           case eWNI_SME_CSA_OFFLOAD_EVENT:
                if (pMsg->bodyptr)
                {
+#ifdef WLAN_FEATURE_SAP_TO_FOLLOW_STA_CHAN
+                   /*Indicate to HostApd*/
+                   if(pMac->sme.pCSASAPIndCb)
+                   {
+                        VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
+                             "%s: CSA Notification to SAP", __func__);
+                        pMac->sme.pCSASAPIndCb(pMac->hHdd, pMsg->bodyptr);
+                   }
+#endif//#ifdef WLAN_FEATURE_SAP_TO_FOLLOW_STA_CHAN
                    csrScanFlushBssEntry(pMac, pMsg->bodyptr);
                    vos_mem_free(pMsg->bodyptr);
                }
@@ -4467,6 +4476,9 @@ eHalStatus sme_RoamDisconnect(tHalHandle hHal, tANI_U8 sessionId, eCsrRoamDiscon
    eHalStatus status = eHAL_STATUS_FAILURE;
    tpAniSirGlobal pMac = PMAC_STRUCT( hHal );
 
+   if (!pMac)
+       return status;
+
    MTRACE(vos_trace(VOS_MODULE_ID_SME,
                         TRACE_CODE_SME_RX_HDD_ROAM_DISCONNECT, sessionId, reason));
    smsLog(pMac, LOG2, FL("enter"));
@@ -4520,6 +4532,9 @@ eHalStatus sme_RoamStopBss(tHalHandle hHal, tANI_U8 sessionId)
 {
    eHalStatus status = eHAL_STATUS_FAILURE;
    tpAniSirGlobal pMac = PMAC_STRUCT( hHal );
+
+   if (!pMac)
+       return status;
 
    smsLog(pMac, LOG2, FL("enter"));
    status = sme_AcquireGlobalLock( &pMac->sme );
@@ -5119,6 +5134,10 @@ eHalStatus sme_GetConfigParam(tHalHandle hHal, tSmeConfigParams *pParam)
       pParam->sta_change_cc_via_beacon = pMac->sta_change_cc_via_beacon;
       pParam->csrConfig.gStaLocalEDCAEnable =
               pMac->roam.configParam.gStaLocalEDCAEnable;
+#if defined WLAN_FEATURE_VOWIFI
+      vos_mem_copy(&pParam->rrmConfig, &pMac->rrm.rrmSmeContext.rrmConfig,
+                   sizeof(struct rrm_config_param));
+#endif
       sme_ReleaseGlobalLock( &pMac->sme );
    }
 
@@ -7450,6 +7469,9 @@ eHalStatus sme_CloseSession(tHalHandle hHal, tANI_U8 sessionId,
    eHalStatus status;
    tpAniSirGlobal pMac = PMAC_STRUCT( hHal );
 
+   if (!pMac)
+       return eHAL_STATUS_FAILURE;
+
    MTRACE(vos_trace(VOS_MODULE_ID_SME,
                  TRACE_CODE_SME_RX_HDD_CLOSE_SESSION, sessionId, 0));
    status = sme_AcquireGlobalLock( &pMac->sme );
@@ -7798,6 +7820,9 @@ eHalStatus sme_AbortMacScan(tHalHandle hHal, tANI_U8 sessionId,
     eHalStatus status;
     tpAniSirGlobal pMac = PMAC_STRUCT( hHal );
 
+    if (!pMac)
+        return eHAL_STATUS_FAILURE;
+
     MTRACE(vos_trace(VOS_MODULE_ID_SME,
                TRACE_CODE_SME_RX_HDD_ABORT_MACSCAN, NO_SESSION, 0));
     status = sme_AcquireGlobalLock( &pMac->sme );
@@ -8001,6 +8026,9 @@ eHalStatus sme_DeregisterMgmtFrame(tHalHandle hHal, tANI_U8 sessionId,
 {
     eHalStatus status = eHAL_STATUS_SUCCESS;
     tpAniSirGlobal pMac = PMAC_STRUCT(hHal);
+
+    if (!pMac)
+        return eHAL_STATUS_FAILURE;
 
     MTRACE(vos_trace(VOS_MODULE_ID_SME,
               TRACE_CODE_SME_RX_HDD_DEREGISTER_MGMTFR, sessionId, 0));
@@ -12592,13 +12620,21 @@ eHalStatus sme_GetLinkSpeed(tHalHandle hHal, tSirLinkSpeedInfo *lsReq, void *pls
            pMac->sme.pLinkSpeedIndCb = pCallbackfn;
         }
         /* serialize the req through MC thread */
-        vosMessage.bodyptr = lsReq;
+        vosMessage.bodyptr = vos_mem_malloc(sizeof(*lsReq));
+        if (NULL == vosMessage.bodyptr) {
+           VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
+                     "%s: Memory allocation failed.", __func__);
+                     sme_ReleaseGlobalLock(&pMac->sme);
+           return eHAL_STATUS_E_MALLOC_FAILED;
+        }
+        vos_mem_copy(vosMessage.bodyptr, lsReq, sizeof(*lsReq));
         vosMessage.type    = WDA_GET_LINK_SPEED;
         vosStatus = vos_mq_post_message(VOS_MQ_ID_WDA, &vosMessage);
         if (!VOS_IS_STATUS_SUCCESS(vosStatus))
         {
            VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
                      "%s: Post Link Speed msg fail", __func__);
+           vos_mem_free(vosMessage.bodyptr);
            status = eHAL_STATUS_FAILURE;
         }
         sme_ReleaseGlobalLock(&pMac->sme);
@@ -15357,6 +15393,57 @@ eHalStatus sme_InitThermalInfo( tHalHandle hHal,
     return eHAL_STATUS_FAILURE;
 }
 
+/* ---------------------------------------------------------------------------
+    \fn sme_InitDPDRecalInfo
+    \brief  SME API to initialize the Runtime DPD Recaliberation parameters
+    \param  hHal
+    \param  DPDParam : DPD Recal parameters
+    \- return eHalStatus
+    -------------------------------------------------------------------------*/
+eHalStatus sme_InitDPDRecalInfo( tHalHandle hHal,
+                                tSmeDPDRecalParams DPDParam )
+{
+    t_dpd_recal_mgmt * pWdaParam;
+    vos_msg_t msg;
+    tpAniSirGlobal pMac = PMAC_STRUCT(hHal);
+
+    pWdaParam = (t_dpd_recal_mgmt *)vos_mem_malloc(sizeof(t_dpd_recal_mgmt));
+    if (NULL == pWdaParam)
+    {
+       VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
+                 "%s: could not allocate t_dpd_recal_mgmt", __func__);
+       return eHAL_STATUS_E_MALLOC_FAILED;
+    }
+
+    vos_mem_zero((void*)pWdaParam, sizeof(t_dpd_recal_mgmt));
+    pWdaParam->dpd_enable = DPDParam.enable;
+    pWdaParam->dpd_delta_degreeHigh = DPDParam.delta_degreeHigh;
+    pWdaParam->dpd_delta_degreeLow = DPDParam.delta_degreeLow;
+    pWdaParam->dpd_cooling_time = DPDParam.cooling_time;
+    pWdaParam->dpd_duration_max = DPDParam.dpd_dur_max;
+
+    if (eHAL_STATUS_SUCCESS == sme_AcquireGlobalLock(&pMac->sme))
+    {
+        msg.type     = WDA_INIT_DPD_RECAL_INFO_CMD;
+        msg.bodyptr  = pWdaParam;
+
+        if (!VOS_IS_STATUS_SUCCESS(
+           vos_mq_post_message(VOS_MODULE_ID_WDA, &msg)))
+        {
+            VOS_TRACE( VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
+                       "%s: Not able to post WDA_INIT_DPD_RECAL_INFO_CMD to WDA!",
+                       __func__);
+            vos_mem_free(pWdaParam);
+            sme_ReleaseGlobalLock(&pMac->sme);
+            return eHAL_STATUS_FAILURE;
+        }
+        sme_ReleaseGlobalLock(&pMac->sme);
+        return eHAL_STATUS_SUCCESS;
+    }
+    vos_mem_free(pWdaParam);
+    return eHAL_STATUS_FAILURE;
+}
+
 /*
  * Plug in set thermal level callback
  */
@@ -15757,6 +15844,10 @@ eHalStatus sme_ModifyAddIE(tHalHandle hHal,
 {
     eHalStatus status = eHAL_STATUS_FAILURE;
     tpAniSirGlobal pMac = PMAC_STRUCT( hHal );
+
+    if (!pMac)
+        return status;
+
     status = sme_AcquireGlobalLock( &pMac->sme );
 
     if ( HAL_STATUS_SUCCESS( status ) )
@@ -15781,6 +15872,10 @@ eHalStatus sme_UpdateAddIE(tHalHandle hHal,
 {
     eHalStatus status = eHAL_STATUS_FAILURE;
     tpAniSirGlobal pMac = PMAC_STRUCT( hHal );
+
+    if (!pMac)
+       return status;
+
     status = sme_AcquireGlobalLock( &pMac->sme );
 
     if ( HAL_STATUS_SUCCESS( status ) )
@@ -17639,6 +17734,34 @@ VOS_STATUS sme_apfind_set_cmd(struct sme_ap_find_request_req *input)
      return VOS_STATUS_SUCCESS;
 }
 #endif /* WLAN_FEATURE_APFIND */
+
+#ifdef WLAN_FEATURE_SAP_TO_FOLLOW_STA_CHAN
+eHalStatus sme_AddCSAIndCallback
+(
+   tHalHandle hHal,
+   void (*pCallbackfn)(void *pAdapter, void *CSAindParam)
+)
+{
+   eHalStatus          status    = eHAL_STATUS_SUCCESS;
+    tpAniSirGlobal      pMac      = PMAC_STRUCT(hHal);
+
+    VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
+              "%s: Plug in CSA Notify CB", __func__);
+
+    status = sme_AcquireGlobalLock(&pMac->sme);
+    if (eHAL_STATUS_SUCCESS == status)
+    {
+        if (NULL != pCallbackfn)
+        {
+           pMac->sme.pCSASAPIndCb = pCallbackfn;
+        }
+        sme_ReleaseGlobalLock(&pMac->sme);
+    }
+
+    return(status);
+
+}
+#endif//#ifdef WLAN_FEATURE_SAP_TO_FOLLOW_STA_CHAN
 #ifdef FEATURE_WLAN_MCC_TO_SCC_SWITCH
 /*
  * sme_validate_sap_channel_switch() - validate target channel switch w.r.t
@@ -20574,4 +20697,17 @@ eHalStatus sme_clear_random_mac(tHalHandle hal, uint32_t session_id,
 		vos_mem_free(filter);
 	}
 	return status;
+}
+
+bool sme_is_sta_key_exchange_in_progress(tHalHandle hal, uint8_t session_id)
+{
+	tpAniSirGlobal mac_ctx = PMAC_STRUCT(hal);
+
+	if (!CSR_IS_SESSION_VALID(mac_ctx, session_id)) {
+		VOS_TRACE(VOS_MODULE_ID_SME, VOS_TRACE_LEVEL_ERROR,
+			  FL("Invalid session %d"), session_id);
+		return false;
+	}
+
+	return CSR_IS_WAIT_FOR_KEY(mac_ctx, session_id);
 }

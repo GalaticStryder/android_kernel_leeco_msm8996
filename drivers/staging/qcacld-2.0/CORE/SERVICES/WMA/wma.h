@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2017 The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2018 The Linux Foundation. All rights reserved.
  *
  * Previously licensed under the ISC license by Qualcomm Atheros, Inc.
  *
@@ -644,6 +644,14 @@ struct wma_txrx_node {
 	uint8_t nss_5g;
 	uint32_t tx_aggregation_size;
 	uint32_t rx_aggregation_size;
+	uint32_t tx_aggr_sw_retry_threshhold_be;
+	uint32_t tx_aggr_sw_retry_threshhold_bk;
+	uint32_t tx_aggr_sw_retry_threshhold_vi;
+	uint32_t tx_aggr_sw_retry_threshhold_vo;
+	uint32_t tx_non_aggr_sw_retry_threshhold_be;
+	uint32_t tx_non_aggr_sw_retry_threshhold_bk;
+	uint32_t tx_non_aggr_sw_retry_threshhold_vi;
+	uint32_t tx_non_aggr_sw_retry_threshhold_vo;
 
 	uint8_t wep_default_key_idx;
 	bool is_vdev_valid;
@@ -954,6 +962,7 @@ typedef struct wma_handle {
 	tSirAddonPsReq psSetting;
 	bool sub_20_support;
 	bool get_one_peer_info;
+    t_dpd_recal_mgmt dpd_recal_info;
 }t_wma_handle, *tp_wma_handle;
 
 struct wma_target_cap {
@@ -1412,6 +1421,14 @@ typedef struct {
 	u_int8_t thermalEnable;
 } t_thermal_cmd_params, *tp_thermal_cmd_params;
 
+typedef struct {
+	u_int8_t enable;
+    u_int32_t delta_degreeHigh;
+    u_int32_t delta_degreeLow;
+    u_int32_t cooling_time; //time in ms
+    u_int32_t dpd_dur_max; //time in ms
+} t_dpd_recal_cmd_params, *tp_dpd_recal_cmd_params;
+
 /* Powersave Related */
 /* Default InActivity Time is 200 ms */
 #define POWERSAVE_DEFAULT_INACTIVITY_TIME 200
@@ -1834,6 +1851,8 @@ uint32_t wma_get_vht_ch_width(void);
 VOS_STATUS wma_get_wakelock_stats(struct sir_wake_lock_stats *wake_lock_stats);
 VOS_STATUS wma_set_tx_rx_aggregation_size
 	(struct sir_set_tx_rx_aggregation_size *tx_rx_aggregation_size);
+VOS_STATUS wma_set_sw_retry_threshhold
+	(struct sir_set_tx_sw_retry_threshhold *tx_sw_retry_threshhold);
 VOS_STATUS wma_set_powersave_config(uint8_t vdev_id, uint8_t val);
 
 /**

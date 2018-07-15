@@ -2395,6 +2395,57 @@ typedef enum
 #endif /* FEATURE_WLAN_THERMAL_SHUTDOWN */
 
 /*
+ * <ini>
+ * gDPDRecalibEnable - Enable/Disable Runtime DPD Recaliberation feature
+ * 		       The parameter ‘enable’ in WMI is used to enable
+ *		       feature and debug log. Set bit0 to enable feature,
+ *		       set bit1 is to enable FW log to host, and set bit2 is
+ *		       to enable UART output.
+ *
+ * @Min: 0
+ * @Max: 7
+ * @Default: 1
+ *
+ * This ini is used to enable/disable DPD Recaliberation feature
+ *
+ * Usage: Internal
+ *
+ * </ini>
+ */
+
+#define CFG_DPD_RECALIB_ENABLE_NAME      "gDPDRecalibEnable"
+#define CFG_DPD_RECALIB_ENABLE_MIN       ( 0 )
+#define CFG_DPD_RECALIB_ENABLE_MAX       ( 7 )
+#define CFG_DPD_RECALIB_ENABLE_DEFAULT   ( 1 )
+
+/*Thermal thresholds: DPD will be triggered
+    when current temperature above this threshold */
+
+/* Delta degree C above first DPD cal after chip is on. Unit: degree C. */
+#define CFG_DPD_RECALIB_DELTA_DEGREE_HIGH_NAME    "gDPDRecalibDeltaDegreeHigh"
+#define CFG_DPD_RECALIB_DELTA_DEGREE_HIGH_MIN       ( 10 )
+#define CFG_DPD_RECALIB_DELTA_DEGREE_HIGH_MAX       ( 60 )
+#define CFG_DPD_RECALIB_DELTA_DEGREE_HIGH_DEFAULT   ( 35 )
+
+/* Delta degree C above first DPD cal after chip is on. Unit: degree C. */
+#define CFG_DPD_RECALIB_DELTA_DEGREE_LOW_NAME    "gDPDRecalibDeltaDegreeLow"
+#define CFG_DPD_RECALIB_DELTA_DEGREE_LOW_MIN       ( 10 )
+#define CFG_DPD_RECALIB_DELTA_DEGREE_LOW_MAX       ( 60 )
+#define CFG_DPD_RECALIB_DELTA_DEGREE_LOW_DEFAULT   ( 25 )
+
+/* Cold down time between two DPD re-cal. Unit: ms*/
+#define CFG_DPD_RECALIB_COOLING_TIME_NAME    "gDPDRecalibCoolingTime"
+#define CFG_DPD_RECALIB_COOLING_TIME_MIN       ( 0 )
+#define CFG_DPD_RECALIB_COOLING_TIME_MAX       ( 5 )
+#define CFG_DPD_RECALIB_COOLING_TIME_DEFAULT   ( 1 )
+
+/*  Max duration for dpd re-cal. Unit: ms */
+#define CFG_DPD_RECALIB_DURATION_MAX_NAME    "gDPDRecalibDurationMax"
+#define CFG_DPD_RECALIB_DURATION_MAX_MIN       ( 30 )
+#define CFG_DPD_RECALIB_DURATION_MAX_MAX       ( 180 )
+#define CFG_DPD_RECALIB_DURATION_MAX_DEFAULT   ( 120 )
+
+/*
  * Enable/Disable Modulated DTIM feature
  * Default: Disable
  */
@@ -4101,6 +4152,199 @@ FG_BTC_BT_INTERVAL_PAGE_P2P_STA_DEFAULT
 #define CFG_RX_AGGREGATION_SIZE_DEFAULT  (64)
 
 /*
+ * <ini>
+ * g_tx_aggr_retry_be - Configure Tx aggregation retry for BE
+ * @Min: 0
+ * @Max: 16
+ * @Default: 0
+ *
+ * g_tx_aggr_retry_be gives an option to configure Tx aggregation
+ * retry for BE. This can be useful in debugging throughput issues.
+ *
+ * Related: None
+ *
+ * Supported Feature: STA & SAP
+ *
+ * Usage: Internal/External
+ *
+ * </ini>
+ */
+
+#define CFG_TX_AGGR_SW_RETRY_BE      "g_tx_aggr_retry_be"
+#define CFG_TX_AGGR_SW_RETRY_BE_MIN      (0)
+#define CFG_TX_AGGR_SW_RETRY_BE_MAX      (16)
+#define CFG_TX_AGGR_SW_RETRY_BE_DEFAULT  (0)
+
+/*
+ * <ini>
+ * g_tx_aggr_retry_bk - Configure Tx aggregation retry for BK
+ * @Min: 0
+ * @Max: 16
+ * @Default: 0
+ *
+ * g_tx_aggr_retry_bk gives an option to configure Tx aggregation
+ * retry for BK. This can be useful in debugging throughput issues.
+ *
+ * Related: None
+ *
+ * Supported Feature: STA & SAP
+ *
+ * Usage: Internal/External
+ *
+ * </ini>
+ */
+
+#define CFG_TX_AGGR_SW_RETRY_BK      "g_tx_aggr_retry_bk"
+#define CFG_TX_AGGR_SW_RETRY_BK_MIN      (0)
+#define CFG_TX_AGGR_SW_RETRY_BK_MAX      (16)
+#define CFG_TX_AGGR_SW_RETRY_BK_DEFAULT  (0)
+
+/*
+ * <ini>
+ * g_tx_aggr_retry_vi - Configure Tx aggregation retry for VI
+ * @Min: 0
+ * @Max: 16
+ * @Default: 0
+ *
+ * g_tx_aggr_retry_vi gives an option to configure Tx aggregation
+ * retry for VI. This can be useful in debugging throughput issues.
+ *
+ * Related: None
+ *
+ * Supported Feature: STA & SAP
+ *
+ * Usage: Internal/External
+ *
+ * </ini>
+ */
+
+#define CFG_TX_AGGR_SW_RETRY_VI      "g_tx_aggr_retry_vi"
+#define CFG_TX_AGGR_SW_RETRY_VI_MIN      (0)
+#define CFG_TX_AGGR_SW_RETRY_VI_MAX      (16)
+#define CFG_TX_AGGR_SW_RETRY_VI_DEFAULT  (0)
+
+/*
+ * <ini>
+ * g_tx_aggr_retry_vo - Configure Tx aggregation retry for VO
+ * @Min: 0
+ * @Max: 16
+ * @Default: 0
+ *
+ * g_tx_aggr_retry_vo gives an option to configure Tx aggregation
+ * retry for VO. This can be useful in debugging throughput issues.
+ *
+ * Related: None
+ *
+ * Supported Feature: STA & SAP
+ *
+ * Usage: Internal/External
+ *
+ * </ini>
+ */
+
+#define CFG_TX_AGGR_SW_RETRY_VO      "g_tx_aggr_retry_vo"
+#define CFG_TX_AGGR_SW_RETRY_VO_MIN      (0)
+#define CFG_TX_AGGR_SW_RETRY_VO_MAX      (16)
+#define CFG_TX_AGGR_SW_RETRY_VO_DEFAULT  (0)
+
+/*
+ * <ini>
+ * g_tx_non_aggr_retry_be - Configure Tx non-aggregation retry for BE
+ * @Min: 0
+ * @Max: 16
+ * @Default: 0
+ *
+ * g_tx_non_aggr_retry_be gives an option to configure Tx
+ * non-aggregation sw retry for BE.
+ * This can be useful in debugging throughput issues.
+ *
+ * Related: None
+ *
+ * Supported Feature: STA & SAP
+ *
+ * Usage: Internal/External
+ *
+ * </ini>
+ */
+
+#define CFG_TX_NON_AGGR_SW_RETRY_BE      "g_tx_non_aggr_retry_be"
+#define CFG_TX_NON_AGGR_SW_RETRY_BE_MIN      (0)
+#define CFG_TX_NON_AGGR_SW_RETRY_BE_MAX      (16)
+#define CFG_TX_NON_AGGR_SW_RETRY_BE_DEFAULT  (0)
+
+/*
+ * <ini>
+ * g_tx_non_aggr_retry_bk - Configure Tx non-aggregation retry for BK
+ * @Min: 0
+ * @Max: 16
+ * @Default: 0
+ *
+ * g_tx_non_aggr_retry_bk gives an option to configure Tx non-aggregation
+ * retry for BK. This can be useful in debugging throughput issues.
+ *
+ * Related: None
+ *
+ * Supported Feature: STA & SAP
+ *
+ * Usage: Internal/External
+ *
+ * </ini>
+ */
+
+#define CFG_TX_NON_AGGR_SW_RETRY_BK      "g_tx_non_aggr_retry_bk"
+#define CFG_TX_NON_AGGR_SW_RETRY_BK_MIN      (0)
+#define CFG_TX_NON_AGGR_SW_RETRY_BK_MAX      (16)
+#define CFG_TX_NON_AGGR_SW_RETRY_BK_DEFAULT  (0)
+
+/*
+ * <ini>
+ * g_tx_non_aggr_retry_vi - Configure Tx non-aggregation retry for VI
+ * @Min: 0
+ * @Max: 16
+ * @Default: 0
+ *
+ * g_tx_non_aggr_retry_vi gives an option to configure Tx non aggregation
+ * retry for VI. This can be useful in debugging throughput issues.
+ *
+ * Related: None
+ *
+ * Supported Feature: STA & SAP
+ *
+ * Usage: Internal/External
+ *
+ * </ini>
+ */
+
+#define CFG_TX_NON_AGGR_SW_RETRY_VI      "g_tx_non_aggr_retry_vi"
+#define CFG_TX_NON_AGGR_SW_RETRY_VI_MIN      (0)
+#define CFG_TX_NON_AGGR_SW_RETRY_VI_MAX      (16)
+#define CFG_TX_NON_AGGR_SW_RETRY_VI_DEFAULT  (0)
+
+/*
+ * <ini>
+ * g_tx_non_aggr_retry_vo - Configure Tx aggregation retry for VO
+ * @Min: 0
+ * @Max: 16
+ * @Default: 0
+ *
+ * g_tx_non_aggr_retry_vo gives an option to configure Tx non-aggregation
+ * retry for VO. This can be useful in debugging throughput issues.
+ *
+ * Related: None
+ *
+ * Supported Feature: STA & SAP
+ *
+ * Usage: Internal/External
+ *
+ * </ini>
+ */
+
+#define CFG_TX_NON_AGGR_SW_RETRY_VO      "g_tx_non_aggr_retry_vo"
+#define CFG_TX_NON_AGGR_SW_RETRY_VO_MIN      (0)
+#define CFG_TX_NON_AGGR_SW_RETRY_VO_MAX      (16)
+#define CFG_TX_NON_AGGR_SW_RETRY_VO_DEFAULT  (0)
+
+/*
  * fine timing measurement capability information
  *
  * <----- fine_time_meas_cap (in bits) ----->
@@ -5061,6 +5305,15 @@ FG_BTC_BT_INTERVAL_PAGE_P2P_STA_DEFAULT
 #define CFG_ENABLE_MONITOR_ON_STA_MAX     (1)
 #define CFG_ENABLE_MONITOR_ON_STA_DEFAULT (0)
 
+#ifdef WLAN_FEATURE_SAP_TO_FOLLOW_STA_CHAN
+/*SAP Channel Switch Support*/
+#define CFG_SAP_CHANNEL_SWITCH_WITH_CSA_NAME "gSAPChannelSwitchWithCSA"
+#define CFG_SAP_CHANNEL_SWITCH_WITH_CSA_MIN      (0)
+#define CFG_SAP_CHANNEL_SWITCH_WITH_CSA_MAX      (1)
+#define CFG_SAP_CHANNEL_SWITCH_WITH_CSA_DEFAULT  (0)
+
+#endif//#ifdef WLAN_FEATURE_SAP_TO_FOLLOW_STA_CHAN
+
 /*---------------------------------------------------------------------------
   Type declarations
   -------------------------------------------------------------------------*/
@@ -5868,6 +6121,14 @@ struct hdd_config {
    bool                        g_use_otpmac;
    uint32_t                    tx_aggregation_size;
    uint32_t                    rx_aggregation_size;
+   uint32_t                    tx_aggr_sw_retry_threshhold_be;
+   uint32_t                    tx_aggr_sw_retry_threshhold_bk;
+   uint32_t                    tx_aggr_sw_retry_threshhold_vi;
+   uint32_t                    tx_aggr_sw_retry_threshhold_vo;
+   uint32_t                    tx_non_aggr_sw_retry_threshhold_be;
+   uint32_t                    tx_non_aggr_sw_retry_threshhold_bk;
+   uint32_t                    tx_non_aggr_sw_retry_threshhold_vi;
+   uint32_t                    tx_non_aggr_sw_retry_threshhold_vo;
    bool                        bug_report_for_scan_results;
    bool                        enable_edca_params;
    uint32_t                    edca_vo_cwmin;
@@ -5957,6 +6218,15 @@ struct hdd_config {
    uint32_t  cca_threshold_2g;
    uint32_t  cca_threshold_5g;
    uint8_t                     mon_on_sta_enable;
+#ifdef WLAN_FEATURE_SAP_TO_FOLLOW_STA_CHAN
+   uint32_t                    sap_ch_switch_with_csa;
+#endif//#ifdef WLAN_FEATURE_SAP_TO_FOLLOW_STA_CHAN
+
+   uint32_t dpd_recalib_enabled;
+   uint32_t dpd_recalib_delta_degreehigh;
+   uint32_t dpd_recalib_delta_degreelow;
+   uint32_t dpd_recalib_cooling_time;
+   uint32_t dpd_recalib_duration_max;
 };
 
 typedef struct hdd_config hdd_config_t;
