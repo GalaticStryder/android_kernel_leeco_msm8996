@@ -58,11 +58,8 @@ static inline int cpu_idle_poll(void)
 	rcu_idle_enter();
 	trace_cpu_idle_rcuidle(0, smp_processor_id());
 	local_irq_enable();
-	stop_critical_timings();
-	while (!tif_need_resched() &&
-		(cpu_idle_force_poll || tick_check_broadcast_expired()))
+	while (!tif_need_resched())
 		cpu_relax();
-	start_critical_timings();
 	trace_cpu_idle_rcuidle(PWR_EVENT_EXIT, smp_processor_id());
 	rcu_idle_exit();
 	return 1;
@@ -94,7 +91,6 @@ static void cpuidle_idle_call(void)
 	struct cpuidle_driver *drv = cpuidle_get_cpu_driver(dev);
 	int next_state, entered_state;
 	unsigned int broadcast;
-	bool reflect;
 
 	/*
 	 * Check if the idle task must be rescheduled. If it is the
@@ -118,9 +114,6 @@ static void cpuidle_idle_call(void)
 	 */
 	rcu_idle_enter();
 
-	if (cpuidle_not_available(drv, dev))
-		goto use_default;
-
 	/*
 	 * Suspend-to-idle ("freeze") is a system state in which all user space
 	 * has been frozen, all I/O devices have been suspended and the only
@@ -131,22 +124,16 @@ static void cpuidle_idle_call(void)
 	 * until a proper wakeup interrupt happens.
 	 */
 	if (idle_should_freeze()) {
-		entered_state = cpuidle_enter_freeze(drv, dev);
-		if (entered_state >= 0) {
-			local_irq_enable();
-			goto exit_idle;
-		}
-
-		reflect = false;
-		next_state = cpuidle_find_deepest_state(drv, dev);
-	} else {
-		reflect = true;
-		/*
-		 * Ask the cpuidle framework to choose a convenient idle state.
-		 */
-		next_state = cpuidle_select(drv, dev);
+		cpuidle_enter_freeze();
+		local_irq_enable();
+		goto exit_idle;
 	}
-	/* Fall back to the default arch idle method on errors. */
+
+	/*
+	 * Ask the cpuidle framework to choose a convenient idle state.
+	 * Fall back to the default arch idle method on errors.
+	 */
+	next_state = cpuidle_select(drv, dev);
 	if (next_state < 0)
 		goto use_default;
 
@@ -193,8 +180,7 @@ static void cpuidle_idle_call(void)
 	/*
 	 * Give the governor an opportunity to reflect on the outcome
 	 */
-	if (reflect)
-		cpuidle_reflect(dev, entered_state);
+	cpuidle_reflect(dev, entered_state);
 
 exit_idle:
 	__current_set_polling();
@@ -222,8 +208,6 @@ use_default:
 	goto exit_idle;
 }
 
-DEFINE_PER_CPU(bool, cpu_dead_idle);
-
 /*
  * Generic idle loop implementation
  *
@@ -249,11 +233,8 @@ static void cpu_idle_loop(void)
 			check_pgt_cache();
 			rmb();
 
-			if (cpu_is_offline(smp_processor_id())) {
-				smp_mb(); /* all activity before dead. */
-				this_cpu_write(cpu_dead_idle, true);
+			if (cpu_is_offline(smp_processor_id()))
 				arch_cpu_idle_dead();
-			}
 
 			local_irq_disable();
 			arch_cpu_idle_enter();

@@ -523,8 +523,8 @@ static void sched_show_numa(struct task_struct *p, struct seq_file *m)
 			unsigned long nr_faults = -1;
 			int cpu_current, home_node;
 
-			if (p->numa_faults)
-				nr_faults = p->numa_faults[2*node + i];
+			if (p->numa_faults_memory)
+				nr_faults = p->numa_faults_memory[2*node + i];
 
 			cpu_current = !i ? (task_node(p) == node) :
 				(pol && node_isset(node, pol->v.nodes));
@@ -592,32 +592,6 @@ void proc_sched_show_task(struct task_struct *p, struct seq_file *m)
 	P(se.statistics.nr_wakeups_affine_attempts);
 	P(se.statistics.nr_wakeups_passive);
 	P(se.statistics.nr_wakeups_idle);
-	/* eas */
-	/* select_idle_sibling() */
-	P(se.statistics.nr_wakeups_sis_attempts);
-	P(se.statistics.nr_wakeups_sis_idle);
-	P(se.statistics.nr_wakeups_sis_cache_affine);
-	P(se.statistics.nr_wakeups_sis_suff_cap);
-	P(se.statistics.nr_wakeups_sis_idle_cpu);
-	P(se.statistics.nr_wakeups_sis_count);
-	/* select_energy_cpu_brute() */
-	P(se.statistics.nr_wakeups_secb_attempts);
-	P(se.statistics.nr_wakeups_secb_sync);
-	P(se.statistics.nr_wakeups_secb_idle_bt);
-	P(se.statistics.nr_wakeups_secb_insuff_cap);
-	P(se.statistics.nr_wakeups_secb_no_nrg_sav);
-	P(se.statistics.nr_wakeups_secb_nrg_sav);
-	P(se.statistics.nr_wakeups_secb_count);
-	/* find_best_target() */
-	P(se.statistics.nr_wakeups_fbt_attempts);
-	P(se.statistics.nr_wakeups_fbt_no_cpu);
-	P(se.statistics.nr_wakeups_fbt_no_sd);
-	P(se.statistics.nr_wakeups_fbt_pref_idle);
-	P(se.statistics.nr_wakeups_fbt_count);
-	/* cas */
-	/* select_task_rq_fair() */
-	P(se.statistics.nr_wakeups_cas_attempts);
-	P(se.statistics.nr_wakeups_cas_count);
 
 	{
 		u64 avg_atom, avg_per_cpu;
