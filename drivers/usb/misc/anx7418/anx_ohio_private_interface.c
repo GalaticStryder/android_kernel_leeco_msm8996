@@ -908,7 +908,7 @@ inline u8 interface_send_msg_timeout(u8 type, u8 *pbuf, u8 len, int timeout_ms)
 		front = tx_buf_front();
 
 		if (front != ((rear + 1 ) % MAX_SEND_BUF_SIZE)) {
-			if (front == front) {
+			if (front) {
 				tmp_len = MAX_SEND_BUF_SIZE - 1;
 			}
 			if (front > rear) {
@@ -1322,11 +1322,10 @@ u8 sel_voltage_pdo_index = 0x02;
 inline u8 build_rdo_from_source_caps(u8 obj_cnt, u8 *buf)
 {
 	u8 i = 0;
-	u16 pdo_h, pdo_l, pdo_h_tmp, pdo_l_tmp;
+	u16 pdo_h = 0, pdo_l = 0, pdo_h_tmp, pdo_l_tmp;
 	u16 max_request_ma;
-	u32 pdo_max, pdo_max_tmp;
+	u32 pdo_max = 0, pdo_max_tmp = 0;
 
-	pdo_max = 0;
 	obj_cnt &= 0x07;
 
 	/* find the max voltage pdo */

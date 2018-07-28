@@ -6321,7 +6321,7 @@ static void increment_aicl_count(struct smbchg_chip *chip)
 
 static int wait_for_usbin_uv(struct smbchg_chip *chip, bool high)
 {
-	int rc;
+	int rc = 0;
 	int tries = 3;
 	struct completion *completion = &chip->usbin_uv_lowered;
 	bool usbin_uv;
@@ -6351,7 +6351,7 @@ static int wait_for_usbin_uv(struct smbchg_chip *chip, bool high)
 
 static int wait_for_src_detect(struct smbchg_chip *chip, bool high)
 {
-	int rc;
+	int rc = 0;
 	int tries = 3;
 	struct completion *completion = &chip->src_det_lowered;
 	bool src_detect;
@@ -8461,7 +8461,7 @@ static irqreturn_t aicl_done_handler(int irq, void *_chip)
 static irqreturn_t usbid_change_handler(int irq, void *_chip)
 {
 	struct smbchg_chip *chip = _chip;
-	bool otg_present;
+	bool otg_present = false;
 #ifdef CONFIG_QPNP_MHL
 	enum rid_state rid_sts;
 #endif
@@ -10223,7 +10223,7 @@ static void smbchg_pd_charger_init_work(struct work_struct *work)
 				struct smbchg_chip,
 				pd_charger_init_work.work);
 
-	int rc, vbus_vol;
+	int rc, vbus_vol = 0;
 	union power_supply_propval prop = {0,};
 	enum power_supply_type usb_supply_type;
 	char *usb_type_name;
