@@ -383,3 +383,7 @@ obj-$(CONFIG_SND_SOC_TPA6130A2)	+= snd-soc-tpa6130a2.o
 obj-$(CONFIG_SND_SOC_ES9018)	+= snd-soc-es9018.o
 obj-$(CONFIG_SND_SOC_TFA98XX)	+=snd-soc-tfa98xx.o
 obj-$(CONFIG_SND_SOC_MAX98927)	+= snd-soc-max98927.o
+
+# TODO: Fix enum-conversion for TFA98XX driver.
+subdir-ccflags-y += \
+	-Wno-enum-conversion
