@@ -77,6 +77,4 @@ void msm_isp_process_overflow_irq(
 	struct vfe_device *vfe_dev,
 	uint32_t *irq_status0, uint32_t *irq_status1,
 	uint32_t force_overflow);
-/* TODO: Condition to #ifdef. */
-void msm_isp_start_error_recovery(struct vfe_device *vfe_dev);
 #endif /* __MSM_ISP_UTIL_H__ */
